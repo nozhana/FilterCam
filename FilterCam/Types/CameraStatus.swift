@@ -8,7 +8,7 @@
 import Foundation
 
 enum CameraStatus: Int, CustomStringConvertible {
-    case unknown, failed, unauthorized, loading, running, interrupted
+    case unknown, failed, unauthorized, running, interrupted
     
     var description: String {
         switch self {
@@ -20,8 +20,6 @@ enum CameraStatus: Int, CustomStringConvertible {
             "Unauthorized"
         case .running:
             "Running"
-        case .loading:
-            "Loading"
         case .interrupted:
             "Interrupted"
         }

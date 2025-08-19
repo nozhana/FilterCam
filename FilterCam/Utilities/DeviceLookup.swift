@@ -14,10 +14,7 @@ final class DeviceLookup {
     private let externalCameraDiscoverSession: AVCaptureDevice.DiscoverySession
     
     init() {
-        backCameraDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInTripleCamera,
-                                                                                    .builtInDualWideCamera,
-                                                                                    .builtInDualCamera,
-                                                                                    .builtInWideAngleCamera],
+        backCameraDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInDualCamera, .builtInWideAngleCamera],
                                                                       mediaType: .video,
                                                                       position: .back)
         frontCameraDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInTrueDepthCamera, .builtInWideAngleCamera],
@@ -34,7 +31,7 @@ final class DeviceLookup {
     
     var defaultCamera: AVCaptureDevice {
         get throws {
-            guard let videoDevice = AVCaptureDevice.systemPreferredCamera ?? cameras.first else {
+            guard let videoDevice = AVCaptureDevice.systemPreferredCamera else {
                 throw CameraError.videoDeviceUnavailable
             }
             return videoDevice

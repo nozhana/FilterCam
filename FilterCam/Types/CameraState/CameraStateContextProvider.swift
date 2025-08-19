@@ -35,55 +35,19 @@ extension CameraState {
     
     struct LoggingContextProvider: ContextProvider {
         func update(with state: CameraState) async throws {
-            logger.debug("""
-New camera state:
-Capture mode: \(String(describing: state.captureMode))
-Camera Position: \(String(describing: state.cameraPosition))
-Quality Prioritization: \(String(describing: state.qualityPrioritization))
-Flash Mode: \(String(describing: state.flashMode))
-Aspect Ratio: \(String(describing: state.aspectRatio))
-""")
+            let data = try JSONEncoder().encode(state)
+            let jsonObject = try JSONSerialization.jsonObject(with: data)
+            let prettyData = try JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted)
+            let prettyJson = String(data: prettyData, encoding: .utf8)!
+            logger.debug("New camera state:\n\(prettyJson)")
         }
         
-        var currentState: CameraState? {
-            logger.debug("Called camera state getter")
-            return nil
-        }
+        var currentState: CameraState? { nil }
     }
     
     struct NoopContextProvider: ContextProvider {
         func update(with state: CameraState) async throws {}
         var currentState: CameraState? { nil }
-    }
-}
-
-private extension CameraState {
-    struct ChainContextProvider<Provider1, Provider2>: ContextProvider where Provider1: ContextProvider, Provider2: ContextProvider {
-        private let provider1: Provider1
-        private let provider2: Provider2
-        
-        init(provider1: Provider1, provider2: Provider2) {
-            self.provider1 = provider1
-            self.provider2 = provider2
-        }
-        
-        var currentState: CameraState? {
-            get async throws {
-                _ = try await provider2.currentState
-                return try await provider1.currentState
-            }
-        }
-        
-        func update(with state: CameraState) async throws {
-            try await provider1.update(with: state)
-            try await provider2.update(with: state)
-        }
-    }
-}
-
-extension CameraState.ContextProvider {
-    func chain(to otherProvider: some CameraState.ContextProvider) -> some CameraState.ContextProvider {
-        return CameraState.ChainContextProvider(provider1: self, provider2: otherProvider)
     }
 }
 
@@ -106,12 +70,7 @@ extension CameraState {
     static let idle = CameraState(contextProvider: .noop)
     static let logging = CameraState(contextProvider: .logging)
     @available(iOS 18.0, *)
-    static func intent<I>(_ intent: I.Type) async -> CameraState where I: CameraCaptureIntent, I.AppContext == CameraState {
-        let provider = IntentContextProvider(intent: intent).chain(to: .logging)
-        if let currentState = try? await provider.currentState {
-            return currentState
-        } else {
-            return .init(contextProvider: provider)
-        }
+    static func intent<I>(_ intent: I.Type) -> CameraState where I: CameraCaptureIntent, I.AppContext == CameraState {
+        .init(contextProvider: .intent(intent))
     }
 }

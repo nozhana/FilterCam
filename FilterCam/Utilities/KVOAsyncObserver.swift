@@ -9,7 +9,7 @@ import Foundation
 
 @propertyWrapper
 class KVOAsyncObserver<Parent: NSObject, Child>: NSObject {
-    private let keyPath: String
+    private let keyPath: KeyPath<Parent, Child>
     
     typealias ChildStream = AsyncStream<Child?>
     let changes: ChildStream
@@ -17,13 +17,13 @@ class KVOAsyncObserver<Parent: NSObject, Child>: NSObject {
     
     var wrappedValue: Child?
     
-    init(_ parent: Parent, child keyPath: String) {
+    init(_ parent: Parent, child keyPath: KeyPath<Parent, Child>) {
         self.keyPath = keyPath
         (changes, continuation) = AsyncStream.makeStream()
         
         super.init()
         
-        parent.addObserver(self, forKeyPath: keyPath, options: [.new], context: nil)
+        parent.addObserver(self, forKeyPath: "\(keyPath)", options: [.new], context: nil)
     }
     
     deinit {
@@ -32,7 +32,7 @@ class KVOAsyncObserver<Parent: NSObject, Child>: NSObject {
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         switch keyPath {
-        case self.keyPath:
+        case "\(self.keyPath)":
             let newValue = change?[.newKey] as? Child
             continuation.yield(newValue)
             wrappedValue = newValue
