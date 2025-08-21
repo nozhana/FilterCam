@@ -15,12 +15,10 @@ struct FilterCamCaptureExtension: LockedCameraCaptureExtension {
         LockedCameraCaptureUIScene { session in
             let appConfiguration = AppConfiguration(captureDirectory: session.sessionContentURL)
             return CameraViewFinder()
-                .databaseContainer()
                 .environment(\.scenePhase, .active)
                 .environment(\.appConfiguration, appConfiguration)
                 .environment(\.openMainApp, .init(session: session))
                 .environment(\.mediaStore, .init(appConfiguration: appConfiguration))
-                .environment(\.isCaptureExtension, true)
         }
     }
 }

@@ -5,16 +5,13 @@
 //  Created by Nozhan A. on 8/20/25.
 //
 
-import UIKit
+import SwiftUI
 
 struct MediaStore {
     private let captureDirectory: URL
     
-    let moviesDirectory: URL
-    
     init(appConfiguration: AppConfiguration = .shared) {
         self.captureDirectory = appConfiguration.captureDirectory
-        self.moviesDirectory = appConfiguration.moviesDirectory
         (thumbnailStream, thumbnailContinuation) = AsyncStream.makeStream()
         refreshThumbnail()
     }
@@ -22,17 +19,14 @@ struct MediaStore {
     let thumbnailStream: AsyncStream<Thumbnail?>
     private let thumbnailContinuation: AsyncStream<Thumbnail?>.Continuation
     
-    var media: [AnyOutputMedium] {
+    var photos: [Photo] {
         guard let contents = try? FileManager.default.contentsOfDirectory(at: captureDirectory, includingPropertiesForKeys: nil),
                 !contents.isEmpty else { return [] }
-        var result = [AnyOutputMedium]()
+        var result = [Photo]()
         for url in contents {
-            guard let data = try? Data(contentsOf: url) else { continue }
-            if let video = try? JSONDecoder().decode(Video.self, from: data) {
-                result.append(video.eraseToAnyMedium())
-            } else if let photo = try? JSONDecoder().decode(Photo.self, from: data) {
-                result.append(photo.eraseToAnyMedium())
-            }
+            guard let data = try? Data(contentsOf: url),
+                  let decoded = try? JSONDecoder().decode(Photo.self, from: data) else { continue }
+            result.append(decoded)
         }
         result.sort(using: KeyPathComparator(\.timestamp, order: .reverse))
         return result
@@ -59,42 +53,29 @@ struct MediaStore {
     }
     
     @discardableResult
-    func deleteItem(_ itemID: UUID) throws -> URL {
-        let itemURL = captureDirectory.appendingPathComponent(itemID.uuidString, conformingTo: .json)
-        try FileManager.default.removeItem(at: itemURL)
-        let possibleVideoFileURL = moviesDirectory.appendingPathComponent(itemID.uuidString, conformingTo: .quickTimeMovie)
-        try? FileManager.default.removeItem(at: possibleVideoFileURL)
+    func deletePhoto(_ photo: Photo) throws -> URL {
+        let photoURL = captureDirectory.appendingPathComponent(photo.id.uuidString, conformingTo: .json)
+        try FileManager.default.removeItem(at: photoURL)
         refreshThumbnail()
-        return itemURL
-    }
-    
-    @discardableResult
-    func saveVideo(_ video: Video) throws -> URL {
-        let jsonData = try JSONEncoder().encode(video)
-        let videoURL = captureDirectory.appendingPathComponent(video.id.uuidString, conformingTo: .json)
-        try? FileManager.default.removeItem(at: videoURL)
-        try jsonData.write(to: videoURL)
-        refreshThumbnail()
-        return videoURL
+        return photoURL
     }
     
     func refreshThumbnail() {
-        if let lastMedium = media.first,
-           let thumbnailData = lastMedium.thumbnailData,
-           let thumbnailImage = UIImage(data: thumbnailData) {
-            let thumbnail = Thumbnail(id: lastMedium.id, image: thumbnailImage)
-            thumbnailContinuation.yield(thumbnail)
-        } else {
-            thumbnailContinuation.yield(nil)
+        if let lastPhoto = photos.first {
+            if let image = UIImage(data: lastPhoto.data),
+               let thumbnail = Thumbnail(id: lastPhoto.id, sourceImage: image) {
+                thumbnailContinuation.yield(thumbnail)
+            } else {
+                thumbnailContinuation.yield(nil)
+            }
         }
     }
-    
-    func wipeGallery() throws {
-        try? FileManager.default.removeItem(at: moviesDirectory)
-        let contents = try FileManager.default.contentsOfDirectory(at: captureDirectory, includingPropertiesForKeys: nil)
-        for contentURL in contents {
-            try FileManager.default.removeItem(at: contentURL)
-        }
-        thumbnailContinuation.yield(nil)
-    }
+}
+
+extension EnvironmentValues {
+#if DEBUG
+    @Entry var mediaStore = ProcessInfo.isRunningPreviews ? MediaStore.preview : .shared
+#else
+    @Entry var mediaStore = MediaStore.shared
+#endif
 }

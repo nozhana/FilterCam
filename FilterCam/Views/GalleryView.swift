@@ -12,12 +12,9 @@ struct GalleryView: View {
     var animation: Namespace.ID?
     
     @StateObject private var model = Model()
-    @State private var detailViewMediumID: UUID?
-    @State private var showDetailView = false
     
     @Environment(\.mediaStore) private var mediaStore
     @Environment(\.openMainApp) private var openMainApp
-    @Environment(\.isCaptureExtension) private var isCaptureExtension
     
     private let columns = Array(repeating: GridItem(spacing: 0), count: 3)
     
@@ -25,111 +22,44 @@ struct GalleryView: View {
         NavigationStack {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 0) {
-                    ForEach(model.media) { medium in
-                        if let thumbnail = Thumbnail(medium) {
+                    ForEach(model.photos) { photo in
+                        if let uiImage = UIImage(data: photo.data),
+                           let thumbnail = Thumbnail(id: photo.id, sourceImage: uiImage) {
                             Rectangle()
                                 .overlay {
                                     Image(uiImage: thumbnail.image)
                                         .resizable()
                                         .scaledToFill()
                                 }
-                                .overlay {
-                                    if medium.type == .video {
-                                        Image(systemName: "play.fill")
-                                            .resizable().scaledToFit()
-                                            .frame(width: 24, height: 24)
-                                            .padding(16)
-                                            .background(.background.secondary.opacity(0.5), in: .circle)
-                                    }
-                                }
                                 .aspectRatio(1, contentMode: .fit)
                                 .clipShape(.rect)
-                                .overlay(alignment: .topTrailing) {
-                                    if model.isEditing {
-                                        let isMarkedForDeletion = model.itemsToBeDeleted.contains(medium.id)
-                                        Image(systemName: isMarkedForDeletion ? "checkmark.circle.fill" : "circle")
-                                            .font(.title2.bold())
-                                            .contentTransition(.symbolEffect)
-                                            .animation(.linear(duration: 0.1), value: isMarkedForDeletion)
-                                            .padding(14)
-                                            .foregroundStyle(isMarkedForDeletion ? Color.accentColor : Color.secondary)
-                                    }
-                                }
-                                .onTapGesture {
-                                    if model.isEditing {
-                                        if model.itemsToBeDeleted.contains(medium.id) {
-                                            model.itemsToBeDeleted.remove(medium.id)
-                                        } else {
-                                            model.itemsToBeDeleted.insert(medium.id)
-                                        }
-                                    } else {
-                                        detailViewMediumID = medium.id
-                                        showDetailView = true
-                                    }
-                                }
                                 .contextMenu {
                                     Button("Delete", systemImage: "trash.fill", role: .destructive) {
-                                        try? model.deleteItem(medium.id)
+                                        try? model.deletePhoto(photo)
                                     }
                                 } preview: {
-                                    if let image = UIImage(data: medium.data) {
-                                        Image(uiImage: image)
-                                            .resizable()
-                                            .scaledToFit()
-                                    } else {
-                                        Image(uiImage: thumbnail.image)
-                                            .resizable()
-                                            .scaledToFit()
-                                    }
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .scaledToFit()
                                 }
+
                         }
                     }
                 }
             }
             .safeAreaInset(edge: .bottom, spacing: .zero) {
-                if isCaptureExtension || model.isEditing {
-                    VStack(spacing: 28) {
-                        if model.isEditing {
-                            HStack(spacing: 32) {
-                                Button("Cancel", systemImage: "xmark", role: .cancel) {
-                                    model.itemsToBeDeleted.removeAll()
-                                    model.isEditing = false
-                                }
-                                .foregroundStyle(Color.secondary)
-                                Button("Delete", systemImage: "trash.fill", role: .destructive) {
-                                    model.confirmDelete()
-                                }
-                                Button("Delete All", systemImage: "trash.square.fill", role: .destructive) {
-                                    model.deleteAllMedia()
-                                }
-                            }
-                            .font(.caption.smallCaps().bold())
-                        }
-                        if isCaptureExtension {
-                            Button {
-                                Task { try await openMainApp() }
-                            } label: {
-                                Label("Open App to see all your media", systemImage: "arrow.up.right")
-                                    .font(.caption.smallCaps().weight(.light))
-                                    .foregroundStyle(.yellow)
-                            }
-                        }
+                if !openMainApp.isNoop {
+                    Button {
+                        Task { try await openMainApp() }
+                    } label: {
+                        Label("Open App to see all your media", systemImage: "arrow.up.right")
+                            .font(.caption.smallCaps().weight(.light))
+                            .foregroundStyle(.yellow)
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 10)
+                            .frame(maxWidth: .infinity)
+                            .background(.ultraThinMaterial)
                     }
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 10)
-                    .frame(maxWidth: .infinity)
-                    .background(.ultraThinMaterial)
-                }
-            }
-            .navigationDestination(isPresented: $showDetailView) {
-                if let binding = Binding($detailViewMediumID) {
-                    GalleryDetailView(selection: binding)
-                        .environmentObject(model)
-                }
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Toggle("Edit", systemImage: "pencil", isOn: $model.isEditing)
                 }
             }
             .navigationTitle("Gallery")
@@ -151,9 +81,7 @@ struct GalleryView: View {
 
 extension GalleryView {
     final class Model: ObservableObject {
-        @Published var media = [AnyOutputMedium]()
-        @Published var itemsToBeDeleted = Set<UUID>()
-        @Published var isEditing = false
+        @Published private(set) var photos = [Photo]()
         
         private var mediaStore: MediaStore!
         
@@ -163,39 +91,13 @@ extension GalleryView {
         }
         
         private func refreshPhotos() {
-            media = mediaStore.media
+            photos = mediaStore.photos
         }
         
         @MainActor
-        func deleteItem(_ itemID: UUID) throws {
-            _ = try mediaStore.deleteItem(itemID)
-            media.removeAll(where: { $0.id == itemID })
-            itemsToBeDeleted.remove(itemID)
-        }
-        
-        @MainActor
-        func confirmDelete() {
-            for itemID in itemsToBeDeleted {
-                do {
-                    try deleteItem(itemID)
-                } catch {
-                    logger.error("Failed to delete medium with id \(itemID): \(error)")
-                }
-            }
-            itemsToBeDeleted.removeAll()
-        }
-        
-        @MainActor
-        func deleteAllMedia() {
-            for medium in media {
-                do {
-                    try deleteItem(medium.id)
-                } catch {
-                    logger.error("Failed to delete medium with id \(medium.id): \(String(describing: medium))\n\(error)")
-                }
-            }
-            itemsToBeDeleted.removeAll()
-            isEditing = false
+        func deletePhoto(_ photo: Photo) throws {
+            _ = try mediaStore.deletePhoto(photo)
+            photos.removeAll(where: { $0.id == photo.id })
         }
     }
 }

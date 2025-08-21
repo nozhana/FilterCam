@@ -73,6 +73,14 @@ final actor CaptureService {
         session.startRunning()
     }
     
+    func stopSession() {
+        session.stopRunning()
+    }
+    
+    func startSession() {
+        session.startRunning()
+    }
+    
     func setUpSession() throws {
         guard !isSetUp else { return }
         
@@ -98,6 +106,7 @@ final actor CaptureService {
     
     func setCaptureMode(_ captureMode: CaptureMode) {
         // TODO: Pending more capture modes
+        logger.fault("No capture modes to set. This method does nothing for now.")
     }
     
     func switchCamera() {

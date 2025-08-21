@@ -43,27 +43,6 @@ extension Backport where V: View {
     }
     
     @ViewBuilder
-    func onCameraCaptureEvent(primaryAction: @escaping () -> Void, secondaryAction: @escaping () -> Void) -> some View {
-        if #available(iOS 18.0, *) {
-            wrappedValue.onCameraCaptureEvent { event in
-                if event.phase == .ended {
-                    primaryAction()
-                }
-            } secondaryAction: { event in
-                if event.phase == .ended {
-                    secondaryAction()
-                }
-            }
-        } else if #available(iOS 17.2, *) {
-            wrappedValue.background(
-                CameraInteractiveView(onCapture: primaryAction)
-            )
-        } else {
-            wrappedValue
-        }
-    }
-    
-    @ViewBuilder
     func matchedTransitionSource(id: some Hashable, in namespace: Namespace.ID) -> some View {
         if #available(iOS 18.0, *) {
             wrappedValue.matchedTransitionSource(id: id, in: namespace)
@@ -102,25 +81,9 @@ extension Backport where V: View {
     }
 }
 
-private extension Backport.ScrollGeometry {
+extension Backport.ScrollGeometry {
     @available(iOS 18.0, *)
     init(_ geometry: SwiftUI.ScrollGeometry) {
         self.init(contentOffset: geometry.contentOffset, contentSize: geometry.contentSize, contentInsets: geometry.contentInsets, containerSize: geometry.containerSize, visibleRect: geometry.visibleRect, bounds: geometry.bounds)
-    }
-}
-
-extension ViewAlignedScrollTargetBehavior.LimitBehavior {
-    static var backport: Backport<ViewAlignedScrollTargetBehavior.LimitBehavior> {
-        .init(.automatic)
-    }
-}
-
-extension Backport where V == ViewAlignedScrollTargetBehavior.LimitBehavior {
-    var alwaysByOne: ViewAlignedScrollTargetBehavior.LimitBehavior {
-        if #available(iOS 18.0, *) {
-            return V.alwaysByOne
-        } else {
-            return V.always
-        }
     }
 }

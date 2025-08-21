@@ -16,7 +16,11 @@ struct CameraState: Codable {
     }
     
     init(from decoder: any Decoder) throws {
-        self.contextProvider = LoggingContextProvider()
+        if #available(iOS 18.0, *) {
+            self.contextProvider = .intent(FilterCamCaptureIntent.self).chain(to: .logging)
+        } else {
+            self.contextProvider = .logging
+        }
         let container = try decoder.container(keyedBy: CodingKeys.self)
         captureMode = try container.decode(CaptureMode.self, forKey: .captureMode)
         cameraPosition = try container.decode(CameraPosition.self, forKey: .cameraPosition)
@@ -31,23 +35,38 @@ struct CameraState: Codable {
     private let contextProvider: ContextProvider
     
     var captureMode = CaptureMode.photo {
-        didSet { updateContext() }
+        didSet {
+            if oldValue != captureMode {
+                updateContext()
+            }
+        }
     }
     
     var cameraPosition = CameraPosition.back {
-        didSet { updateContext() }
+        didSet {
+            if oldValue != cameraPosition {
+                updateContext()
+            }
+        }
     }
     
     var qualityPrioritization = QualityPrioritization.balanced {
-        didSet { updateContext() }
+        didSet {
+            if oldValue != qualityPrioritization {
+                updateContext()
+            }
+        }
     }
     
     var flashMode = FlashMode.auto {
-        didSet { updateContext() }
+        didSet {
+            if oldValue != flashMode {
+                updateContext()
+            }
+        }
     }
     
     private func updateContext() {
-        // TODO: Update intent context
         Task {
             do {
                 try await contextProvider.update(with: self)
@@ -59,8 +78,11 @@ struct CameraState: Codable {
     
     static var current: CameraState {
         get async {
-            // TODO: Get state from app context
-            return .idle
+            if #available(iOS 18.0, *) {
+                return await .intent(FilterCamCaptureIntent.self)
+            } else {
+                return .idle
+            }
         }
     }
 }
