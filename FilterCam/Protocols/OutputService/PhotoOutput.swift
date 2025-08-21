@@ -52,6 +52,8 @@ final class PhotoOutput: OutputService {
             settings.photoQualityPrioritization = prioritization
         }
         
+        logger.debug("AVCapturePhotoSettings: \(settings)")
+        
         return settings
     }
     

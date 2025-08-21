@@ -6,19 +6,208 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3174E16E2E552BE2006D6EB3 /* FilterCamCaptureExtension.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = 3174E1652E552BE2006D6EB3 /* FilterCamCaptureExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3174E1992E55310D006D6EB3 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3174E1982E55310D006D6EB3 /* WidgetKit.framework */; };
+		3174E19B2E55310D006D6EB3 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3174E19A2E55310D006D6EB3 /* SwiftUI.framework */; };
+		3174E1A82E553110006D6EB3 /* FilterCamWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3174E1962E55310D006D6EB3 /* FilterCamWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		3174E16C2E552BE2006D6EB3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 31AB53192E54D66F00A51742 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3174E1642E552BE2006D6EB3;
+			remoteInfo = FilterCamCaptureExtension;
+		};
+		3174E1A62E553110006D6EB3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 31AB53192E54D66F00A51742 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3174E1952E55310D006D6EB3;
+			remoteInfo = FilterCamWidgetsExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		3174E1732E552BE2006D6EB3 /* Embed ExtensionKit Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(EXTENSIONS_FOLDER_PATH)";
+			dstSubfolderSpec = 16;
+			files = (
+				3174E16E2E552BE2006D6EB3 /* FilterCamCaptureExtension.appex in Embed ExtensionKit Extensions */,
+			);
+			name = "Embed ExtensionKit Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3174E1AD2E553110006D6EB3 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				3174E1A82E553110006D6EB3 /* FilterCamWidgetsExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		3174E1652E552BE2006D6EB3 /* FilterCamCaptureExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = FilterCamCaptureExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		3174E1962E55310D006D6EB3 /* FilterCamWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FilterCamWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		3174E1982E55310D006D6EB3 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		3174E19A2E55310D006D6EB3 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		31AB53212E54D66F00A51742 /* FilterCam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FilterCam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		3174E16F2E552BE2006D6EB3 /* Exceptions for "FilterCamCaptureExtension" folder in "FilterCamCaptureExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 3174E1642E552BE2006D6EB3 /* FilterCamCaptureExtension */;
+		};
+		3174E1752E552C7F006D6EB3 /* Exceptions for "FilterCam" folder in "FilterCamCaptureExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Environment/AppConfiguration.swift,
+				Extensions/CaptureExtensions.swift,
+				"Extensions/Logger+.swift",
+				"Extensions/ProcessInfo+.swift",
+				"Extensions/View+.swift",
+				"Preview Content/Preview Assets.xcassets",
+				"Preview Content/PreviewAssets.swift",
+				Protocols/OutputService/OutputService.swift,
+				Protocols/OutputService/PhotoOutput.swift,
+				Protocols/PreviewSource.swift,
+				Services/CaptureService.swift,
+				Types/CameraPosition.swift,
+				Types/CameraState/CameraState.swift,
+				Types/CameraState/CameraStateContextProvider.swift,
+				Types/CameraStatus.swift,
+				Types/CaptureActivity.swift,
+				Types/CaptureMode.swift,
+				Types/Errors/CameraError.swift,
+				Types/Errors/PhotoCaptureError.swift,
+				Types/Photo.swift,
+				Types/PhotoFeatures.swift,
+				Types/Thumbnail.swift,
+				Utilities/Backport.swift,
+				Utilities/DeviceLookup.swift,
+				Utilities/MediaStore.swift,
+				Utilities/SPCObserver.swift,
+				Views/CameraInteractiveView.swift,
+				Views/CameraModel.swift,
+				Views/CameraOptionsView.swift,
+				Views/CameraViewFinder.swift,
+				Views/GalleryView.swift,
+			);
+			target = 3174E1642E552BE2006D6EB3 /* FilterCamCaptureExtension */;
+		};
+		3174E17E2E552E37006D6EB3 /* Exceptions for "FilterCamCaptureExtension" folder in "FilterCam" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				OpenMainAppAction.swift,
+			);
+			target = 31AB53202E54D66F00A51742 /* FilterCam */;
+		};
+		3174E1AC2E553110006D6EB3 /* Exceptions for "FilterCamWidgets" folder in "FilterCamWidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 3174E1952E55310D006D6EB3 /* FilterCamWidgetsExtension */;
+		};
+		3174E1B42E553182006D6EB3 /* Exceptions for "FilterCamWidgets" folder in "FilterCam" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				FilterCamCaptureIntent.swift,
+			);
+			target = 31AB53202E54D66F00A51742 /* FilterCam */;
+		};
+		3174E1B52E553182006D6EB3 /* Exceptions for "FilterCamWidgets" folder in "FilterCamCaptureExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				FilterCamCaptureIntent.swift,
+			);
+			target = 3174E1642E552BE2006D6EB3 /* FilterCamCaptureExtension */;
+		};
+		3174E1B72E553246006D6EB3 /* Exceptions for "FilterCam" folder in "FilterCamWidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Environment/AppConfiguration.swift,
+				"Extensions/Logger+.swift",
+				"Extensions/ProcessInfo+.swift",
+				"Extensions/View+.swift",
+				"Preview Content/Preview Assets.xcassets",
+				"Preview Content/PreviewAssets.swift",
+				Types/CameraPosition.swift,
+				Types/CameraState/CameraState.swift,
+				Types/CameraState/CameraStateContextProvider.swift,
+				Types/CaptureMode.swift,
+				Types/Photo.swift,
+				Types/PhotoFeatures.swift,
+				Types/Thumbnail.swift,
+				Utilities/Backport.swift,
+				Utilities/MediaStore.swift,
+				Views/CameraInteractiveView.swift,
+			);
+			target = 3174E1952E55310D006D6EB3 /* FilterCamWidgetsExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		3174E1662E552BE2006D6EB3 /* FilterCamCaptureExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3174E17E2E552E37006D6EB3 /* Exceptions for "FilterCamCaptureExtension" folder in "FilterCam" target */,
+				3174E16F2E552BE2006D6EB3 /* Exceptions for "FilterCamCaptureExtension" folder in "FilterCamCaptureExtension" target */,
+			);
+			path = FilterCamCaptureExtension;
+			sourceTree = "<group>";
+		};
+		3174E19C2E55310D006D6EB3 /* FilterCamWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3174E1B42E553182006D6EB3 /* Exceptions for "FilterCamWidgets" folder in "FilterCam" target */,
+				3174E1B52E553182006D6EB3 /* Exceptions for "FilterCamWidgets" folder in "FilterCamCaptureExtension" target */,
+				3174E1AC2E553110006D6EB3 /* Exceptions for "FilterCamWidgets" folder in "FilterCamWidgetsExtension" target */,
+			);
+			path = FilterCamWidgets;
+			sourceTree = "<group>";
+		};
 		31AB53232E54D66F00A51742 /* FilterCam */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3174E1752E552C7F006D6EB3 /* Exceptions for "FilterCam" folder in "FilterCamCaptureExtension" target */,
+				3174E1B72E553246006D6EB3 /* Exceptions for "FilterCam" folder in "FilterCamWidgetsExtension" target */,
+			);
 			path = FilterCam;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		3174E1622E552BE2006D6EB3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3174E1932E55310D006D6EB3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3174E19B2E55310D006D6EB3 /* SwiftUI.framework in Frameworks */,
+				3174E1992E55310D006D6EB3 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		31AB531E2E54D66F00A51742 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -29,10 +218,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3174E1972E55310D006D6EB3 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3174E1982E55310D006D6EB3 /* WidgetKit.framework */,
+				3174E19A2E55310D006D6EB3 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		31AB53182E54D66F00A51742 = {
 			isa = PBXGroup;
 			children = (
 				31AB53232E54D66F00A51742 /* FilterCam */,
+				3174E1662E552BE2006D6EB3 /* FilterCamCaptureExtension */,
+				3174E19C2E55310D006D6EB3 /* FilterCamWidgets */,
+				3174E1972E55310D006D6EB3 /* Frameworks */,
 				31AB53222E54D66F00A51742 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +242,8 @@
 			isa = PBXGroup;
 			children = (
 				31AB53212E54D66F00A51742 /* FilterCam.app */,
+				3174E1652E552BE2006D6EB3 /* FilterCamCaptureExtension.appex */,
+				3174E1962E55310D006D6EB3 /* FilterCamWidgetsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,6 +251,50 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		3174E1642E552BE2006D6EB3 /* FilterCamCaptureExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3174E1702E552BE2006D6EB3 /* Build configuration list for PBXNativeTarget "FilterCamCaptureExtension" */;
+			buildPhases = (
+				3174E1612E552BE2006D6EB3 /* Sources */,
+				3174E1622E552BE2006D6EB3 /* Frameworks */,
+				3174E1632E552BE2006D6EB3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				3174E1662E552BE2006D6EB3 /* FilterCamCaptureExtension */,
+			);
+			name = FilterCamCaptureExtension;
+			packageProductDependencies = (
+			);
+			productName = FilterCamCaptureExtension;
+			productReference = 3174E1652E552BE2006D6EB3 /* FilterCamCaptureExtension.appex */;
+			productType = "com.apple.product-type.extensionkit-extension";
+		};
+		3174E1952E55310D006D6EB3 /* FilterCamWidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3174E1A92E553110006D6EB3 /* Build configuration list for PBXNativeTarget "FilterCamWidgetsExtension" */;
+			buildPhases = (
+				3174E1922E55310D006D6EB3 /* Sources */,
+				3174E1932E55310D006D6EB3 /* Frameworks */,
+				3174E1942E55310D006D6EB3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				3174E19C2E55310D006D6EB3 /* FilterCamWidgets */,
+			);
+			name = FilterCamWidgetsExtension;
+			packageProductDependencies = (
+			);
+			productName = FilterCamWidgetsExtension;
+			productReference = 3174E1962E55310D006D6EB3 /* FilterCamWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		31AB53202E54D66F00A51742 /* FilterCam */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 31AB532F2E54D67200A51742 /* Build configuration list for PBXNativeTarget "FilterCam" */;
@@ -55,10 +302,14 @@
 				31AB531D2E54D66F00A51742 /* Sources */,
 				31AB531E2E54D66F00A51742 /* Frameworks */,
 				31AB531F2E54D66F00A51742 /* Resources */,
+				3174E1732E552BE2006D6EB3 /* Embed ExtensionKit Extensions */,
+				3174E1AD2E553110006D6EB3 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				3174E16D2E552BE2006D6EB3 /* PBXTargetDependency */,
+				3174E1A72E553110006D6EB3 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				31AB53232E54D66F00A51742 /* FilterCam */,
@@ -80,6 +331,12 @@
 				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
+					3174E1642E552BE2006D6EB3 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					3174E1952E55310D006D6EB3 = {
+						CreatedOnToolsVersion = 16.0;
+					};
 					31AB53202E54D66F00A51742 = {
 						CreatedOnToolsVersion = 16.0;
 					};
@@ -100,11 +357,27 @@
 			projectRoot = "";
 			targets = (
 				31AB53202E54D66F00A51742 /* FilterCam */,
+				3174E1642E552BE2006D6EB3 /* FilterCamCaptureExtension */,
+				3174E1952E55310D006D6EB3 /* FilterCamWidgetsExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		3174E1632E552BE2006D6EB3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3174E1942E55310D006D6EB3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		31AB531F2E54D66F00A51742 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -115,6 +388,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		3174E1612E552BE2006D6EB3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3174E1922E55310D006D6EB3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		31AB531D2E54D66F00A51742 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -124,7 +411,132 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		3174E16D2E552BE2006D6EB3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3174E1642E552BE2006D6EB3 /* FilterCamCaptureExtension */;
+			targetProxy = 3174E16C2E552BE2006D6EB3 /* PBXContainerItemProxy */;
+		};
+		3174E1A72E553110006D6EB3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3174E1952E55310D006D6EB3 /* FilterCamWidgetsExtension */;
+			targetProxy = 3174E1A62E553110006D6EB3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		3174E1712E552BE2006D6EB3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K79BRFXPP9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FilterCamCaptureExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FilterCamCaptureExtension;
+				INFOPLIST_KEY_NSCameraUsageDescription = "This permission allows us to capture photos using your device's cameras.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This permission allows us to record audio for videos.";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nozhana.FilterCam.FilterCamCaptureExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3174E1722E552BE2006D6EB3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K79BRFXPP9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FilterCamCaptureExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FilterCamCaptureExtension;
+				INFOPLIST_KEY_NSCameraUsageDescription = "This permission allows us to capture photos using your device's cameras.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This permission allows us to record audio for videos.";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nozhana.FilterCam.FilterCamCaptureExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		3174E1AA2E553110006D6EB3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K79BRFXPP9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FilterCamWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FilterCamWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nozhana.FilterCam.FilterCamWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3174E1AB2E553110006D6EB3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K79BRFXPP9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FilterCamWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FilterCamWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nozhana.FilterCam.FilterCamWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		31AB532D2E54D67200A51742 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -264,6 +676,7 @@
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -302,6 +715,7 @@
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -323,6 +737,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		3174E1702E552BE2006D6EB3 /* Build configuration list for PBXNativeTarget "FilterCamCaptureExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3174E1712E552BE2006D6EB3 /* Debug */,
+				3174E1722E552BE2006D6EB3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3174E1A92E553110006D6EB3 /* Build configuration list for PBXNativeTarget "FilterCamWidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3174E1AA2E553110006D6EB3 /* Debug */,
+				3174E1AB2E553110006D6EB3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		31AB531C2E54D66F00A51742 /* Build configuration list for PBXProject "FilterCam" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
