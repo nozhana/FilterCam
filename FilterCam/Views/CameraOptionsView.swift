@@ -102,7 +102,7 @@ private struct CameraOptionView: View {
                 HStack(spacing: 24) {
                     switch option {
                     case .flashMode:
-                        ForEach(FlashMode.allCases) { flashMode in
+                        ForEach(FlashMode.availableFlashModes) { flashMode in
                             Button(flashMode.title) {
                                 withAnimation(.snappy) {
                                     model.flashMode = flashMode
@@ -165,11 +165,20 @@ private enum CameraOption: Int, Identifiable, CaseIterable {
     func nextTitle(model: CameraModel) -> String {
         switch self {
         case .flashMode:
-            model.flashMode.nextElement.title
+            if let index = FlashMode.availableFlashModes.firstIndex(of: model.flashMode) {
+                var nextIndex = FlashMode.availableFlashModes.index(after: index)
+                if nextIndex == FlashMode.availableFlashModes.endIndex {
+                    nextIndex = FlashMode.availableFlashModes.startIndex
+                }
+                let flashMode = FlashMode.availableFlashModes[nextIndex]
+                return flashMode.title
+            } else {
+                return FlashMode.availableFlashModes.first!.title
+            }
         case .qualityPrioritization:
-            model.qualityPrioritization.nextElement.title
+            return model.qualityPrioritization.nextElement.title
         case .aspectRatio:
-            model.aspectRatio.nextElement.title
+            return model.aspectRatio.nextElement.title
         }
     }
     
@@ -187,11 +196,20 @@ private enum CameraOption: Int, Identifiable, CaseIterable {
     func nextSystemImage(model: CameraModel) -> String {
         switch self {
         case .flashMode:
-            model.flashMode.nextElement.systemImage
+            if let index = FlashMode.availableFlashModes.firstIndex(of: model.flashMode) {
+                var nextIndex = FlashMode.availableFlashModes.index(after: index)
+                if nextIndex == FlashMode.availableFlashModes.endIndex {
+                    nextIndex = FlashMode.availableFlashModes.startIndex
+                }
+                let flashMode = FlashMode.availableFlashModes[nextIndex]
+                return flashMode.systemImage
+            } else {
+                return FlashMode.availableFlashModes.first!.systemImage
+            }
         case .qualityPrioritization:
-            model.qualityPrioritization.nextElement.systemImage
+            return model.qualityPrioritization.nextElement.systemImage
         case .aspectRatio:
-            model.aspectRatio.nextElement.systemImage
+            return model.aspectRatio.nextElement.systemImage
         }
     }
     
@@ -217,7 +235,15 @@ private enum CameraOption: Int, Identifiable, CaseIterable {
     func cycle(model: CameraModel) {
         switch self {
         case .flashMode:
-            model.flashMode.cycle()
+            if let index = FlashMode.availableFlashModes.firstIndex(of: model.flashMode) {
+                var nextIndex = FlashMode.availableFlashModes.index(after: index)
+                if nextIndex == FlashMode.availableFlashModes.endIndex {
+                    nextIndex = FlashMode.availableFlashModes.startIndex
+                }
+                model.flashMode = .availableFlashModes[nextIndex]
+            } else {
+                model.flashMode = .availableFlashModes.first!
+            }
         case .qualityPrioritization:
             model.qualityPrioritization.cycle()
         case .aspectRatio:

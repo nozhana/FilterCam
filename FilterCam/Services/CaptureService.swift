@@ -19,7 +19,9 @@ final actor CaptureService {
     
     private let photoOutput = PhotoOutput()
     
-    private var outputServices: [any OutputService] { [photoOutput] }
+    private let movieOutput = MovieOutput()
+    
+    private var outputServices: [any OutputService] { [photoOutput, movieOutput] }
     
     private var activeVideoInput: AVCaptureDeviceInput?
     
@@ -29,8 +31,8 @@ final actor CaptureService {
     
     private let systemPreferredCamera = SystemPreferredCameraObserver()
     
-    private var rotationCoordinator: AVCaptureDevice.RotationCoordinator!
-    private var rotationObservers: [AnyObject] = []
+    // private var rotationCoordinator: AVCaptureDevice.RotationCoordinator!
+    // private var rotationObservers: [AnyObject] = []
     
     private var isSetUp = false
     
@@ -105,8 +107,20 @@ final actor CaptureService {
     }
     
     func setCaptureMode(_ captureMode: CaptureMode) {
-        // TODO: Pending more capture modes
-        logger.fault("No capture modes to set. This method does nothing for now.")
+        session.sessionPreset = captureMode == .photo ? .photo : .high
+        self.captureMode = captureMode
+        switch captureMode {
+        case .photo:
+            if session.outputs.contains(movieOutput.output) {
+                session.removeOutput(movieOutput.output)
+            }
+        case .video:
+            do {
+                try addOutput(movieOutput.output)
+            } catch {
+                logger.error("Failed to add movie output to session.")
+            }
+        }
     }
     
     func switchCamera() {
@@ -128,6 +142,14 @@ final actor CaptureService {
         try await photoOutput.capturePhoto(with: features)
     }
     
+    func recordVideo(with features: VideoFeatures) async throws -> Video {
+        try await movieOutput.recordVideo(with: features)
+    }
+    
+    func stopRecording() {
+        movieOutput.stopRecording()
+    }
+    
     func focusAndExpose(on devicePoint: CGPoint) throws {
         try currentDevice.lockForConfiguration()
         defer { currentDevice.unlockForConfiguration() }
@@ -146,7 +168,9 @@ final actor CaptureService {
     }
     
     private func observeOutputServices() {
-        photoOutput.$captureActivity.assign(to: &$captureActivity)
+        photoOutput.$captureActivity
+            .merge(with: movieOutput.$captureActivity)
+            .assign(to: &$captureActivity)
     }
     
     private func observeNotifications() {

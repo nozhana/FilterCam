@@ -5,11 +5,12 @@
 //  Created by Nozhan A. on 8/19/25.
 //
 
+import AVFoundation
 import Foundation
 import CoreGraphics
 
 struct PhotoFeatures {
-    var flashMode: FlashMode = .auto
+    var flashMode: FlashMode = .firstAvailable
     var qualityPrioritization: QualityPrioritization = .balanced
     
     static let `default` = PhotoFeatures()
@@ -40,6 +41,17 @@ enum FlashMode: Int, Codable, CaseIterable, CameraOptionable {
         case .auto: "bolt.badge.automatic.fill"
         }
     }
+    
+    static var availableFlashModes: [FlashMode] {
+        if let systemPreferredCamera = AVCaptureDevice.systemPreferredCamera,
+           systemPreferredCamera.hasFlash,
+           systemPreferredCamera.isFlashAvailable {
+            return FlashMode.allCases
+        }
+        return [.off]
+    }
+    
+    static let firstAvailable = availableFlashModes.first!
 }
 
 enum QualityPrioritization: Int, Codable, CaseIterable, CameraOptionable {

@@ -12,6 +12,8 @@ struct GalleryView: View {
     var animation: Namespace.ID?
     
     @StateObject private var model = Model()
+    @State private var detailViewMediumID: UUID?
+    @State private var showDetailView = false
     
     @Environment(\.mediaStore) private var mediaStore
     @Environment(\.openMainApp) private var openMainApp
@@ -23,19 +25,28 @@ struct GalleryView: View {
         NavigationStack {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 0) {
-                    ForEach(model.photos) { photo in
-                        if let thumbnail = Thumbnail(id: photo.id, sourceImage: photo.image) {
+                    ForEach(model.media) { medium in
+                        if let thumbnail = Thumbnail(medium) {
                             Rectangle()
                                 .overlay {
                                     Image(uiImage: thumbnail.image)
                                         .resizable()
                                         .scaledToFill()
                                 }
+                                .overlay {
+                                    if medium.type == .video {
+                                        Image(systemName: "play.fill")
+                                            .resizable().scaledToFit()
+                                            .frame(width: 24, height: 24)
+                                            .padding(16)
+                                            .background(.background.secondary.opacity(0.5), in: .circle)
+                                    }
+                                }
                                 .aspectRatio(1, contentMode: .fit)
                                 .clipShape(.rect)
                                 .overlay(alignment: .topTrailing) {
                                     if model.isEditing {
-                                        let isMarkedForDeletion = model.photosToBeDeleted.contains(photo.id)
+                                        let isMarkedForDeletion = model.itemsToBeDeleted.contains(medium.id)
                                         Image(systemName: isMarkedForDeletion ? "checkmark.circle.fill" : "circle")
                                             .font(.title2.bold())
                                             .contentTransition(.symbolEffect)
@@ -46,41 +57,41 @@ struct GalleryView: View {
                                 }
                                 .onTapGesture {
                                     if model.isEditing {
-                                        if model.photosToBeDeleted.contains(photo.id) {
-                                            model.photosToBeDeleted.remove(photo.id)
+                                        if model.itemsToBeDeleted.contains(medium.id) {
+                                            model.itemsToBeDeleted.remove(medium.id)
                                         } else {
-                                            model.photosToBeDeleted.insert(photo.id)
+                                            model.itemsToBeDeleted.insert(medium.id)
                                         }
+                                    } else {
+                                        detailViewMediumID = medium.id
+                                        showDetailView = true
                                     }
                                 }
                                 .contextMenu {
                                     Button("Delete", systemImage: "trash.fill", role: .destructive) {
-                                        try? model.deletePhoto(photo)
+                                        try? model.deleteItem(medium.id)
                                     }
-                                } preview: {
-                                    Image(uiImage: photo.image)
-                                        .resizable()
-                                        .scaledToFit()
                                 }
-
+               
                         }
                     }
                 }
             }
             .safeAreaInset(edge: .bottom, spacing: .zero) {
                 if isCaptureExtension || model.isEditing {
-                    VStack(spacing: 16) {
+                    VStack(spacing: 28) {
                         if model.isEditing {
-                            HStack(spacing: 24) {
+                            HStack(spacing: 32) {
                                 Button("Cancel", systemImage: "xmark", role: .cancel) {
-                                    model.photosToBeDeleted.removeAll()
+                                    model.itemsToBeDeleted.removeAll()
                                     model.isEditing = false
                                 }
+                                .foregroundStyle(Color.secondary)
                                 Button("Delete", systemImage: "trash.fill", role: .destructive) {
-                                    for photoID in model.photosToBeDeleted {
-                                        try? model.deletePhoto(photoID)
+                                    for itemID in model.itemsToBeDeleted {
+                                        try? model.deleteItem(itemID)
                                     }
-                                    model.photosToBeDeleted.removeAll()
+                                    model.itemsToBeDeleted.removeAll()
                                 }
                             }
                             .font(.caption.smallCaps().bold())
@@ -99,6 +110,12 @@ struct GalleryView: View {
                     .padding(.horizontal, 10)
                     .frame(maxWidth: .infinity)
                     .background(.ultraThinMaterial)
+                }
+            }
+            .navigationDestination(isPresented: $showDetailView) {
+                if let binding = Binding($detailViewMediumID) {
+                    GalleryDetailView(selection: binding)
+                        .environmentObject(model)
                 }
             }
             .toolbar {
@@ -125,8 +142,8 @@ struct GalleryView: View {
 
 extension GalleryView {
     final class Model: ObservableObject {
-        @Published fileprivate var photos = [LoadedPhoto]()
-        @Published var photosToBeDeleted = Set<UUID>()
+        @Published var media = [AnyOutputMedium]()
+        @Published var itemsToBeDeleted = Set<UUID>()
         @Published var isEditing = false
         
         private var mediaStore: MediaStore!
@@ -137,38 +154,13 @@ extension GalleryView {
         }
         
         private func refreshPhotos() {
-            photos = mediaStore.photos.compactMap(LoadedPhoto.init)
+            media = mediaStore.media
         }
         
         @MainActor
-        fileprivate func deletePhoto(_ photo: LoadedPhoto) throws {
-            _ = try mediaStore.deletePhoto(photo.id)
-            photos.removeAll { $0.id == photo.id }
+        func deleteItem(_ itemID: UUID) throws {
+            _ = try mediaStore.deleteItem(itemID)
+            media.removeAll(where: { $0.id == itemID })
         }
-        
-        @MainActor
-        func deletePhoto(_ photoID: UUID) throws {
-            _ = try mediaStore.deletePhoto(photoID)
-            photos.removeAll { $0.id == photoID }
-        }
-    }
-}
-
-private struct LoadedPhoto: Identifiable {
-    var id: UUID
-    var image: UIImage
-    var timestamp: Date
-    var isProxy: Bool
-}
-
-extension LoadedPhoto {
-    init?(_ photo: Photo) {
-        guard let image = UIImage(data: photo.data) else {
-            return nil
-        }
-        self.id = photo.id
-        self.image = image
-        self.timestamp = photo.timestamp
-        self.isProxy = photo.isProxy
     }
 }

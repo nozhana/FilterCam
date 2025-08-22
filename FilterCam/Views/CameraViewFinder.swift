@@ -112,6 +112,16 @@ struct CameraViewFinder: View {
                         .buttonStyle(.plain)
                         .transition(.move(edge: .top).combined(with: .offset(y: -64)))
                     }
+                    if model.captureActivity.isRecording {
+                        let duration = Duration.seconds(model.captureActivity.duration)
+                        Text(duration, format: .time(pattern: .minuteSecond(padMinuteToLength: 2, fractionalSecondsLength: 2)))
+                            .font(.callout.weight(.light).monospacedDigit())
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .background(.red, in: .rect(cornerRadius: 12, style: .continuous))
+                            .transition(.move(edge: .top).combined(with: .blurReplace))
+                    }
                     Spacer()
                     HStack {
                         Button {
@@ -138,18 +148,8 @@ struct CameraViewFinder: View {
                         }
                         .backport.matchedTransitionSource(id: "gallery", in: galleryAnimation)
                         Spacer()
-                        Button {
-                            Task { await model.capturePhoto() }
-                        } label: {
-                            Circle()
-                                .fill(.white)
-                                .frame(width: 68, height: 68)
-                                .background(
-                                    Circle()
-                                        .stroke(.white, lineWidth: 2)
-                                        .padding(-4)
-                                )
-                        }
+                        CameraActionButton()
+                            .environmentObject(model)
                         Spacer()
                         Button {
                             Task { await model.switchCamera() }

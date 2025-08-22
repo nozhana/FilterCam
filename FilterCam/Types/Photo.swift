@@ -7,7 +7,7 @@
 
 import UIKit
 
-struct Photo: Identifiable, Codable {
+struct Photo: OutputMedium {
     let id: UUID
     let data: Data
     let timestamp: Date

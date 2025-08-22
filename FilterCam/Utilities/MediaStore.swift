@@ -5,13 +5,16 @@
 //  Created by Nozhan A. on 8/20/25.
 //
 
-import SwiftUI
+import UIKit
 
 struct MediaStore {
     private let captureDirectory: URL
     
+    let moviesDirectory: URL
+    
     init(appConfiguration: AppConfiguration = .shared) {
         self.captureDirectory = appConfiguration.captureDirectory
+        self.moviesDirectory = appConfiguration.moviesDirectory
         (thumbnailStream, thumbnailContinuation) = AsyncStream.makeStream()
         refreshThumbnail()
     }
@@ -19,14 +22,17 @@ struct MediaStore {
     let thumbnailStream: AsyncStream<Thumbnail?>
     private let thumbnailContinuation: AsyncStream<Thumbnail?>.Continuation
     
-    var photos: [Photo] {
+    var media: [AnyOutputMedium] {
         guard let contents = try? FileManager.default.contentsOfDirectory(at: captureDirectory, includingPropertiesForKeys: nil),
                 !contents.isEmpty else { return [] }
-        var result = [Photo]()
+        var result = [AnyOutputMedium]()
         for url in contents {
-            guard let data = try? Data(contentsOf: url),
-                  let decoded = try? JSONDecoder().decode(Photo.self, from: data) else { continue }
-            result.append(decoded)
+            guard let data = try? Data(contentsOf: url) else { continue }
+            if let video = try? JSONDecoder().decode(Video.self, from: data) {
+                result.append(video.eraseToAnyMedium())
+            } else if let photo = try? JSONDecoder().decode(Photo.self, from: data) {
+                result.append(photo.eraseToAnyMedium())
+            }
         }
         result.sort(using: KeyPathComparator(\.timestamp, order: .reverse))
         return result
@@ -53,28 +59,33 @@ struct MediaStore {
     }
     
     @discardableResult
-    func deletePhoto(_ photoID: UUID) throws -> URL {
-        let photoURL = captureDirectory.appendingPathComponent(photoID.uuidString, conformingTo: .json)
-        try FileManager.default.removeItem(at: photoURL)
+    func deleteItem(_ itemID: UUID) throws -> URL {
+        let itemURL = captureDirectory.appendingPathComponent(itemID.uuidString, conformingTo: .json)
+        try FileManager.default.removeItem(at: itemURL)
+        let possibleVideoFileURL = moviesDirectory.appendingPathComponent(itemID.uuidString, conformingTo: .mpeg4Movie)
+        try? FileManager.default.removeItem(at: possibleVideoFileURL)
         refreshThumbnail()
-        return photoURL
+        return itemURL
+    }
+    
+    @discardableResult
+    func saveVideo(_ video: Video) throws -> URL {
+        let jsonData = try JSONEncoder().encode(video)
+        let videoURL = captureDirectory.appendingPathComponent(video.id.uuidString, conformingTo: .json)
+        try? FileManager.default.removeItem(at: videoURL)
+        try jsonData.write(to: videoURL)
+        refreshThumbnail()
+        return videoURL
     }
     
     func refreshThumbnail() {
-        if let lastPhoto = photos.first,
-           let image = UIImage(data: lastPhoto.data),
-           let thumbnail = Thumbnail(id: lastPhoto.id, sourceImage: image) {
+        if let lastMedium = media.first,
+           let thumbnailData = lastMedium.thumbnailData,
+           let thumbnailImage = UIImage(data: thumbnailData) {
+            let thumbnail = Thumbnail(id: lastMedium.id, image: thumbnailImage)
             thumbnailContinuation.yield(thumbnail)
         } else {
             thumbnailContinuation.yield(nil)
         }
     }
-}
-
-extension EnvironmentValues {
-#if DEBUG
-    @Entry var mediaStore = ProcessInfo.isRunningPreviews ? MediaStore.preview : .shared
-#else
-    @Entry var mediaStore = MediaStore.shared
-#endif
 }

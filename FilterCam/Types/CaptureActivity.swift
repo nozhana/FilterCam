@@ -19,6 +19,10 @@ extension CaptureActivity {
         return false
     }
     
+    var isRecording: Bool {
+        if case .video = self { true } else { false }
+    }
+    
     var duration: TimeInterval {
         if case .video(let duration) = self {
             return duration

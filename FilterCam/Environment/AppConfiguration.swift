@@ -10,6 +10,14 @@ import SwiftUI
 struct AppConfiguration: Sendable {
     let captureDirectory: URL
     
+    var moviesDirectory: URL {
+        let directory = captureDirectory.appending(component: "movies", directoryHint: .isDirectory)
+        if !FileManager.default.fileExists(atPath: directory.path()) {
+            try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        }
+        return directory
+    }
+    
     static let shared = {
         var url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         url.append(component: "capture")

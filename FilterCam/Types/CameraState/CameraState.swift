@@ -60,7 +60,7 @@ struct CameraState: Codable {
         }
     }
     
-    var flashMode = FlashMode.auto {
+    var flashMode = FlashMode.firstAvailable {
         didSet {
             if oldValue != flashMode {
                 updateContext()

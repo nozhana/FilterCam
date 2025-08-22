@@ -24,9 +24,10 @@ final class CameraModel: ObservableObject {
     @Published var captureMode = CaptureMode.photo {
         didSet {
             cameraState.captureMode = captureMode
+            Task { await captureService.setCaptureMode(captureMode) }
         }
     }
-    @Published var flashMode = FlashMode.auto {
+    @Published var flashMode = FlashMode.firstAvailable {
         didSet {
             cameraState.flashMode = flashMode
         }
@@ -137,6 +138,24 @@ final class CameraModel: ObservableObject {
         } catch {
             logger.error("Failed to capture photo: \(error)")
         }
+    }
+    
+    func startRecording() async {
+        do {
+            logger.debug("-- RECORDING VIDEO --")
+            let features = VideoFeatures(flashMode: cameraState.flashMode)
+            logger.debug("Features: \(String(describing: features))")
+            let video = try await captureService.recordVideo(with: features)
+            logger.debug("Recorded video: \(String(describing: video))")
+            let videoURL = try mediaStore.saveVideo(video)
+            logger.debug("Video saved to URL: \(String(describing: videoURL))")
+        } catch {
+            logger.error("Failed to record video: \(error)")
+        }
+    }
+    
+    func stopRecording() async {
+        await captureService.stopRecording()
     }
     
     @MainActor

@@ -81,9 +81,25 @@ extension Backport where V: View {
     }
 }
 
-extension Backport.ScrollGeometry {
+private extension Backport.ScrollGeometry {
     @available(iOS 18.0, *)
     init(_ geometry: SwiftUI.ScrollGeometry) {
         self.init(contentOffset: geometry.contentOffset, contentSize: geometry.contentSize, contentInsets: geometry.contentInsets, containerSize: geometry.containerSize, visibleRect: geometry.visibleRect, bounds: geometry.bounds)
+    }
+}
+
+extension ViewAlignedScrollTargetBehavior.LimitBehavior {
+    static var backport: Backport<ViewAlignedScrollTargetBehavior.LimitBehavior> {
+        .init(.automatic)
+    }
+}
+
+extension Backport where V == ViewAlignedScrollTargetBehavior.LimitBehavior {
+    var alwaysByOne: ViewAlignedScrollTargetBehavior.LimitBehavior {
+        if #available(iOS 18.0, *) {
+            return V.alwaysByOne
+        } else {
+            return V.always
+        }
     }
 }
