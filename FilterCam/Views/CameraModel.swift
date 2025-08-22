@@ -18,6 +18,7 @@ final class CameraModel: ObservableObject {
     @Published private(set) var shouldFlashScreen = false
     @Published private(set) var thumbnail: Thumbnail?
     @Published private(set) var isPaused = false
+    @Published private(set) var focusPoint: CGPoint?
     
     // TODO: Pending more capture modes
     @Published var captureMode = CaptureMode.photo {
@@ -33,6 +34,11 @@ final class CameraModel: ObservableObject {
     @Published var qualityPrioritization = QualityPrioritization.balanced {
         didSet {
             cameraState.qualityPrioritization = qualityPrioritization
+        }
+    }
+    @Published var aspectRatio = AspectRatio.fourToThree {
+        didSet {
+            cameraState.aspectRatio = aspectRatio
         }
     }
     
@@ -100,12 +106,19 @@ final class CameraModel: ObservableObject {
         captureMode = cameraState.captureMode
         flashMode = cameraState.flashMode
         qualityPrioritization = cameraState.qualityPrioritization
+        aspectRatio = cameraState.aspectRatio
     }
     
     @MainActor
     func switchCamera() async {
-        isSwitchingCameras = true
-        defer { isSwitchingCameras = false }
+        withAnimation(.snappy) {
+            isSwitchingCameras = true
+        }
+        defer {
+            withAnimation(.snappy) {
+                isSwitchingCameras = false
+            }
+        }
         await captureService.switchCamera()
         cameraState.cameraPosition = await captureService.activeCameraPosition
     }
@@ -117,10 +130,29 @@ final class CameraModel: ObservableObject {
             logger.debug("Features: \(String(describing: features))")
             let photo = try await captureService.capturePhoto(with: features)
             logger.debug("Captured photo: \(String(describing: photo))")
-            let photoURL = try mediaStore.savePhoto(photo)
+            let croppedPhoto = photo.cropped(to: aspectRatio.rawValue)
+            logger.debug("Cropped photo: \(String(describing: croppedPhoto))")
+            let photoURL = try mediaStore.savePhoto(croppedPhoto)
             logger.debug("Photo saved to URL: \(String(describing: photoURL))")
         } catch {
             logger.error("Failed to capture photo: \(error)")
+        }
+    }
+    
+    @MainActor
+    private func flashFocusTarget(on layerPoint: CGPoint) {
+        focusPoint = layerPoint
+        withAnimation(.snappy.delay(3)) {
+            focusPoint = nil
+        }
+    }
+    
+    func focusAndExpose(on devicePoint: CGPoint, layerPoint: CGPoint) async {
+        do {
+            try await captureService.focusAndExpose(on: devicePoint)
+            await flashFocusTarget(on: layerPoint)
+        } catch {
+            logger.error("Failed to auto-focus-and-expose on devicePoint: \(String(describing: devicePoint))")
         }
     }
     

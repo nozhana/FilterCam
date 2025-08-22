@@ -5,7 +5,7 @@
 //  Created by Nozhan A. on 8/19/25.
 //
 
-import Foundation
+import UIKit
 
 struct Photo: Identifiable, Codable {
     let id: UUID
@@ -18,5 +18,14 @@ struct Photo: Identifiable, Codable {
         self.data = data
         self.timestamp = timestamp
         self.isProxy = isProxy
+    }
+}
+
+extension Photo {
+    func cropped(to ratio: CGFloat) -> Photo {
+        guard let uiImage = UIImage(data: data),
+              let croppedImage = uiImage.cropped(to: ratio),
+              let pngData = croppedImage.pngData() else { return self }
+        return Photo(id: id, data: pngData, timestamp: timestamp, isProxy: isProxy)
     }
 }

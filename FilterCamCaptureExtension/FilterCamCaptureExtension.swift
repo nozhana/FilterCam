@@ -19,6 +19,7 @@ struct FilterCamCaptureExtension: LockedCameraCaptureExtension {
                 .environment(\.appConfiguration, appConfiguration)
                 .environment(\.openMainApp, .init(session: session))
                 .environment(\.mediaStore, .init(appConfiguration: appConfiguration))
+                .environment(\.isCaptureExtension, true)
         }
     }
 }

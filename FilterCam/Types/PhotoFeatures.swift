@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreGraphics
 
 struct PhotoFeatures {
     var flashMode: FlashMode = .auto
@@ -61,6 +62,55 @@ enum QualityPrioritization: Int, Codable, CaseIterable, CameraOptionable {
         case .speed: "bolt.horizontal.fill"
         case .balanced: "equal"
         case .quality: "sparkles"
+        }
+    }
+}
+
+enum AspectRatio: CGFloat, Codable, CaseIterable, CameraOptionable {
+    case fourToThree
+    case sixteenToNine
+    case threeToTwo
+    
+    var id: CGFloat { rawValue }
+    
+    var rawValue: CGFloat {
+        switch self {
+        case .fourToThree: 4.0/3
+        case .sixteenToNine: 16.0/9
+        case .threeToTwo: 3.0/2
+        }
+    }
+    
+    init?(rawValue: CGFloat) {
+        if let value: AspectRatio = switch rawValue {
+        case 4.0/3: .fourToThree
+        case 16.0/9: .sixteenToNine
+        case 3.0/2: .threeToTwo
+        default: nil
+        } {
+            self = value
+        } else {
+            return nil
+        }
+    }
+    
+    var title: String {
+        switch self {
+        case .fourToThree: "4:3"
+        case .sixteenToNine: "16:9"
+        case .threeToTwo: "3:2"
+        }
+    }
+    
+    var systemImage: String {
+        "aspectratio"
+    }
+    
+    var previewOffsetY: CGFloat {
+        switch self {
+        case .fourToThree: 110
+        case .threeToTwo: 60
+        case .sixteenToNine: .zero
         }
     }
 }

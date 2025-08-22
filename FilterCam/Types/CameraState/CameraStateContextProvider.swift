@@ -41,6 +41,7 @@ Capture mode: \(String(describing: state.captureMode))
 Camera Position: \(String(describing: state.cameraPosition))
 Quality Prioritization: \(String(describing: state.qualityPrioritization))
 Flash Mode: \(String(describing: state.flashMode))
+Aspect Ratio: \(String(describing: state.aspectRatio))
 """)
         }
         

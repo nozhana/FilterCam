@@ -53,21 +53,20 @@ struct MediaStore {
     }
     
     @discardableResult
-    func deletePhoto(_ photo: Photo) throws -> URL {
-        let photoURL = captureDirectory.appendingPathComponent(photo.id.uuidString, conformingTo: .json)
+    func deletePhoto(_ photoID: UUID) throws -> URL {
+        let photoURL = captureDirectory.appendingPathComponent(photoID.uuidString, conformingTo: .json)
         try FileManager.default.removeItem(at: photoURL)
         refreshThumbnail()
         return photoURL
     }
     
     func refreshThumbnail() {
-        if let lastPhoto = photos.first {
-            if let image = UIImage(data: lastPhoto.data),
-               let thumbnail = Thumbnail(id: lastPhoto.id, sourceImage: image) {
-                thumbnailContinuation.yield(thumbnail)
-            } else {
-                thumbnailContinuation.yield(nil)
-            }
+        if let lastPhoto = photos.first,
+           let image = UIImage(data: lastPhoto.data),
+           let thumbnail = Thumbnail(id: lastPhoto.id, sourceImage: image) {
+            thumbnailContinuation.yield(thumbnail)
+        } else {
+            thumbnailContinuation.yield(nil)
         }
     }
 }

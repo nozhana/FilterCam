@@ -13,6 +13,7 @@ struct CameraState: Codable {
         case cameraPosition
         case qualityPrioritization
         case flashMode
+        case aspectRatio
     }
     
     init(from decoder: any Decoder) throws {
@@ -26,6 +27,7 @@ struct CameraState: Codable {
         cameraPosition = try container.decode(CameraPosition.self, forKey: .cameraPosition)
         qualityPrioritization = try container.decode(QualityPrioritization.self, forKey: .qualityPrioritization)
         flashMode = try container.decode(FlashMode.self, forKey: .flashMode)
+        aspectRatio = try container.decode(AspectRatio.self, forKey: .aspectRatio)
     }
     
     init(contextProvider: some ContextProvider) {
@@ -61,6 +63,14 @@ struct CameraState: Codable {
     var flashMode = FlashMode.auto {
         didSet {
             if oldValue != flashMode {
+                updateContext()
+            }
+        }
+    }
+    
+    var aspectRatio = AspectRatio.fourToThree {
+        didSet {
+            if oldValue != aspectRatio {
                 updateContext()
             }
         }

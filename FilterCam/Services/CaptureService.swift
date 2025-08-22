@@ -128,6 +128,23 @@ final actor CaptureService {
         try await photoOutput.capturePhoto(with: features)
     }
     
+    func focusAndExpose(on devicePoint: CGPoint) throws {
+        try currentDevice.lockForConfiguration()
+        defer { currentDevice.unlockForConfiguration() }
+        if currentDevice.isFocusPointOfInterestSupported {
+            currentDevice.focusPointOfInterest = devicePoint
+        }
+        if currentDevice.isFocusModeSupported(.continuousAutoFocus) {
+            currentDevice.focusMode = .continuousAutoFocus
+        }
+        if currentDevice.isExposurePointOfInterestSupported {
+            currentDevice.exposurePointOfInterest = devicePoint
+        }
+        if currentDevice.isExposureModeSupported(.continuousAutoExposure) {
+            currentDevice.exposureMode = .continuousAutoExposure
+        }
+    }
+    
     private func observeOutputServices() {
         photoOutput.$captureActivity.assign(to: &$captureActivity)
     }

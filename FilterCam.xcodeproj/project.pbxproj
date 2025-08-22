@@ -75,9 +75,11 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Environment/AppConfiguration.swift,
+				"Environment/CaptureExtension+Environment.swift",
 				Extensions/CaptureExtensions.swift,
 				"Extensions/Logger+.swift",
 				"Extensions/ProcessInfo+.swift",
+				"Extensions/UIImage+.swift",
 				"Extensions/View+.swift",
 				"Preview Content/Preview Assets.xcassets",
 				"Preview Content/PreviewAssets.swift",
@@ -85,6 +87,8 @@
 				Protocols/OutputService/PhotoOutput.swift,
 				Protocols/PreviewSource.swift,
 				Services/CaptureService.swift,
+				Services/UserDefaults/UserDefaultsKey.swift,
+				Shapes/TargetShape.swift,
 				Types/CameraPosition.swift,
 				Types/CameraState/CameraState.swift,
 				Types/CameraState/CameraStateContextProvider.swift,
@@ -105,6 +109,7 @@
 				Views/CameraOptionsView.swift,
 				Views/CameraViewFinder.swift,
 				Views/GalleryView.swift,
+				Views/SettingsView.swift,
 			);
 			target = 3174E1642E552BE2006D6EB3 /* FilterCamCaptureExtension */;
 		};
@@ -140,8 +145,10 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Environment/AppConfiguration.swift,
+				"Environment/CaptureExtension+Environment.swift",
 				"Extensions/Logger+.swift",
 				"Extensions/ProcessInfo+.swift",
+				"Extensions/UIImage+.swift",
 				"Extensions/View+.swift",
 				"Preview Content/Preview Assets.xcassets",
 				"Preview Content/PreviewAssets.swift",
