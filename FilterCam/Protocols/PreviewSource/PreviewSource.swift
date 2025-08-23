@@ -12,10 +12,6 @@ protocol PreviewSource: Sendable {
     func connect(to target: PreviewTarget)
 }
 
-protocol PreviewTarget {
-    func setSession(_ session: AVCaptureSession)
-}
-
 struct DefaultPreviewSource: PreviewSource {
     private let session: AVCaptureSession
     

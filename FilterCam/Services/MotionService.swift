@@ -11,4 +11,6 @@ import Foundation
 final actor MotionService {
     private let manager = CMMotionManager()
     private let activityManager = CMMotionActivityManager()
+    
+    // TODO: Motion and level
 }

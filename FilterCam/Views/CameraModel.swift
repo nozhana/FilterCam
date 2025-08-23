@@ -19,6 +19,7 @@ final class CameraModel: ObservableObject {
     @Published private(set) var thumbnail: Thumbnail?
     @Published private(set) var isPaused = false
     @Published private(set) var focusPoint: CGPoint?
+    @Published private(set) var toastText: Text?
     
     // TODO: Pending more capture modes
     @Published var captureMode = CaptureMode.photo {
@@ -43,19 +44,30 @@ final class CameraModel: ObservableObject {
         }
     }
     
-    let session = AVCaptureSession()
-    private let captureService: CaptureService
+    private var captureService = try! CaptureService.default()
     private var captureDirectory: URL!
     private var mediaStore: MediaStore!
     
-    init() {
-        captureService = .init(session: session)
+    var previewTarget: any PreviewTarget {
+        captureService.previewTarget
     }
     
     // MARK: - Public
     func configure(with configuration: AppConfiguration) {
         captureDirectory = configuration.captureDirectory
         mediaStore = MediaStore(appConfiguration: configuration)
+        let useMetalRendering = UserDefaults.shared.bool(forKey: UserDefaultsKey.useMetalRendering.rawValue)
+        captureService = useMetalRendering ? try! .metal() : try! .default()
+    }
+    
+    func showToast(_ text: Text) {
+        withAnimation(.bouncy) {
+            toastText = text
+        } completion: {
+            withAnimation(.smooth(duration: 1).delay(3)) {
+                self.toastText = nil
+            }
+        }
     }
     
     @MainActor
@@ -74,6 +86,19 @@ final class CameraModel: ObservableObject {
         } catch {
             logger.error("Failed to start capture service: \(error)")
             status = .failed
+        }
+    }
+    
+    func switchCaptureService(_ service: some CaptureService) async {
+        let oldService = captureService
+        await captureService.stopSession()
+        captureService = service
+        do {
+            try await captureService.start(with: cameraState)
+        } catch {
+            logger.error("Failed to switch capture service: \(error)")
+            captureService = oldService
+            await captureService.startSession()
         }
     }
     
@@ -112,6 +137,11 @@ final class CameraModel: ObservableObject {
     
     @MainActor
     func switchCamera() async {
+        if captureService.previewSource is MetalCameraSource {
+            logger.warning("Metal camera doesn't support switching yet.")
+            showToast(Text("Metal front camera isn't supported yet."))
+            return
+        }
         withAnimation(.snappy) {
             isSwitchingCameras = true
         }

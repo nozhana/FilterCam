@@ -1,0 +1,15 @@
+{
+  "originHash" : "c9abdcb482ac90279de8237de96bb7ae46b57d786224db9bae76bcf22c73bb24",
+  "pins" : [
+    {
+      "identity" : "gpuimage3",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/BradLarson/GPUImage3",
+      "state" : {
+        "branch" : "main",
+        "revision" : "84466fc344e1220238c1c07e94e91207caaabe51"
+      }
+    }
+  ],
+  "version" : 3
+}

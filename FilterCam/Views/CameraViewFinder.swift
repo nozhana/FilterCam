@@ -39,9 +39,16 @@ struct CameraViewFinder: View {
                         }
                     }
                 
-                CameraPreview(session: model.session) { devicePoint, layerPoint in
-                    Task {
-                        await model.focusAndExpose(on: devicePoint, layerPoint: layerPoint)
+                Group {
+                    if let metalTarget = model.previewTarget as? MetalPreviewTarget {
+                        MetalRenderView(previewTarget: metalTarget)
+                    } else if let defaultTarget = model.previewTarget as? DefaultPreviewTarget,
+                              let session = defaultTarget.session {
+                        CameraPreview(session: session) { devicePoint, layerPoint in
+                            Task {
+                                await model.focusAndExpose(on: devicePoint, layerPoint: layerPoint)
+                            }
+                        }
                     }
                 }
                 .if(rotateCamera) { conditionalContent in
@@ -68,12 +75,14 @@ struct CameraViewFinder: View {
                 .animation(.snappy) { content in
                     content
                         .aspectRatio(1 / model.aspectRatio.rawValue, contentMode: .fit)
+                        .clipped()
                         .offset(y: model.aspectRatio.previewOffsetY)
                 }
                 .gesture(showOptionsGesture)
                 .onTapGesture(count: 2) {
                     Task { await model.switchCamera() }
                 }
+                .zIndex(0)
                 VStack(spacing: 44) {
                     if showOptions {
                         CameraOptionsView()
@@ -121,6 +130,7 @@ struct CameraViewFinder: View {
                             .padding(.vertical, 10)
                             .background(.red, in: .rect(cornerRadius: 12, style: .continuous))
                             .transition(.move(edge: .top).combined(with: .blurReplace))
+                            .zIndex(2)
                     }
                     Spacer()
                     HStack {
@@ -202,12 +212,28 @@ struct CameraViewFinder: View {
                         .offset(y: -64)
                     }
                 }
+                .zIndex(1)
+                if let toastText = model.toastText {
+                    toastText
+                        .font(.caption.bold().weight(.light))
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(.background.opacity(0.4), in: .capsule(style: .continuous))
+                        .overlay {
+                            Capsule(style: .continuous)
+                                .strokeBorder(.primary.opacity(0.4), lineWidth: 2)
+                        }
+                        .transition(.move(edge: .bottom).combined(with: .blurReplace))
+                        .offset(y: 86)
+                        .zIndex(2)
+                }
             }
             .sheet(isPresented: $showGallery) {
                 GalleryView(animation: galleryAnimation)
             }
             .sheet(isPresented: $showSettings) {
                 SettingsView()
+                    .environmentObject(model)
             }
         }
         .backport.onCameraCaptureEvent {

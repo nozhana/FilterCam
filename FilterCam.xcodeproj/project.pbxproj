@@ -11,6 +11,8 @@
 		3174E1992E55310D006D6EB3 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3174E1982E55310D006D6EB3 /* WidgetKit.framework */; };
 		3174E19B2E55310D006D6EB3 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3174E19A2E55310D006D6EB3 /* SwiftUI.framework */; };
 		3174E1A82E553110006D6EB3 /* FilterCamWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3174E1962E55310D006D6EB3 /* FilterCamWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		31DF54572E592C8D00790201 /* GPUImage in Frameworks */ = {isa = PBXBuildFile; productRef = 31DF54562E592C8D00790201 /* GPUImage */; };
+		31DF54722E593DE000790201 /* GPUImage in Frameworks */ = {isa = PBXBuildFile; productRef = 31DF54712E593DE000790201 /* GPUImage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -89,7 +91,10 @@
 				Protocols/OutputService/MovieOutput.swift,
 				Protocols/OutputService/OutputService.swift,
 				Protocols/OutputService/PhotoOutput.swift,
-				Protocols/PreviewSource.swift,
+				Protocols/PreviewSource/MetalCameraSource.swift,
+				Protocols/PreviewSource/PreviewSource.swift,
+				Protocols/PreviewTarget/MetalPreviewTarget.swift,
+				Protocols/PreviewTarget/PreviewTarget.swift,
 				Services/CaptureService.swift,
 				Services/MotionService.swift,
 				Shapes/TargetShape.swift,
@@ -118,6 +123,7 @@
 				Views/CameraViewFinder.swift,
 				Views/GalleryDetailView.swift,
 				Views/GalleryView.swift,
+				Views/MetalRenderView.swift,
 				Views/SettingsView.swift,
 			);
 			target = 3174E1642E552BE2006D6EB3 /* FilterCamCaptureExtension */;
@@ -217,6 +223,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				31DF54722E593DE000790201 /* GPUImage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -233,6 +240,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				31DF54572E592C8D00790201 /* GPUImage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -289,6 +297,7 @@
 			);
 			name = FilterCamCaptureExtension;
 			packageProductDependencies = (
+				31DF54712E593DE000790201 /* GPUImage */,
 			);
 			productName = FilterCamCaptureExtension;
 			productReference = 3174E1652E552BE2006D6EB3 /* FilterCamCaptureExtension.appex */;
@@ -337,6 +346,7 @@
 			);
 			name = FilterCam;
 			packageProductDependencies = (
+				31DF54562E592C8D00790201 /* GPUImage */,
 			);
 			productName = FilterCam;
 			productReference = 31AB53212E54D66F00A51742 /* FilterCam.app */;
@@ -372,6 +382,9 @@
 			);
 			mainGroup = 31AB53182E54D66F00A51742;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				31DF54552E592C8D00790201 /* XCRemoteSwiftPackageReference "GPUImage3" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 31AB53222E54D66F00A51742 /* Products */;
 			projectDirPath = "";
@@ -795,6 +808,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		31DF54552E592C8D00790201 /* XCRemoteSwiftPackageReference "GPUImage3" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/BradLarson/GPUImage3";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		31DF54562E592C8D00790201 /* GPUImage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 31DF54552E592C8D00790201 /* XCRemoteSwiftPackageReference "GPUImage3" */;
+			productName = GPUImage;
+		};
+		31DF54712E593DE000790201 /* GPUImage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 31DF54552E592C8D00790201 /* XCRemoteSwiftPackageReference "GPUImage3" */;
+			productName = GPUImage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 31AB53192E54D66F00A51742 /* Project object */;
 }

@@ -9,6 +9,8 @@ import Foundation
 
 enum UserDefaultsKey: String {
     case cameraSwitchRotationEffect = "cam_switch_rotation"
+    case showDeveloperSettings = "show_dev_settings"
+    case useMetalRendering = "use_metal"
 }
 
 extension UserDefaults {

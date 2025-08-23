@@ -15,6 +15,8 @@ final actor CaptureService {
     
     nonisolated let previewSource: PreviewSource
     
+    nonisolated let previewTarget: PreviewTarget
+    
     private let session: AVCaptureSession
     
     private let photoOutput = PhotoOutput()
@@ -42,9 +44,22 @@ final actor CaptureService {
         sessionQueue.asUnownedSerialExecutor()
     }
     
-    init(session: AVCaptureSession? = nil) {
-        self.session = session ?? .init()
-        previewSource = .default(session: self.session)
+    private init(previewSource: some PreviewSource, previewTarget: some PreviewTarget, session: AVCaptureSession) {
+        self.previewSource = previewSource
+        self.previewTarget = previewTarget
+        self.session = session
+    }
+    
+    static func `default`() throws -> CaptureService {
+        let session = AVCaptureSession()
+        return CaptureService(previewSource: .default(session: session), previewTarget: .default(), session: session)
+    }
+    
+    static func `metal`() throws -> CaptureService {
+        let metalCamera = try MetalCameraSource()
+        let session = metalCamera.session
+        let metalPreviewTarget = MetalPreviewTarget()
+        return CaptureService(previewSource: metalCamera, previewTarget: metalPreviewTarget, session: session)
     }
     
     var isAuthorized: Bool {
@@ -71,8 +86,15 @@ final actor CaptureService {
     
     func start(with state: CameraState) async throws {
         captureMode = state.captureMode
+        setUpMetalResources()
         try setUpSession()
-        session.startRunning()
+        if let camera = previewSource as? MetalCameraSource {
+            logger.debug("Starting metal camera")
+            camera.start()
+        } else {
+            logger.debug("Starting basic camera")
+            session.startRunning()
+        }
     }
     
     func stopSession() {
@@ -83,6 +105,11 @@ final actor CaptureService {
         session.startRunning()
     }
     
+    func setUpMetalResources() {
+        // TODO: Filter chain
+        previewSource.connect(to: previewTarget)
+    }
+    
     func setUpSession() throws {
         guard !isSetUp else { return }
         
@@ -90,10 +117,15 @@ final actor CaptureService {
         observeNotifications()
         
         do {
-            let defaultCamera = try deviceLookup.defaultCamera
+            let defaultCamera: AVCaptureDevice
+            if let cameraSource = previewSource as? MetalCameraSource {
+                defaultCamera = cameraSource.camera.inputCamera
+                activeVideoInput = try AVCaptureDeviceInput(device: defaultCamera)
+            } else {
+                defaultCamera = try deviceLookup.defaultCamera
+                activeVideoInput = try addInput(for: defaultCamera)
+            }
             let defaultMic = try deviceLookup.defaultMic
-            
-            activeVideoInput = try addInput(for: defaultCamera)
             try addInput(for: defaultMic)
             
             session.sessionPreset = captureMode == .photo ? .photo : .high
