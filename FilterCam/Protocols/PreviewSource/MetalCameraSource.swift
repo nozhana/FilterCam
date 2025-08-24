@@ -23,6 +23,7 @@ struct MetalCameraSource: PreviewSource, ImageSource {
     func connect(to target: any PreviewTarget) {
         target.setSession(camera.captureSession)
         if let consumer = target as? ImageConsumer {
+            camera.removeAllTargets()
             camera --> consumer
         }
     }

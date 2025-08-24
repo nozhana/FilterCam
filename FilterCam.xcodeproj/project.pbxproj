@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		312EE4EE2E5B606900CF131D /* GPUImage in Frameworks */ = {isa = PBXBuildFile; productRef = 312EE4ED2E5B606900CF131D /* GPUImage */; };
 		3174E16E2E552BE2006D6EB3 /* FilterCamCaptureExtension.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = 3174E1652E552BE2006D6EB3 /* FilterCamCaptureExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3174E1992E55310D006D6EB3 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3174E1982E55310D006D6EB3 /* WidgetKit.framework */; };
 		3174E19B2E55310D006D6EB3 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3174E19A2E55310D006D6EB3 /* SwiftUI.framework */; };
@@ -83,6 +84,7 @@
 				"Extensions/Logger+.swift",
 				"Extensions/ProcessInfo+.swift",
 				"Extensions/UIImage+.swift",
+				"Extensions/URL+.swift",
 				"Extensions/View+.swift",
 				"Preview Content/Preview Assets.xcassets",
 				"Preview Content/PreviewAssets.swift",
@@ -93,8 +95,12 @@
 				Protocols/OutputService/PhotoOutput.swift,
 				Protocols/PreviewSource/MetalCameraSource.swift,
 				Protocols/PreviewSource/PreviewSource.swift,
+				Protocols/PreviewSource/StaticImageSource.swift,
 				Protocols/PreviewTarget/MetalPreviewTarget.swift,
 				Protocols/PreviewTarget/PreviewTarget.swift,
+				Protocols/PreviewTarget/StaticImageTarget.swift,
+				Resources/Assets.xcassets,
+				Resources/LUTs.xcassets,
 				Services/CaptureService.swift,
 				Services/MotionService.swift,
 				Shapes/TargetShape.swift,
@@ -106,8 +112,11 @@
 				Types/CaptureMode.swift,
 				Types/Errors/CameraError.swift,
 				Types/Errors/PhotoCaptureError.swift,
+				Types/Filters/CameraFilter.swift,
+				Types/Filters/FilterStack.swift,
 				Types/Photo.swift,
 				Types/PhotoFeatures.swift,
+				Types/RenderMode.swift,
 				Types/Thumbnail.swift,
 				Types/UserDefaults/UserDefaultsKey.swift,
 				Types/Video.swift,
@@ -116,6 +125,8 @@
 				Utilities/DeviceLookup.swift,
 				Utilities/MediaStore.swift,
 				Utilities/SPCObserver.swift,
+				Utilities/Toasts/Toaster.swift,
+				Utilities/Toasts/ToasterContainerModifier.swift,
 				Views/CameraActionButton.swift,
 				Views/CameraInteractiveView.swift,
 				Views/CameraModel.swift,
@@ -165,22 +176,29 @@
 				"Extensions/Logger+.swift",
 				"Extensions/ProcessInfo+.swift",
 				"Extensions/UIImage+.swift",
+				"Extensions/URL+.swift",
 				"Extensions/View+.swift",
 				"Preview Content/Preview Assets.xcassets",
 				"Preview Content/PreviewAssets.swift",
 				Protocols/OutputMedium/AnyOutputMedium.swift,
 				Protocols/OutputMedium/OutputMedium.swift,
+				Resources/Assets.xcassets,
+				Resources/LUTs.xcassets,
 				Types/CameraPosition.swift,
 				Types/CameraState/CameraState.swift,
 				Types/CameraState/CameraStateContextProvider.swift,
 				Types/CaptureMode.swift,
+				Types/Filters/CameraFilter.swift,
 				Types/Photo.swift,
 				Types/PhotoFeatures.swift,
+				Types/RenderMode.swift,
 				Types/Thumbnail.swift,
 				Types/Video.swift,
 				Types/VideoFeatures.swift,
 				Utilities/Backport.swift,
 				Utilities/MediaStore.swift,
+				Utilities/Toasts/Toaster.swift,
+				Utilities/Toasts/ToasterContainerModifier.swift,
 				Views/CameraInteractiveView.swift,
 			);
 			target = 3174E1952E55310D006D6EB3 /* FilterCamWidgetsExtension */;
@@ -232,6 +250,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3174E19B2E55310D006D6EB3 /* SwiftUI.framework in Frameworks */,
+				312EE4EE2E5B606900CF131D /* GPUImage in Frameworks */,
 				3174E1992E55310D006D6EB3 /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -320,6 +339,7 @@
 			);
 			name = FilterCamWidgetsExtension;
 			packageProductDependencies = (
+				312EE4ED2E5B606900CF131D /* GPUImage */,
 			);
 			productName = FilterCamWidgetsExtension;
 			productReference = 3174E1962E55310D006D6EB3 /* FilterCamWidgetsExtension.appex */;
@@ -821,6 +841,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		312EE4ED2E5B606900CF131D /* GPUImage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 31DF54552E592C8D00790201 /* XCRemoteSwiftPackageReference "GPUImage3" */;
+			productName = GPUImage;
+		};
 		31DF54562E592C8D00790201 /* GPUImage */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 31DF54552E592C8D00790201 /* XCRemoteSwiftPackageReference "GPUImage3" */;

@@ -33,3 +33,9 @@ final class MetalPreviewTarget: @unchecked Sendable, PreviewTarget, ImageConsume
         renderView.newTextureAvailable(texture, fromSourceIndex: index)
     }
 }
+
+extension PreviewTarget where Self == MetalPreviewTarget {
+    static func metal() -> MetalPreviewTarget {
+        .init()
+    }
+}

@@ -19,7 +19,6 @@ final class CameraModel: ObservableObject {
     @Published private(set) var thumbnail: Thumbnail?
     @Published private(set) var isPaused = false
     @Published private(set) var focusPoint: CGPoint?
-    @Published private(set) var toastText: Text?
     
     // TODO: Pending more capture modes
     @Published var captureMode = CaptureMode.photo {
@@ -43,8 +42,18 @@ final class CameraModel: ObservableObject {
             cameraState.aspectRatio = aspectRatio
         }
     }
+    @Published var renderMode = RenderMode.default {
+        didSet {
+            cameraState.renderMode = renderMode
+        }
+    }
+    @Published var lastFilter = CameraFilter.none {
+        didSet {
+            cameraState.lastFilter = lastFilter
+        }
+    }
     
-    private var captureService = try! CaptureService.default()
+    private var captureService = CaptureService.default()
     private var captureDirectory: URL!
     private var mediaStore: MediaStore!
     
@@ -53,21 +62,25 @@ final class CameraModel: ObservableObject {
     }
     
     // MARK: - Public
-    func configure(with configuration: AppConfiguration) {
+    func configure(with configuration: AppConfiguration) async {
         captureDirectory = configuration.captureDirectory
         mediaStore = MediaStore(appConfiguration: configuration)
-        let useMetalRendering = UserDefaults.shared.bool(forKey: UserDefaultsKey.useMetalRendering.rawValue)
-        captureService = useMetalRendering ? try! .metal() : try! .default()
-    }
-    
-    func showToast(_ text: Text) {
-        withAnimation(.bouncy) {
-            toastText = text
-        } completion: {
-            withAnimation(.smooth(duration: 1).delay(3)) {
-                self.toastText = nil
-            }
-        }
+        // let useMetalRendering = UserDefaults.shared.bool(forKey: UserDefaultsKey.useMetalRendering.rawValue)
+        // let useFilters = UserDefaults.shared.bool(forKey: UserDefaultsKey.useFilters.rawValue)
+        // let oldStatus = status
+        // status = .loading
+        // do {
+        //     captureService = useMetalRendering ? (useFilters ? try .metalWithFilters() : try .metal()) : .default()
+        //     let currentState = await CameraState.current
+        //     captureService = switch currentState.renderMode {
+        //     case .default: .default()
+        //     case .metal: try .metal()
+        //     case .metalWithFilters: try .metalWithFilters()
+        //     }
+        //     status = oldStatus
+        // } catch {
+        //     status = .failed
+        // }
     }
     
     @MainActor
@@ -76,6 +89,8 @@ final class CameraModel: ObservableObject {
             status = .unauthorized
             return
         }
+        
+        status = .loading
         
         do {
             await syncState()
@@ -91,14 +106,20 @@ final class CameraModel: ObservableObject {
     
     func switchCaptureService(_ service: some CaptureService) async {
         let oldService = captureService
-        await captureService.stopSession()
+        await oldService.tearDownSession()
+        await service.tearDownSession()
         captureService = service
         do {
             try await captureService.start(with: cameraState)
         } catch {
             logger.error("Failed to switch capture service: \(error)")
             captureService = oldService
-            await captureService.startSession()
+            do {
+                try await captureService.start(with: cameraState)
+            } catch {
+                logger.error("Failed to restart previous capture service: \(error)")
+                status = .failed
+            }
         }
     }
     
@@ -114,6 +135,8 @@ final class CameraModel: ObservableObject {
     @MainActor
     func unpauseStream() async {
         guard status == .running else { return }
+        status = .loading
+        defer { status = .running }
         await captureService.startSession()
         observeState()
         mediaStore.refreshThumbnail()
@@ -123,23 +146,41 @@ final class CameraModel: ObservableObject {
     }
     
     @MainActor
-    func syncState() async {
+    private func syncState() async {
         let oldState = cameraState
         cameraState = await .current
         if oldState.captureMode != cameraState.captureMode {
             await captureService.setCaptureMode(cameraState.captureMode)
         }
+        switch cameraState.renderMode {
+        case .default:
+            await switchCaptureService(.default())
+        case .metal:
+            do {
+                await switchCaptureService(try .metal())
+            } catch {
+                logger.error("Failed to switch capture service")
+            }
+        case .metalWithFilters:
+            do {
+                await switchCaptureService(try .metalWithFilters())
+            } catch {
+                logger.error("Failed to switch capture service")
+            }
+        }
         captureMode = cameraState.captureMode
         flashMode = cameraState.flashMode
         qualityPrioritization = cameraState.qualityPrioritization
         aspectRatio = cameraState.aspectRatio
+        renderMode = cameraState.renderMode
+        lastFilter = cameraState.lastFilter
     }
     
     @MainActor
     func switchCamera() async {
         if captureService.previewSource is MetalCameraSource {
             logger.warning("Metal camera doesn't support switching yet.")
-            showToast(Text("Metal front camera isn't supported yet."))
+            Toaster.shared.showToast(.warning(Text("Metal front camera isn't supported yet.")))
             return
         }
         withAnimation(.snappy) {

@@ -6,6 +6,7 @@
 //
 
 import AVFoundation
+import GPUImage
 import SwiftUI
 
 struct CameraViewFinder: View {
@@ -25,6 +26,16 @@ struct CameraViewFinder: View {
     @AppStorage(UserDefaultsKey.cameraSwitchRotationEffect.rawValue, store: .shared)
     private var rotateCamera = true
     
+    private func onFocus(devicePoint: CGPoint, layerPoint: CGPoint) {
+        Task {
+            await model.focusAndExpose(on: devicePoint, layerPoint: layerPoint)
+        }
+    }
+    
+    private var cameraUnavailableView: some View {
+        ContentUnavailableView("Camera unavailable", systemImage: "exclamationmark.circle", description: Text("Change the capture service configuration."))
+    }
+    
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {
@@ -40,14 +51,68 @@ struct CameraViewFinder: View {
                     }
                 
                 Group {
-                    if let metalTarget = model.previewTarget as? MetalPreviewTarget {
-                        MetalRenderView(previewTarget: metalTarget)
-                    } else if let defaultTarget = model.previewTarget as? DefaultPreviewTarget,
-                              let session = defaultTarget.session {
-                        CameraPreview(session: session) { devicePoint, layerPoint in
-                            Task {
-                                await model.focusAndExpose(on: devicePoint, layerPoint: layerPoint)
+                    switch model.status {
+                    case .unknown:
+                        ContentUnavailableView("Pending setup", systemImage: "ellipsis")
+                    case .loading:
+                        ProgressView("Loading")
+                            .font(.title2.bold())
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    case .failed:
+                        ContentUnavailableView("Failed to setup camera", systemImage: "exclamationmark.circle.fill", description: Text("Try restarting or reinstalling the app.").foregroundStyle(.secondary))
+                            .foregroundStyle(.red)
+                    case .unauthorized:
+                        ContentUnavailableView {
+                            Label("Unauthorized", systemImage: "eye.slash.fill")
+                        } description: {
+                            Text("Please authorize FilterCam in Settings to continue.")
+                                .foregroundStyle(.secondary)
+                        } actions: {
+                            Link(destination: .appSettingsOrGeneralSettings) {
+                                Label("Open Settings", systemImage: "arrow.up.right")
                             }
+                        }
+                    case .interrupted:
+                        ContentUnavailableView("Interrupted", systemImage: "circle.slash")
+                            .foregroundStyle(.orange.gradient)
+                    case .running:
+                        if let filterStack = model.previewTarget as? FilterStack {
+                            ScrollView(.horizontal) {
+                                LazyHStack(alignment: .top, spacing: .zero) {
+                                    let screenBounds = UIScreen.main.bounds
+                                    ForEach(filterStack.targetsMap.mapValues(\.target).sorted(using: KeyPathComparator(\.key)), id: \.key) { (filter, target) in
+                                        Group {
+                                            if let metalTarget = target as? MetalPreviewTarget {
+                                                MetalRenderView(previewTarget: metalTarget)
+                                            } else {
+                                                cameraUnavailableView
+                                            }
+                                        }
+                                        .scrollTransition(.interactive(timingCurve: .linear), axis: .horizontal) { content, phase in
+                                            content
+                                                .brightness(phase.isIdentity ? 0 : 0.2)
+                                                .opacity(phase.isIdentity ? 1 : 0)
+                                                .offset(x: -phase.value * screenBounds.width)
+                                        }
+                                    }
+                                    .containerRelativeFrame(.horizontal)
+                                }
+                                .scrollTargetLayout()
+                            }
+                            .scrollIndicators(.hidden)
+                            .scrollTargetBehavior(.viewAligned(limitBehavior: .backport.alwaysByOne))
+                            .scrollPosition(id: Binding($model.lastFilter), anchor: .center)
+                        } else if let metalTarget = model.previewTarget as? MetalPreviewTarget {
+                            MetalRenderView(previewTarget: metalTarget)
+                        } else if let defaultTarget = model.previewTarget as? DefaultPreviewTarget,
+                                  let session = defaultTarget.session {
+                            CameraPreview(session: session, onFocus: onFocus)
+                        } else if let staticTarget = model.previewTarget as? StaticImageTarget {
+                            Image(uiImage: staticTarget.image)
+                                .resizable()
+                                .scaledToFill()
+                        } else {
+                            cameraUnavailableView
                         }
                     }
                 }
@@ -70,7 +135,7 @@ struct CameraViewFinder: View {
                 }
                 .overlay(.black.opacity(model.shouldFlashScreen ? 1 : 0))
                 .overlay(.black.opacity(model.isSwitchingCameras ? 1 : 0))
-                .overlay(.ultraThinMaterial.opacity(model.isPaused ? 1 : 0))
+                .overlay(.ultraThinMaterial.opacity(model.isPaused && model.status == .running ? 1 : 0))
                 .ignoresSafeArea(edges: .top)
                 .animation(.snappy) { content in
                     content
@@ -183,50 +248,83 @@ struct CameraViewFinder: View {
                     .safeAreaPadding(.horizontal, 16)
                     .safeAreaPadding(.vertical, 24)
                     .background(.background.opacity(0.6))
-                    .overlay(alignment: .top) {
-                        Group {
-                            if isCaptureExtension {
-                                Button {
-                                    Task { try await openMainApp() }
-                                } label: {
-                                    Label("Open App", systemImage: "arrow.up.right")
-                                        .font(.caption2.smallCaps().weight(.light))
-                                        .foregroundStyle(.yellow.gradient)
-                                        .padding(12)
-                                        .background(.background.secondary.opacity(0.5), in: .rect(cornerRadius: 12, style: .continuous))
-                                }
-                            } else {
-                                Button {
-                                    showSettings = true
-                                } label: {
-                                    Image(systemName: "gearshape.fill")
-                                        .font(.caption.bold())
-                                        .foregroundStyle(Color.secondary)
-                                        .padding(12)
-                                        .background(.background.secondary.opacity(0.5), in: .circle)
-                                }
-                                .padding(.leading, 20)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            }
-                        }
-                        .offset(y: -64)
-                    }
                 }
                 .zIndex(1)
-                if let toastText = model.toastText {
-                    toastText
-                        .font(.caption.bold().weight(.light))
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(.background.opacity(0.4), in: .capsule(style: .continuous))
-                        .overlay {
-                            Capsule(style: .continuous)
-                                .strokeBorder(.primary.opacity(0.4), lineWidth: 2)
+                VStack(spacing: 24) {
+                    Group {
+                        if isCaptureExtension {
+                            Button {
+                                Task { try await openMainApp() }
+                            } label: {
+                                Label("Open App", systemImage: "arrow.up.right")
+                                    .font(.caption2.smallCaps().weight(.light))
+                                    .foregroundStyle(.yellow.gradient)
+                                    .padding(12)
+                                    .background(.background.secondary.opacity(0.5), in: .rect(cornerRadius: 12, style: .continuous))
+                            }
+                        } else {
+                            Button {
+                                showSettings = true
+                            } label: {
+                                Image(systemName: "gearshape.fill")
+                                    .font(.caption.bold())
+                                    .foregroundStyle(Color.secondary)
+                                    .padding(12)
+                                    .background(.background.secondary.opacity(0.5), in: .circle)
+                            }
+                            .padding(.leading, 20)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        .transition(.move(edge: .bottom).combined(with: .blurReplace))
-                        .offset(y: 86)
-                        .zIndex(2)
+                    }
+                    if let filterStack = model.previewTarget as? FilterStack {
+                        let margin: CGFloat = (UIScreen.main.bounds.width - 64) / 2
+                        ScrollViewReader { proxy in
+                            ScrollView(.horizontal) {
+                                HStack(spacing: 16) {
+                                    ForEach(filterStack.targetsMap.keys.sorted(), id: \.self) { filter in
+                                        FilteredImage(filter: filter, source: .donut)
+                                            .aspectRatio(1, contentMode: .fit)
+                                            .overlay {
+                                                let isSelected = model.lastFilter == filter
+                                                RoundedRectangle(cornerRadius: 12)
+                                                    .strokeBorder(Color.accentColor.gradient, lineWidth: isSelected ? 2 : 0)
+                                            }
+                                            .clipShape(.rect(cornerRadius: 12))
+                                            .overlay(alignment: .bottom) {
+                                                Text(filter.title)
+                                                    .font(.caption2.smallCaps())
+                                                    .multilineTextAlignment(.leading)
+                                                    .lineLimit(2)
+                                                    .minimumScaleFactor(0.5)
+                                                    .padding(.horizontal, 8)
+                                                    .padding(.vertical, 6)
+                                                    .background(.background.secondary.opacity(0.5), in: .rect)
+                                                    .fixedSize(horizontal: false, vertical: true)
+                                                    .frame(height: 44, alignment: .top)
+                                                    .padding(.horizontal, -8)
+                                                    .offset(y: 44 + 8)
+                                            }
+                                    }
+                                }
+                                .scrollTargetLayout()
+                            }
+                            .scrollIndicators(.hidden)
+                            .scrollTargetBehavior(.viewAligned(limitBehavior: .backport.alwaysByOne))
+                            .scrollDisabled(true)
+                            .safeAreaPadding(.horizontal, margin)
+                            .onChange(of: model.lastFilter) { _, newValue in
+                                withAnimation(.smooth) {
+                                    proxy.scrollTo(newValue, anchor: .center)
+                                }
+                            }
+                        }
+                        .frame(height: 64)
+                        .allowsHitTesting(false)
+                    }
                 }
+                .safeAreaPadding(.bottom, 144)
+                .frame(maxHeight: .infinity, alignment: .bottom)
+                .zIndex(2)
             }
             .sheet(isPresented: $showGallery) {
                 GalleryView(animation: galleryAnimation)
@@ -253,7 +351,7 @@ struct CameraViewFinder: View {
             guard model.status == .unknown else {
                 return
             }
-            model.configure(with: appConfiguration)
+            await model.configure(with: appConfiguration)
             await model.start()
         }
         .task {
@@ -268,6 +366,10 @@ struct CameraViewFinder: View {
             }
         }
     }
+}
+
+#Preview {
+    CameraViewFinder()
 }
 
 private struct CameraPreview: UIViewRepresentable {
@@ -313,4 +415,78 @@ private struct CameraPreview: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIViewType, context: Context) {}
+}
+
+private struct FilteredImage: View {
+    var filter: CameraFilter
+    var source: UIImage
+    
+    @StateObject private var model = Model()
+    
+    var body: some View {
+        Group {
+            switch model.status {
+            case .idle:
+                Rectangle()
+                    .fill(.background.secondary)
+                    .onAppear {
+                        model.load(filter, on: source)
+                    }
+            case .loading:
+                Rectangle()
+                    .fill(.background.secondary)
+                    .overlay {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .frame(width: 44, height: 44)
+                    }
+            case .loaded(let uiImage):
+                Rectangle()
+                    .overlay {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFill()
+                    }
+                    .clipShape(.rect)
+            case .failed(let error):
+                Rectangle()
+                    .fill(.red.gradient)
+                    .overlay {
+                        ContentUnavailableView("Failed to load image", systemImage: "exclamationmark.triangle.fill", description: Text(error.localizedDescription))
+                    }
+            }
+        }
+    }
+}
+
+private extension FilteredImage {
+    enum Status {
+        case idle, loading, loaded(UIImage), failed(Error)
+    }
+    
+    final class Model: ObservableObject {
+        @Published private(set) var status: Status = .idle
+        
+        private lazy var output = {
+            let output = PictureOutput()
+            output.imageAvailableCallback = { image in
+                Task {
+                    await MainActor.run { [weak self] in
+                        self?.status = .loaded(image)
+                    }
+                }
+            }
+            return output
+        }()
+        
+        func load(_ filter: CameraFilter, on sourceImage: UIImage) {
+            let input = PictureInput(image: sourceImage)
+            let operation = filter.makeOperation()
+            input --> operation --> output
+            input.processImage()
+            DispatchQueue.main.async { [weak self] in
+                self?.status = .loading
+            }
+        }
+    }
 }

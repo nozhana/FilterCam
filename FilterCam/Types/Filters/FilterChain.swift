@@ -38,7 +38,8 @@ final class FilterChain: PreviewSource, PreviewTarget, ImageProcessingOperation,
             target.setSession(session)
         }
         if let nextConsumer = target as? ImageConsumer {
-            self --> nextConsumer
+            operationGroup.removeAllTargets()
+            operationGroup --> nextConsumer
         }
     }
     

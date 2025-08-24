@@ -17,6 +17,12 @@ struct SettingsView: View {
     @AppStorage(UserDefaultsKey.useMetalRendering.rawValue, store: .shared)
     private var useMetalRendering = false
     
+    @AppStorage(UserDefaultsKey.useFilters.rawValue, store: .shared)
+    private var useFilters = false
+    
+    @AppStorage(UserDefaultsKey.mockCamera.rawValue, store: .shared)
+    private var mockCamera = false
+    
     @EnvironmentObject private var cameraModel: CameraModel
     
     @State private var stepsToBecomeADeveloper = 10
@@ -61,14 +67,19 @@ struct SettingsView: View {
                 
                 if showDeveloperSettings {
                     Section {
-                        Toggle("Use Metal Rendering", systemImage: "cpu.fill", isOn: $useMetalRendering)
-                            .onChange(of: useMetalRendering) { _, newValue in
-                                Task {
-                                    await cameraModel.switchCaptureService(newValue ? try .metal() : try .default())
-                                }
+                        Toggle("Mock Camera", systemImage: "camera.macro", isOn: $mockCamera)
+                            .onChange(of: mockCamera) {
+                                refreshCaptureService()
                             }
+                        Toggle("Use Metal Rendering", systemImage: "cpu.fill", isOn: $useMetalRendering.animation())
+                        if useMetalRendering {
+                            Toggle("Use Filters", systemImage: "camera.filters", isOn: $useFilters)
+                        }
                     } header: {
                         Label("Developer Settings", systemImage: "hammer.fill")
+                    }
+                    .onChange(of: useMetalRendering != useFilters) {
+                        refreshCaptureService()
                     }
                     
                     Section {
@@ -106,6 +117,21 @@ struct SettingsView: View {
                 .padding(.vertical, 16)
             }
             .navigationTitle("Settings")
+        }
+    }
+    
+    private func refreshCaptureService() {
+        Task {
+            let (service, renderMode): (CaptureService, RenderMode) = switch (useMetalRendering, useFilters) {
+            case (false, _):
+                (.default(), .default)
+            case (true, false):
+                (try .metal(), .metal)
+            case (true, true):
+                (try .metalWithFilters(), .metalWithFilters)
+            }
+            cameraModel.renderMode = renderMode
+            await cameraModel.switchCaptureService(service)
         }
     }
 }

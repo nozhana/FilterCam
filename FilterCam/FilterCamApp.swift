@@ -13,9 +13,12 @@ struct FilterCamApp: App {
     @Environment(\.mediaStore) private var mediaStore
     @Environment(\.scenePhase) private var scenePhase
     
+    @ObservedObject private var toaster  = Toaster.shared
+    
     var body: some Scene {
         WindowGroup {
             CameraViewFinder()
+                .toasterContainer(toaster)
                 .task(id: scenePhase, priority: .utility) {
                     guard scenePhase == .active else { return }
                     if #available(iOS 18.0, *) {

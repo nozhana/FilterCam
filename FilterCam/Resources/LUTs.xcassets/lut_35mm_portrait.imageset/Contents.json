@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "lut_35mm_portrait.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
