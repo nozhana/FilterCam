@@ -6,24 +6,15 @@
 //
 
 import GPUImage
-import SwiftUI
+import UIKit
 
-enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable, FilterGenerator {
+enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable {
     case none
     case noir
-    case blur(radius: Float = 20.0)
     case sepia(intensity: Float = 0.9)
     case haze(distance: Float = 0.2, slope: Float = 0.0)
     case sharpen(sharpness: Float = 0.5)
-    case lookup(image: LookupImage, intensity: Float = 1.0)
-    case custom(CustomFilter)
-    
-    var isCustom: Bool {
-        if case .custom = self {
-            return true
-        }
-        return false
-    }
+    case lookup(image: LookupImage, intensity: Float = 0.8)
     
     var rawValue: String {
         switch self {
@@ -31,8 +22,6 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable, FilterGenera
             "none"
         case .noir:
             "noir"
-        case .blur:
-            "blur"
         case .sepia:
             "sepia"
         case .haze:
@@ -41,8 +30,6 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable, FilterGenera
             "sharpen"
         case .lookup(let image, _):
             "lookup-\(image.rawValue)"
-        case .custom(let customFilter):
-            "custom-\(customFilter.title)"
         }
     }
     
@@ -52,8 +39,6 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable, FilterGenera
             "Original"
         case .noir:
             "Noir"
-        case .blur:
-            "Blur"
         case .sepia:
             "Sepia"
         case .haze:
@@ -62,8 +47,6 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable, FilterGenera
             "Sharpen"
         case .lookup(let image, _):
             image.title
-        case .custom(let customFilter):
-            customFilter.title
         }
     }
     
@@ -71,12 +54,10 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable, FilterGenera
         switch self {
         case .none: 0
         case .noir: 1
-        case .blur: 2
-        case .sepia: 3
-        case .haze: 4
-        case .sharpen: 5
-        case .lookup(let image, _): 6 + image.rawValue
-        case .custom(let customFilter): -1 - customFilter.layoutIndex
+        case .sepia: 2
+        case .haze: 3
+        case .sharpen: 4
+        case .lookup(let image, _): 5 + image.rawValue
         }
     }
     
@@ -88,7 +69,6 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable, FilterGenera
         if let value: CameraFilter = switch rawValue {
         case "none": CameraFilter.none
         case "noir": .noir
-        case "blur": .blur()
         case "sepia": .sepia()
         case "haze": .haze()
         case "sharpen": .sharpen()
@@ -110,12 +90,7 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable, FilterGenera
     func makeOperation() -> any ImageProcessingOperation {
         switch self {
         case .none: return ImageRelay()
-        case .custom(let customFilter): return customFilter.makeOperation()
         case .noir: return Luminance()
-        case .blur(let radius):
-            let blur = GaussianBlur()
-            blur.blurRadiusInPixels = radius
-            return blur
         case .sepia(let intensity):
             let sepia = SepiaToneFilter()
             sepia.intensity = intensity
@@ -139,7 +114,7 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable, FilterGenera
 }
 
 extension CameraFilter {
-    enum LookupImage: Int, Codable, CaseIterable, Identifiable {
+    enum LookupImage: Int, Codable {
         case portrait35mm
         case agfaVista
         case classicChrome
@@ -150,14 +125,12 @@ extension CameraFilter {
         case portra800
         case velvia100
         
-        var id: Int { rawValue }
-        
         var title: String {
             switch self {
             case .portrait35mm:
                 "Portrait 35mm"
             case .agfaVista:
-                "Agfa Vista"
+                "Agfa Vist"
             case .classicChrome:
                 "Classic Chrome"
             case .eliteChrome:
@@ -189,25 +162,4 @@ extension CameraFilter {
             }
         }
     }
-}
-
-extension CameraFilter {
-    mutating func update(with floatValue: Float, atIndex index: Int = 0) {
-        switch self {
-        case .none: break
-        case .noir: break
-        case .blur: self = .blur(radius: floatValue)
-        case .sepia: self = .sepia(intensity: floatValue)
-        case .haze(let distance, let slope):
-            self = .haze(distance: index == 0 ? floatValue : distance,
-                         slope: index == 1 ? floatValue : slope)
-        case .sharpen:
-            self = .sharpen(sharpness: floatValue)
-        case .lookup(let image, _):
-            self = .lookup(image: image, intensity: floatValue)
-        case .custom: break
-        }
-    }
-    
-    mutating func update(with booleanValue: Bool, atIndex index: Int = 0) {}
 }

@@ -13,6 +13,9 @@ struct CameraState: Codable {
         case cameraPosition
         case qualityPrioritization
         case flashMode
+        case aspectRatio
+        case renderMode
+        case lastFilter
     }
     
     init(from decoder: any Decoder) throws {
@@ -26,6 +29,9 @@ struct CameraState: Codable {
         cameraPosition = try container.decode(CameraPosition.self, forKey: .cameraPosition)
         qualityPrioritization = try container.decode(QualityPrioritization.self, forKey: .qualityPrioritization)
         flashMode = try container.decode(FlashMode.self, forKey: .flashMode)
+        aspectRatio = try container.decode(AspectRatio.self, forKey: .aspectRatio)
+        renderMode = try container.decode(RenderMode.self, forKey: .renderMode)
+        lastFilter = try container.decode(CameraFilter.self, forKey: .lastFilter)
     }
     
     init(contextProvider: some ContextProvider) {
@@ -58,9 +64,33 @@ struct CameraState: Codable {
         }
     }
     
-    var flashMode = FlashMode.auto {
+    var flashMode = FlashMode.firstAvailable {
         didSet {
             if oldValue != flashMode {
+                updateContext()
+            }
+        }
+    }
+    
+    var aspectRatio = AspectRatio.fourToThree {
+        didSet {
+            if oldValue != aspectRatio {
+                updateContext()
+            }
+        }
+    }
+    
+    var renderMode = RenderMode.default {
+        didSet {
+            if oldValue != renderMode {
+                updateContext()
+            }
+        }
+    }
+    
+    var lastFilter = CameraFilter.none {
+        didSet {
+            if oldValue != lastFilter {
                 updateContext()
             }
         }
@@ -84,5 +114,10 @@ struct CameraState: Codable {
                 return .idle
             }
         }
+    }
+    
+    static func update<T>(_ keyPath: WritableKeyPath<CameraState, T>, with newValue: T) async {
+        var current = await current
+        current[keyPath: keyPath] = newValue
     }
 }

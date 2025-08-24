@@ -8,6 +8,7 @@
 import AVFoundation
 import Combine
 import Foundation
+import GPUImage
 
 final actor CaptureService {
     @Published private(set) var captureActivity: CaptureActivity = .idle
@@ -15,11 +16,15 @@ final actor CaptureService {
     
     nonisolated let previewSource: PreviewSource
     
+    nonisolated let previewTarget: PreviewTarget
+    
     private let session: AVCaptureSession
     
     private let photoOutput = PhotoOutput()
     
-    private var outputServices: [any OutputService] { [photoOutput] }
+    private let movieOutput = MovieOutput()
+    
+    private var outputServices: [any OutputService] { [photoOutput, movieOutput] }
     
     private var activeVideoInput: AVCaptureDeviceInput?
     
@@ -29,8 +34,8 @@ final actor CaptureService {
     
     private let systemPreferredCamera = SystemPreferredCameraObserver()
     
-    private var rotationCoordinator: AVCaptureDevice.RotationCoordinator!
-    private var rotationObservers: [AnyObject] = []
+    // private var rotationCoordinator: AVCaptureDevice.RotationCoordinator!
+    // private var rotationObservers: [AnyObject] = []
     
     private var isSetUp = false
     
@@ -40,9 +45,58 @@ final actor CaptureService {
         sessionQueue.asUnownedSerialExecutor()
     }
     
-    init(session: AVCaptureSession? = nil) {
-        self.session = session ?? .init()
-        previewSource = .default(session: self.session)
+    private init(previewSource: some PreviewSource, previewTarget: some PreviewTarget, session: AVCaptureSession) {
+        self.previewSource = previewSource
+        self.previewTarget = previewTarget
+        self.session = session
+    }
+    
+    static func `default`() -> CaptureService {
+        let session = AVCaptureSession()
+#if DEBUG
+        if ProcessInfo.isRunningPreviews || UserDefaults.shared.bool(forKey: UserDefaultsKey.mockCamera.rawValue) {
+            return CaptureService(previewSource: .staticImage(.camPreview), previewTarget: .staticImage(.camPreview), session: session)
+        } else {
+            return CaptureService(previewSource: .default(session: session), previewTarget: .default(), session: session)
+        }
+#else
+        return CaptureService(previewSource: .default(session: session), previewTarget: .default(), session: session)
+#endif
+    }
+    
+    static func metal() throws -> CaptureService {
+#if DEBUG
+        if ProcessInfo.isRunningPreviews || UserDefaults.shared.bool(forKey: UserDefaultsKey.mockCamera.rawValue) {
+            return CaptureService(previewSource: .staticImage(.camPreview), previewTarget: .metal(), session: .init())
+        } else {
+            let metalCamera = try MetalCameraSource()
+            let session = metalCamera.session
+            let target = MetalPreviewTarget()
+            return CaptureService(previewSource: metalCamera, previewTarget: target, session: session)
+        }
+#else
+        let metalCamera = try MetalCameraSource()
+        let session = metalCamera.session
+        let target = MetalPreviewTarget()
+        return CaptureService(previewSource: metalCamera, previewTarget: target, session: session)
+#endif
+    }
+    
+    static func metalWithFilters() throws -> CaptureService {
+        let filterStack: FilterStack = [.none, .haze(), .noir, .lookup(image: .agfaVista), .lookup(image: .moodyFilm), .lookup(image: .portra800), .lookup(image: .classicChrome), .lookup(image: .eliteChrome), .lookup(image: .polaroidColor), .lookup(image: .velvia100)]
+#if DEBUG
+        if ProcessInfo.isRunningPreviews || UserDefaults.shared.bool(forKey: UserDefaultsKey.mockCamera.rawValue) {
+            return CaptureService(previewSource: .staticImage(.camPreview), previewTarget: filterStack, session: .init())
+        } else {
+            let metalCamera = try MetalCameraSource()
+            let session = metalCamera.session
+            return CaptureService(previewSource: metalCamera, previewTarget: filterStack, session: session)
+        }
+#else
+        let metalCamera = try MetalCameraSource()
+        let session = metalCamera.session
+        return CaptureService(previewSource: metalCamera, previewTarget: filterStack, session: session)
+#endif
     }
     
     var isAuthorized: Bool {
@@ -68,9 +122,17 @@ final actor CaptureService {
     }
     
     func start(with state: CameraState) async throws {
+        guard !isSetUp, !session.isRunning else { return }
         captureMode = state.captureMode
+        configurePipeline()
         try setUpSession()
-        session.startRunning()
+        if let camera = previewSource as? MetalCameraSource {
+            logger.debug("Starting metal camera")
+            camera.start()
+        } else {
+            logger.debug("Starting basic camera")
+            session.startRunning()
+        }
     }
     
     func stopSession() {
@@ -81,6 +143,28 @@ final actor CaptureService {
         session.startRunning()
     }
     
+    func tearDownSession() {
+        session.stopRunning()
+        guard isSetUp else { return }
+        defer { isSetUp = false }
+        
+        session.beginConfiguration()
+        defer { session.commitConfiguration() }
+        
+        for input in session.inputs {
+            session.removeInput(input)
+        }
+        
+        for output in session.outputs {
+            session.removeOutput(output)
+        }
+        
+        let preset: AVCaptureSession.Preset = captureMode == .photo ? .photo : .high
+        if session.canSetSessionPreset(preset) {
+            session.sessionPreset = preset
+        }
+    }
+    
     func setUpSession() throws {
         guard !isSetUp else { return }
         
@@ -88,10 +172,15 @@ final actor CaptureService {
         observeNotifications()
         
         do {
-            let defaultCamera = try deviceLookup.defaultCamera
+            let defaultCamera: AVCaptureDevice
+            if let cameraSource = previewSource as? MetalCameraSource {
+                defaultCamera = cameraSource.camera.inputCamera
+                activeVideoInput = try AVCaptureDeviceInput(device: defaultCamera)
+            } else {
+                defaultCamera = try deviceLookup.defaultCamera
+                activeVideoInput = try addInput(for: defaultCamera)
+            }
             let defaultMic = try deviceLookup.defaultMic
-            
-            activeVideoInput = try addInput(for: defaultCamera)
             try addInput(for: defaultMic)
             
             session.sessionPreset = captureMode == .photo ? .photo : .high
@@ -99,14 +188,27 @@ final actor CaptureService {
             
             monitorSystemPreferredCamera()
             updateOutputConfigurations()
+            isSetUp = true
         } catch {
             throw CameraError.setupFailed
         }
     }
     
     func setCaptureMode(_ captureMode: CaptureMode) {
-        // TODO: Pending more capture modes
-        logger.fault("No capture modes to set. This method does nothing for now.")
+        session.sessionPreset = captureMode == .photo ? .photo : .high
+        self.captureMode = captureMode
+        switch captureMode {
+        case .photo:
+            if session.outputs.contains(movieOutput.output) {
+                session.removeOutput(movieOutput.output)
+            }
+        case .video:
+            do {
+                try addOutput(movieOutput.output)
+            } catch {
+                logger.error("Failed to add movie output to session.")
+            }
+        }
     }
     
     func switchCamera() {
@@ -128,8 +230,39 @@ final actor CaptureService {
         try await photoOutput.capturePhoto(with: features)
     }
     
+    func recordVideo(with features: VideoFeatures) async throws -> Video {
+        try await movieOutput.recordVideo(with: features)
+    }
+    
+    func stopRecording() {
+        movieOutput.stopRecording()
+    }
+    
+    func focusAndExpose(on devicePoint: CGPoint) throws {
+        try currentDevice.lockForConfiguration()
+        defer { currentDevice.unlockForConfiguration() }
+        if currentDevice.isFocusPointOfInterestSupported {
+            currentDevice.focusPointOfInterest = devicePoint
+        }
+        if currentDevice.isFocusModeSupported(.continuousAutoFocus) {
+            currentDevice.focusMode = .continuousAutoFocus
+        }
+        if currentDevice.isExposurePointOfInterestSupported {
+            currentDevice.exposurePointOfInterest = devicePoint
+        }
+        if currentDevice.isExposureModeSupported(.continuousAutoExposure) {
+            currentDevice.exposureMode = .continuousAutoExposure
+        }
+    }
+    
+    private func configurePipeline() {
+        previewSource.connect(to: previewTarget)
+    }
+    
     private func observeOutputServices() {
-        photoOutput.$captureActivity.assign(to: &$captureActivity)
+        photoOutput.$captureActivity
+            .merge(with: movieOutput.$captureActivity)
+            .assign(to: &$captureActivity)
     }
     
     private func observeNotifications() {
