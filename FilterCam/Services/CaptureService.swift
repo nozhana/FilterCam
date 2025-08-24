@@ -18,11 +18,11 @@ final actor CaptureService {
     
     nonisolated let previewTarget: PreviewTarget
     
+    nonisolated let photoOutput: any PhotoOutputService
+    
+    nonisolated let movieOutput: any MovieOutputService
+    
     private let session: AVCaptureSession
-    
-    private let photoOutput = PhotoOutput()
-    
-    private let movieOutput = MovieOutput()
     
     private var outputServices: [any OutputService] { [photoOutput, movieOutput] }
     
@@ -45,9 +45,11 @@ final actor CaptureService {
         sessionQueue.asUnownedSerialExecutor()
     }
     
-    private init(previewSource: some PreviewSource, previewTarget: some PreviewTarget, session: AVCaptureSession) {
+    private init(previewSource: some PreviewSource, previewTarget: some PreviewTarget, photoOutput: any PhotoOutputService, movieOutput: any MovieOutputService, session: AVCaptureSession) {
         self.previewSource = previewSource
         self.previewTarget = previewTarget
+        self.photoOutput = photoOutput
+        self.movieOutput = movieOutput
         self.session = session
     }
     
@@ -55,47 +57,45 @@ final actor CaptureService {
         let session = AVCaptureSession()
 #if DEBUG
         if ProcessInfo.isRunningPreviews || UserDefaults.shared.bool(forKey: UserDefaultsKey.mockCamera.rawValue) {
-            return CaptureService(previewSource: .staticImage(.camPreview), previewTarget: .staticImage(.camPreview), session: session)
+            return CaptureService(previewSource: .staticImage(.camPreview), previewTarget: .staticImage(.camPreview), photoOutput: .default(), movieOutput: .default(), session: session)
         } else {
-            return CaptureService(previewSource: .default(session: session), previewTarget: .default(), session: session)
+            return CaptureService(previewSource: .default(session: session), previewTarget: .default(), photoOutput: .default(), movieOutput: .default(), session: session)
         }
 #else
-        return CaptureService(previewSource: .default(session: session), previewTarget: .default(), session: session)
+        return CaptureService(previewSource: .default(session: session), previewTarget: .default(), photoOutput: .default(), movieOutput: .default(), session: session)
 #endif
     }
     
     static func metal() throws -> CaptureService {
 #if DEBUG
         if ProcessInfo.isRunningPreviews || UserDefaults.shared.bool(forKey: UserDefaultsKey.mockCamera.rawValue) {
-            return CaptureService(previewSource: .staticImage(.camPreview), previewTarget: .metal(), session: .init())
+            return CaptureService(previewSource: .staticImage(.camPreview), previewTarget: .metal(), photoOutput: .metal(), movieOutput: .metal(), session: .init())
         } else {
             let metalCamera = try MetalCameraSource()
             let session = metalCamera.session
-            let target = MetalPreviewTarget()
-            return CaptureService(previewSource: metalCamera, previewTarget: target, session: session)
+            return CaptureService(previewSource: metalCamera, previewTarget: .metal(), photoOutput: .metal(), movieOutput: .metal(), session: session)
         }
 #else
         let metalCamera = try MetalCameraSource()
         let session = metalCamera.session
-        let target = MetalPreviewTarget()
-        return CaptureService(previewSource: metalCamera, previewTarget: target, session: session)
+        return CaptureService(previewSource: metalCamera, previewTarget: .metal(), photoOutput: .metal(), movieOutput: .metal(), session: session)
 #endif
     }
     
     static func metalWithFilters() throws -> CaptureService {
-        let filterStack: FilterStack = [.none, .haze(), .noir, .lookup(image: .agfaVista), .lookup(image: .moodyFilm), .lookup(image: .portra800), .lookup(image: .classicChrome), .lookup(image: .eliteChrome), .lookup(image: .polaroidColor), .lookup(image: .velvia100)]
+        let filterStack: FilterStack = [.none, .haze(), .noir, .sepia(), .blur(), .lookup(image: .agfaVista), .lookup(image: .moodyFilm), .lookup(image: .portra800), .lookup(image: .classicChrome), .lookup(image: .eliteChrome), .lookup(image: .polaroidColor), .lookup(image: .velvia100)]
 #if DEBUG
         if ProcessInfo.isRunningPreviews || UserDefaults.shared.bool(forKey: UserDefaultsKey.mockCamera.rawValue) {
-            return CaptureService(previewSource: .staticImage(.camPreview), previewTarget: filterStack, session: .init())
+            return CaptureService(previewSource: .staticImage(.camPreview), previewTarget: filterStack, photoOutput: .metal(), movieOutput: .metal(), session: .init())
         } else {
             let metalCamera = try MetalCameraSource()
             let session = metalCamera.session
-            return CaptureService(previewSource: metalCamera, previewTarget: filterStack, session: session)
+            return CaptureService(previewSource: metalCamera, previewTarget: filterStack, photoOutput: .metal(), movieOutput: .metal(), session: session)
         }
 #else
         let metalCamera = try MetalCameraSource()
         let session = metalCamera.session
-        return CaptureService(previewSource: metalCamera, previewTarget: filterStack, session: session)
+        return CaptureService(previewSource: metalCamera, previewTarget: filterStack, photoOutput: .metal(), movieOutput: .metal(), session: session)
 #endif
     }
     
@@ -125,7 +125,7 @@ final actor CaptureService {
         guard !isSetUp, !session.isRunning else { return }
         captureMode = state.captureMode
         configurePipeline()
-        try setUpSession()
+        try await setUpSession()
         if let camera = previewSource as? MetalCameraSource {
             logger.debug("Starting metal camera")
             camera.start()
@@ -165,7 +165,7 @@ final actor CaptureService {
         }
     }
     
-    func setUpSession() throws {
+    private func setUpSession() async throws {
         guard !isSetUp else { return }
         
         observeOutputServices()
@@ -184,7 +184,19 @@ final actor CaptureService {
             try addInput(for: defaultMic)
             
             session.sessionPreset = captureMode == .photo ? .photo : .high
-            try addOutput(photoOutput.output)
+            if let defaultOutput = photoOutput.output as? any DefaultCaptureOutput {
+                try addOutput(defaultOutput.output)
+            } else if let metalOutput = photoOutput.output as? any MetalCaptureOutput,
+                      let metalCamera = previewSource as? MetalCameraSource {
+                let currentState = await CameraState.current
+                if currentState.renderMode == .metalWithFilters {
+                    let operation = currentState.lastFilter.makeOperation()
+                    operation.addTarget(metalOutput.output, atTargetIndex: 0)
+                    metalCamera --> operation
+                } else {
+                    metalCamera --> metalOutput.output
+                }
+            }
             
             monitorSystemPreferredCamera()
             updateOutputConfigurations()
@@ -197,14 +209,15 @@ final actor CaptureService {
     func setCaptureMode(_ captureMode: CaptureMode) {
         session.sessionPreset = captureMode == .photo ? .photo : .high
         self.captureMode = captureMode
+        guard let defaultOutput = movieOutput.output as? any DefaultCaptureOutput else { return }
         switch captureMode {
         case .photo:
-            if session.outputs.contains(movieOutput.output) {
-                session.removeOutput(movieOutput.output)
+            if session.outputs.contains(defaultOutput.output) {
+                session.removeOutput(defaultOutput.output)
             }
         case .video:
             do {
-                try addOutput(movieOutput.output)
+                try addOutput(defaultOutput.output)
             } catch {
                 logger.error("Failed to add movie output to session.")
             }
@@ -227,11 +240,13 @@ final actor CaptureService {
     }
     
     func capturePhoto(with features: PhotoFeatures) async throws -> Photo {
-        try await photoOutput.capturePhoto(with: features)
+        await reconfigureMetalOutputs()
+        return try await photoOutput.capturePhoto(with: features)
     }
     
     func recordVideo(with features: VideoFeatures) async throws -> Video {
-        try await movieOutput.recordVideo(with: features)
+        await reconfigureMetalOutputs()
+        return try await movieOutput.recordVideo(with: features)
     }
     
     func stopRecording() {
@@ -260,8 +275,8 @@ final actor CaptureService {
     }
     
     private func observeOutputServices() {
-        photoOutput.$captureActivity
-            .merge(with: movieOutput.$captureActivity)
+        photoOutput.captureActivityPublisher
+            .merge(with: movieOutput.captureActivityPublisher)
             .assign(to: &$captureActivity)
     }
     
@@ -339,5 +354,21 @@ final actor CaptureService {
     
     private func updateOutputConfigurations() {
         outputServices.forEach { $0.updateConfiguration(for: currentDevice) }
+    }
+    
+    private func reconfigureMetalOutputs() async {
+        if let metalOutput = photoOutput.output as? any MetalCaptureOutput,
+           let imageSource = previewSource as? ImageSource {
+            let currentState = await CameraState.current
+            imageSource.removeAllTargets()
+            configurePipeline()
+            if currentState.renderMode == .metalWithFilters {
+                let operation = currentState.lastFilter.makeOperation()
+                operation.addTarget(metalOutput.output, atTargetIndex: 0)
+                imageSource --> operation
+            } else {
+                imageSource --> metalOutput.output
+            }
+        }
     }
 }

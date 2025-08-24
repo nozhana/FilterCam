@@ -22,6 +22,7 @@ struct CameraViewFinder: View {
     @State private var showGallery = false
     @State private var showOptions = false
     @State private var showSettings = false
+    @State private var showFilterConfigurator = false
     
     @AppStorage(UserDefaultsKey.cameraSwitchRotationEffect.rawValue, store: .shared)
     private var rotateCamera = true
@@ -39,12 +40,12 @@ struct CameraViewFinder: View {
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {
-                let showOptionsGesture = DragGesture()
+                let previewGesture = DragGesture()
                     .onEnded { value in
                         withAnimation(.smooth) {
-                            if value.predictedEndTranslation.height > 100 {
+                            if value.predictedEndTranslation.height > 70 {
                                 showOptions = true
-                            } else if value.predictedEndTranslation.height < -100 {
+                            } else if value.predictedEndTranslation.height < -70 {
                                 showOptions = false
                             }
                         }
@@ -111,6 +112,8 @@ struct CameraViewFinder: View {
                             Image(uiImage: staticTarget.image)
                                 .resizable()
                                 .scaledToFill()
+                                .clipped()
+                                .containerRelativeFrame(.horizontal)
                         } else {
                             cameraUnavailableView
                         }
@@ -143,7 +146,7 @@ struct CameraViewFinder: View {
                         .clipped()
                         .offset(y: model.aspectRatio.previewOffsetY)
                 }
-                .gesture(showOptionsGesture)
+                .gesture(previewGesture)
                 .onTapGesture(count: 2) {
                     Task { await model.switchCamera() }
                 }
@@ -277,52 +280,87 @@ struct CameraViewFinder: View {
                         }
                     }
                     if let filterStack = model.previewTarget as? FilterStack {
-                        let margin: CGFloat = (UIScreen.main.bounds.width - 64) / 2
-                        ScrollViewReader { proxy in
-                            ScrollView(.horizontal) {
-                                HStack(spacing: 16) {
-                                    ForEach(filterStack.targetsMap.keys.sorted(), id: \.self) { filter in
-                                        FilteredImage(filter: filter, source: .donut)
-                                            .aspectRatio(1, contentMode: .fit)
-                                            .overlay {
-                                                let isSelected = model.lastFilter == filter
-                                                RoundedRectangle(cornerRadius: 12)
-                                                    .strokeBorder(Color.accentColor.gradient, lineWidth: isSelected ? 2 : 0)
-                                            }
-                                            .clipShape(.rect(cornerRadius: 12))
-                                            .overlay(alignment: .bottom) {
-                                                Text(filter.title)
-                                                    .font(.caption2.smallCaps())
-                                                    .multilineTextAlignment(.leading)
-                                                    .lineLimit(2)
-                                                    .minimumScaleFactor(0.5)
-                                                    .padding(.horizontal, 8)
-                                                    .padding(.vertical, 6)
-                                                    .background(.background.secondary.opacity(0.5), in: .rect)
-                                                    .fixedSize(horizontal: false, vertical: true)
-                                                    .frame(height: 44, alignment: .top)
-                                                    .padding(.horizontal, -8)
-                                                    .offset(y: 44 + 8)
-                                            }
+                        if showFilterConfigurator {
+                            FilterConfiguratorView(filter: model.lastFilter, filterStack: filterStack)
+                                .overlay(alignment: .topTrailing) {
+                                    Button {
+                                        withAnimation(.smooth) {
+                                            showFilterConfigurator = false
+                                        }
+                                    } label: {
+                                        Image(systemName: "xmark")
+                                            .bold()
+                                            .foregroundStyle(.secondary)
+                                            .padding(10)
+                                            .background(.background.secondary.opacity(0.75), in: .circle)
+                                    }
+                                    .offset(y: -44)
+                                }
+                                .transition(.move(edge: .bottom).combined(with: .blurReplace))
+                        } else {
+                            let margin: CGFloat = (UIScreen.main.bounds.width - 64 - 40) / 2
+                            ScrollViewReader { proxy in
+                                ScrollView(.horizontal) {
+                                    HStack(spacing: 16) {
+                                        ForEach(filterStack.targetsMap.keys.sorted(), id: \.self) { filter in
+                                            let isSelected = model.lastFilter == filter
+                                            FilteredImage(filter: filter, source: .donut)
+                                                .aspectRatio(1, contentMode: .fit)
+                                                .overlay {
+                                                    RoundedRectangle(cornerRadius: 12)
+                                                        .strokeBorder(Color.accentColor.gradient, lineWidth: isSelected ? 3 : 0)
+                                                }
+                                                .overlay(alignment: .bottomTrailing) {
+                                                    if isSelected {
+                                                        Image(systemName: "gearshape.fill")
+                                                            .foregroundStyle(.secondary)
+                                                            .padding(12)
+                                                            .transition(.scale.combined(with: .blurReplace))
+                                                    }
+                                                }
+                                                .animation(.smooth, value: model.lastFilter)
+                                                .clipShape(.rect(cornerRadius: 12))
+                                                .overlay(alignment: .bottom) {
+                                                    Text(filter.title)
+                                                        .font(.caption2.smallCaps())
+                                                        .multilineTextAlignment(.leading)
+                                                        .lineLimit(2)
+                                                        .minimumScaleFactor(0.5)
+                                                        .padding(.horizontal, 8)
+                                                        .padding(.vertical, 6)
+                                                        .background(.background.secondary.opacity(0.5), in: .rect)
+                                                        .fixedSize(horizontal: false, vertical: true)
+                                                        .frame(height: 44, alignment: .top)
+                                                        .padding(.horizontal, -8)
+                                                        .offset(y: 44 + 8)
+                                                }
+                                                .onTapGesture {
+                                                    guard isSelected else { return }
+                                                    withAnimation(.smooth) {
+                                                        showFilterConfigurator = true
+                                                    }
+                                                }
+                                        }
+                                    }
+                                    .scrollTargetLayout()
+                                }
+                                .scrollIndicators(.hidden)
+                                .scrollTargetBehavior(.viewAligned(limitBehavior: .backport.alwaysByOne))
+                                .scrollDisabled(true)
+                                .safeAreaPadding(.horizontal, margin)
+                                .onChange(of: model.lastFilter, initial: true) { _, newValue in
+                                    withAnimation(.smooth) {
+                                        proxy.scrollTo(newValue, anchor: .center)
                                     }
                                 }
-                                .scrollTargetLayout()
                             }
-                            .scrollIndicators(.hidden)
-                            .scrollTargetBehavior(.viewAligned(limitBehavior: .backport.alwaysByOne))
-                            .scrollDisabled(true)
-                            .safeAreaPadding(.horizontal, margin)
-                            .onChange(of: model.lastFilter) { _, newValue in
-                                withAnimation(.smooth) {
-                                    proxy.scrollTo(newValue, anchor: .center)
-                                }
-                            }
+                            .frame(height: 64)
+                            .transition(.move(edge: .top).combined(with: .blurReplace))
                         }
-                        .frame(height: 64)
-                        .allowsHitTesting(false)
                     }
                 }
                 .safeAreaPadding(.bottom, 144)
+                .safeAreaPadding(.horizontal, 20)
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .zIndex(2)
             }

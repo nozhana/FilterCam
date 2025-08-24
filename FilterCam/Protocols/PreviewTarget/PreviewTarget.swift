@@ -7,22 +7,7 @@
 
 @preconcurrency import AVFoundation
 import Foundation
-@preconcurrency import GPUImage
 
 protocol PreviewTarget {
     func setSession(_ session: AVCaptureSession)
-}
-
-final class DefaultPreviewTarget: PreviewTarget {
-    var session: AVCaptureSession?
-    
-    func setSession(_ session: AVCaptureSession) {
-        self.session = session
-    }
-}
-
-extension PreviewTarget where Self == DefaultPreviewTarget {
-    static func `default`() -> DefaultPreviewTarget {
-        .init()
-    }
 }

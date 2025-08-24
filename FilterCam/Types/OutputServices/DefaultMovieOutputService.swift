@@ -1,19 +1,23 @@
 //
-//  MovieOutput.swift
+//  DefaultMovieOutputService.swift
 //  FilterCam
 //
-//  Created by Nozhan A. on 8/22/25.
+//  Created by Nozhan A. on 8/24/25.
 //
 
 import AVFoundation
 import Combine
 import UIKit
 
-final class MovieOutput: OutputService {
+final class DefaultMovieOutputService: MovieOutputService {
     private let movieOutput = AVCaptureMovieFileOutput()
     
-    var output: some AVCaptureOutput { movieOutput }
+    var output: some DefaultCaptureOutput { DefaultMovieCaptureOutput(output: movieOutput) }
     @Published private(set) var captureActivity: CaptureActivity = .idle
+    
+    var captureActivityPublisher: AnyPublisher<CaptureActivity, Never> {
+        $captureActivity.eraseToAnyPublisher()
+    }
     
     func recordVideo(with features: VideoFeatures) async throws -> Video {
         try await withCheckedThrowingContinuation { continuation in
@@ -35,6 +39,12 @@ final class MovieOutput: OutputService {
                 captureActivity = activity
             }
         }
+    }
+}
+
+extension MovieOutputService where Self == DefaultMovieOutputService {
+    static func `default`() -> DefaultMovieOutputService {
+        .init()
     }
 }
 

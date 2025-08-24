@@ -18,7 +18,11 @@ struct Video: OutputMedium {
     }
     
     init(id: UUID = UUID(), fileURL: URL, timestamp: Date = .now, thumbnailData: Data? = nil) {
-        self.id = id
+        if let inferredID = UUID(uuidString: fileURL.lastPathComponent) {
+            self.id = inferredID
+        } else {
+            self.id = id
+        }
         self.fileURL = fileURL
         self.timestamp = timestamp
         self.thumbnailData = thumbnailData

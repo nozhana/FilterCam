@@ -71,8 +71,17 @@ struct GalleryView: View {
                                     Button("Delete", systemImage: "trash.fill", role: .destructive) {
                                         try? model.deleteItem(medium.id)
                                     }
+                                } preview: {
+                                    if let image = UIImage(data: medium.data) {
+                                        Image(uiImage: image)
+                                            .resizable()
+                                            .scaledToFit()
+                                    } else {
+                                        Image(uiImage: thumbnail.image)
+                                            .resizable()
+                                            .scaledToFit()
+                                    }
                                 }
-               
                         }
                     }
                 }
@@ -88,10 +97,10 @@ struct GalleryView: View {
                                 }
                                 .foregroundStyle(Color.secondary)
                                 Button("Delete", systemImage: "trash.fill", role: .destructive) {
-                                    for itemID in model.itemsToBeDeleted {
-                                        try? model.deleteItem(itemID)
-                                    }
-                                    model.itemsToBeDeleted.removeAll()
+                                    model.confirmDelete()
+                                }
+                                Button("Delete All", systemImage: "trash.square.fill", role: .destructive) {
+                                    model.deleteAllMedia()
                                 }
                             }
                             .font(.caption.smallCaps().bold())
@@ -161,6 +170,32 @@ extension GalleryView {
         func deleteItem(_ itemID: UUID) throws {
             _ = try mediaStore.deleteItem(itemID)
             media.removeAll(where: { $0.id == itemID })
+            itemsToBeDeleted.remove(itemID)
+        }
+        
+        @MainActor
+        func confirmDelete() {
+            for itemID in itemsToBeDeleted {
+                do {
+                    try deleteItem(itemID)
+                } catch {
+                    logger.error("Failed to delete medium with id \(itemID): \(error)")
+                }
+            }
+            itemsToBeDeleted.removeAll()
+        }
+        
+        @MainActor
+        func deleteAllMedia() {
+            for medium in media {
+                do {
+                    try deleteItem(medium.id)
+                } catch {
+                    logger.error("Failed to delete medium with id \(medium.id): \(String(describing: medium))\n\(error)")
+                }
+            }
+            itemsToBeDeleted.removeAll()
+            isEditing = false
         }
     }
 }

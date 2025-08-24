@@ -6,15 +6,16 @@
 //
 
 import GPUImage
-import UIKit
+import SwiftUI
 
 enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable {
     case none
     case noir
+    case blur(radius: Float = 20.0)
     case sepia(intensity: Float = 0.9)
     case haze(distance: Float = 0.2, slope: Float = 0.0)
     case sharpen(sharpness: Float = 0.5)
-    case lookup(image: LookupImage, intensity: Float = 0.8)
+    case lookup(image: LookupImage, intensity: Float = 1.0)
     
     var rawValue: String {
         switch self {
@@ -22,6 +23,8 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable {
             "none"
         case .noir:
             "noir"
+        case .blur:
+            "blur"
         case .sepia:
             "sepia"
         case .haze:
@@ -39,6 +42,8 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable {
             "Original"
         case .noir:
             "Noir"
+        case .blur:
+            "Blur"
         case .sepia:
             "Sepia"
         case .haze:
@@ -50,14 +55,69 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable {
         }
     }
     
+    var configurations: [CameraFilterConfiguration] {
+        switch self {
+        case .none: []
+        case .noir: []
+        case .blur:
+            [.slider(title: "Radius", range: 1...100, step: 1, bindingFactory: { operation in
+                Binding {
+                    (operation as! GaussianBlur).blurRadiusInPixels
+                } set: {
+                    (operation as! GaussianBlur).blurRadiusInPixels = $0
+                }
+            })]
+        case .sepia:
+            [.slider(title: "Intensity", range: 0...1, step: 0.01, bindingFactory: { operation in
+                Binding {
+                    (operation as! SepiaToneFilter).intensity
+                } set: {
+                    (operation as! SepiaToneFilter).intensity = $0
+                }
+            })]
+        case .haze:
+            [.slider(title: "Distance", range: 0...1, bindingFactory: { operation in
+                Binding {
+                    (operation as! Haze).distance
+                } set: {
+                    (operation as! Haze).distance = $0
+                }
+            }),
+             .slider(title: "Slope", range: 0...1, bindingFactory: { operation in
+                 Binding {
+                     (operation as! Haze).slope
+                 } set: {
+                     (operation as! Haze).slope = $0
+                 }
+             })]
+        case .sharpen:
+            [.slider(title: "Sharpness", range: 0...1, step: 0.01, bindingFactory: { operation in
+                Binding {
+                    (operation as! Sharpen).sharpness
+                } set: {
+                    (operation as! Sharpen).sharpness = $0
+                }
+            })]
+        case .lookup:
+            [.slider(title: "Intensity", range: 0...1, step: 0.01, bindingFactory: { operation in
+                Binding {
+                    (operation as! LookupFilter).intensity
+                } set: {
+                    (operation as! LookupFilter).intensity = $0
+                }
+            })]
+        }
+    }
+    
     private var index: Int {
         switch self {
         case .none: 0
         case .noir: 1
-        case .sepia: 2
-        case .haze: 3
-        case .sharpen: 4
-        case .lookup(let image, _): 5 + image.rawValue
+        case .blur: 2
+        case .sepia: 3
+        case .haze: 4
+        case .sharpen: 5
+        case .lookup(let image, _): 6 + image.rawValue
         }
     }
     
@@ -69,6 +129,7 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable {
         if let value: CameraFilter = switch rawValue {
         case "none": CameraFilter.none
         case "noir": .noir
+        case "blur": .blur()
         case "sepia": .sepia()
         case "haze": .haze()
         case "sharpen": .sharpen()
@@ -91,6 +152,10 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable {
         switch self {
         case .none: return ImageRelay()
         case .noir: return Luminance()
+        case .blur(let radius):
+            let blur = GaussianBlur()
+            blur.blurRadiusInPixels = radius
+            return blur
         case .sepia(let intensity):
             let sepia = SepiaToneFilter()
             sepia.intensity = intensity

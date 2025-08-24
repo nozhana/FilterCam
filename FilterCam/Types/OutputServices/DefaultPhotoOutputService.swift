@@ -1,18 +1,23 @@
 //
-//  PhotoOutput.swift
+//  DefaultPhotoOutputService.swift
 //  FilterCam
 //
-//  Created by Nozhan A. on 8/19/25.
+//  Created by Nozhan A. on 8/24/25.
 //
 
 import AVFoundation
+import Combine
 import Foundation
 
-final class PhotoOutput: OutputService {
+final class DefaultPhotoOutputService: PhotoOutputService {
     private let photoOutput = AVCapturePhotoOutput()
     
-    var output: AVCapturePhotoOutput { photoOutput }
+    var output: some DefaultCaptureOutput { DefaultPhotoCaptureOutput(output: photoOutput) }
     @Published private(set) var captureActivity: CaptureActivity = .idle
+    
+    var captureActivityPublisher: AnyPublisher<CaptureActivity, Never> {
+        $captureActivity.eraseToAnyPublisher()
+    }
     
     func updateConfiguration(for device: AVCaptureDevice) {
         photoOutput.maxPhotoDimensions = device.activeFormat.supportedMaxPhotoDimensions.last ?? .zero
@@ -64,6 +69,12 @@ final class PhotoOutput: OutputService {
                 captureActivity = activity
             }
         }
+    }
+}
+
+extension PhotoOutputService where Self == DefaultPhotoOutputService {
+    static func `default`() -> DefaultPhotoOutputService {
+        .init()
     }
 }
 
