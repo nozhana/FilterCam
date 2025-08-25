@@ -8,7 +8,7 @@
 import GPUImage
 import SwiftUI
 
-enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable {
+enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable, FilterGenerator {
     case none
     case noir
     case blur(radius: Float = 20.0)
@@ -16,6 +16,14 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable {
     case haze(distance: Float = 0.2, slope: Float = 0.0)
     case sharpen(sharpness: Float = 0.5)
     case lookup(image: LookupImage, intensity: Float = 1.0)
+    case custom(CustomFilter)
+    
+    var isCustom: Bool {
+        if case .custom = self {
+            return true
+        }
+        return false
+    }
     
     var rawValue: String {
         switch self {
@@ -33,6 +41,8 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable {
             "sharpen"
         case .lookup(let image, _):
             "lookup-\(image.rawValue)"
+        case .custom(let customFilter):
+            "custom-\(customFilter.title)"
         }
     }
     
@@ -52,60 +62,8 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable {
             "Sharpen"
         case .lookup(let image, _):
             image.title
-        }
-    }
-    
-    var configurations: [CameraFilterConfiguration] {
-        switch self {
-        case .none: []
-        case .noir: []
-        case .blur:
-            [.slider(title: "Radius", range: 1...100, step: 1, bindingFactory: { operation in
-                Binding {
-                    (operation as! GaussianBlur).blurRadiusInPixels
-                } set: {
-                    (operation as! GaussianBlur).blurRadiusInPixels = $0
-                }
-            })]
-        case .sepia:
-            [.slider(title: "Intensity", range: 0...1, step: 0.01, bindingFactory: { operation in
-                Binding {
-                    (operation as! SepiaToneFilter).intensity
-                } set: {
-                    (operation as! SepiaToneFilter).intensity = $0
-                }
-            })]
-        case .haze:
-            [.slider(title: "Distance", range: 0...1, bindingFactory: { operation in
-                Binding {
-                    (operation as! Haze).distance
-                } set: {
-                    (operation as! Haze).distance = $0
-                }
-            }),
-             .slider(title: "Slope", range: 0...1, bindingFactory: { operation in
-                 Binding {
-                     (operation as! Haze).slope
-                 } set: {
-                     (operation as! Haze).slope = $0
-                 }
-             })]
-        case .sharpen:
-            [.slider(title: "Sharpness", range: 0...1, step: 0.01, bindingFactory: { operation in
-                Binding {
-                    (operation as! Sharpen).sharpness
-                } set: {
-                    (operation as! Sharpen).sharpness = $0
-                }
-            })]
-        case .lookup:
-            [.slider(title: "Intensity", range: 0...1, step: 0.01, bindingFactory: { operation in
-                Binding {
-                    (operation as! LookupFilter).intensity
-                } set: {
-                    (operation as! LookupFilter).intensity = $0
-                }
-            })]
+        case .custom(let customFilter):
+            customFilter.title
         }
     }
     
@@ -118,6 +76,7 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable {
         case .haze: 4
         case .sharpen: 5
         case .lookup(let image, _): 6 + image.rawValue
+        case .custom(let customFilter): -1 - customFilter.layoutIndex
         }
     }
     
@@ -151,6 +110,7 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable {
     func makeOperation() -> any ImageProcessingOperation {
         switch self {
         case .none: return ImageRelay()
+        case .custom(let customFilter): return customFilter.makeOperation()
         case .noir: return Luminance()
         case .blur(let radius):
             let blur = GaussianBlur()
@@ -179,7 +139,7 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable {
 }
 
 extension CameraFilter {
-    enum LookupImage: Int, Codable {
+    enum LookupImage: Int, Codable, CaseIterable, Identifiable {
         case portrait35mm
         case agfaVista
         case classicChrome
@@ -190,12 +150,14 @@ extension CameraFilter {
         case portra800
         case velvia100
         
+        var id: Int { rawValue }
+        
         var title: String {
             switch self {
             case .portrait35mm:
                 "Portrait 35mm"
             case .agfaVista:
-                "Agfa Vist"
+                "Agfa Vista"
             case .classicChrome:
                 "Classic Chrome"
             case .eliteChrome:
@@ -227,4 +189,25 @@ extension CameraFilter {
             }
         }
     }
+}
+
+extension CameraFilter {
+    mutating func update(with floatValue: Float, atIndex index: Int = 0) {
+        switch self {
+        case .none: break
+        case .noir: break
+        case .blur: self = .blur(radius: floatValue)
+        case .sepia: self = .sepia(intensity: floatValue)
+        case .haze(let distance, let slope):
+            self = .haze(distance: index == 0 ? floatValue : distance,
+                         slope: index == 1 ? floatValue : slope)
+        case .sharpen:
+            self = .sharpen(sharpness: floatValue)
+        case .lookup(let image, _):
+            self = .lookup(image: image, intensity: floatValue)
+        case .custom: break
+        }
+    }
+    
+    mutating func update(with booleanValue: Bool, atIndex index: Int = 0) {}
 }

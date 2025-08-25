@@ -57,6 +57,10 @@ final class CameraModel: ObservableObject {
     private var captureDirectory: URL!
     private var mediaStore: MediaStore!
     
+    var previewSource: any PreviewSource {
+        captureService.previewSource
+    }
+    
     var previewTarget: any PreviewTarget {
         captureService.previewTarget
     }

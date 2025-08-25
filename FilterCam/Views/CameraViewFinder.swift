@@ -7,6 +7,7 @@
 
 import AVFoundation
 import GPUImage
+import SwiftData
 import SwiftUI
 
 struct CameraViewFinder: View {
@@ -15,14 +16,19 @@ struct CameraViewFinder: View {
     @Environment(\.openMainApp) private var openMainApp
     @Environment(\.isCaptureExtension) private var isCaptureExtension
     
+    @Query(sort: [.init(\CustomFilter.layoutIndex, order: .reverse)], animation: .smooth)
+    private var customFilters: [CustomFilter]
+    
     @StateObject private var model = CameraModel()
     
     @Namespace private var galleryAnimation
+    @Namespace private var filterChainCreatorAnimation
     
     @State private var showGallery = false
     @State private var showOptions = false
     @State private var showSettings = false
     @State private var showFilterConfigurator = false
+    @State private var showFilterChainCreator = false
     
     @AppStorage(UserDefaultsKey.cameraSwitchRotationEffect.rawValue, store: .shared)
     private var rotateCamera = true
@@ -70,7 +76,7 @@ struct CameraViewFinder: View {
                                 .foregroundStyle(.secondary)
                         } actions: {
                             Link(destination: .appSettingsOrGeneralSettings) {
-                                Label("Open Settings", systemImage: "arrow.up.right")
+                                Label("App Settings", systemImage: "arrow.up.right")
                             }
                         }
                     case .interrupted:
@@ -275,67 +281,75 @@ struct CameraViewFinder: View {
                                     .padding(12)
                                     .background(.background.secondary.opacity(0.5), in: .circle)
                             }
-                            .padding(.leading, 20)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
                     if let filterStack = model.previewTarget as? FilterStack {
-                        if showFilterConfigurator {
-                            FilterConfiguratorView(filter: model.lastFilter, filterStack: filterStack)
-                                .overlay(alignment: .topTrailing) {
-                                    Button {
-                                        withAnimation(.smooth) {
-                                            showFilterConfigurator = false
-                                        }
-                                    } label: {
-                                        Image(systemName: "xmark")
-                                            .bold()
-                                            .foregroundStyle(.secondary)
-                                            .padding(10)
-                                            .background(.background.secondary.opacity(0.75), in: .circle)
+                        if showFilterConfigurator,
+                           let operation = filterStack.operation(for: model.lastFilter) {
+                            HStack(spacing: 16) {
+                                FilterConfiguratorView(filter: model.lastFilter, operation: operation)
+                                    .environmentObject(model)
+                            }
+                            .font(.caption.smallCaps().weight(.heavy))
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(.background.secondary.opacity(0.5), in: .rect(cornerRadius: 12))
+                            .overlay(alignment: .topTrailing) {
+                                Button {
+                                    withAnimation(.smooth) {
+                                        showFilterConfigurator = false
                                     }
-                                    .offset(y: -44)
+                                } label: {
+                                    Image(systemName: "xmark")
+                                        .bold()
+                                        .foregroundStyle(.secondary)
+                                        .padding(10)
+                                        .background(.background.secondary.opacity(0.75), in: .circle)
                                 }
-                                .transition(.move(edge: .bottom).combined(with: .blurReplace))
+                                .offset(y: -44)
+                            }
+                            .transition(.move(edge: .bottom).combined(with: .blurReplace))
                         } else {
                             let margin: CGFloat = (UIScreen.main.bounds.width - 64 - 40) / 2
                             ScrollViewReader { proxy in
                                 ScrollView(.horizontal) {
                                     HStack(spacing: 16) {
-                                        ForEach(filterStack.targetsMap.keys.sorted(), id: \.self) { filter in
-                                            let isSelected = model.lastFilter == filter
-                                            FilteredImage(filter: filter, source: .donut)
+                                        let filters = customFilters.map { CameraFilter.custom($0) }
+                                        ForEach(filters, id: \.self) { filter in
+                                            FilterPreview(filter: filter, isSelected: model.lastFilter == filter)
+                                                .onTapGesture {
+                                                    guard model.lastFilter == filter else { return }
+                                                    withAnimation(.smooth) {
+                                                        showFilterConfigurator = true
+                                                    }
+                                                }
+                                        }
+                                        let isFilterChainDisabled = model.status != .running || model.isPaused || model.isSwitchingCameras
+                                        Button {
+                                            guard !isFilterChainDisabled else { return }
+                                            showFilterChainCreator = true
+                                        } label: {
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .fill(.ultraThinMaterial)
                                                 .aspectRatio(1, contentMode: .fit)
                                                 .overlay {
                                                     RoundedRectangle(cornerRadius: 12)
-                                                        .strokeBorder(Color.accentColor.gradient, lineWidth: isSelected ? 3 : 0)
+                                                        .strokeBorder(.primary.opacity(0.5), lineWidth: 4)
                                                 }
-                                                .overlay(alignment: .bottomTrailing) {
-                                                    if isSelected {
-                                                        Image(systemName: "gearshape.fill")
-                                                            .foregroundStyle(.secondary)
-                                                            .padding(12)
-                                                            .transition(.scale.combined(with: .blurReplace))
-                                                    }
+                                                .overlay {
+                                                    Image(systemName: "plus.circle.fill")
                                                 }
-                                                .animation(.smooth, value: model.lastFilter)
-                                                .clipShape(.rect(cornerRadius: 12))
-                                                .overlay(alignment: .bottom) {
-                                                    Text(filter.title)
-                                                        .font(.caption2.smallCaps())
-                                                        .multilineTextAlignment(.leading)
-                                                        .lineLimit(2)
-                                                        .minimumScaleFactor(0.5)
-                                                        .padding(.horizontal, 8)
-                                                        .padding(.vertical, 6)
-                                                        .background(.background.secondary.opacity(0.5), in: .rect)
-                                                        .fixedSize(horizontal: false, vertical: true)
-                                                        .frame(height: 44, alignment: .top)
-                                                        .padding(.horizontal, -8)
-                                                        .offset(y: 44 + 8)
-                                                }
+                                        }
+                                        .foregroundStyle(Color.primary)
+                                        .opacity(isFilterChainDisabled ? 0.5 : 1)
+                                        .animation(.smooth, value: isFilterChainDisabled)
+                                        .disabled(isFilterChainDisabled)
+                                        .backport.matchedTransitionSource(id: "filter_chain", in: filterChainCreatorAnimation)
+                                        ForEach(filterStack.targetsMap.keys.filter { !$0.isCustom }.sorted(), id: \.self) { filter in
+                                            FilterPreview(filter: filter, isSelected: model.lastFilter == filter)
                                                 .onTapGesture {
-                                                    guard isSelected else { return }
+                                                    guard model.lastFilter == filter else { return }
                                                     withAnimation(.smooth) {
                                                         showFilterConfigurator = true
                                                     }
@@ -363,6 +377,11 @@ struct CameraViewFinder: View {
                 .safeAreaPadding(.horizontal, 20)
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .zIndex(2)
+            }
+            .sheet(isPresented: $showFilterChainCreator) {
+                FilterChainCreatorView()
+                    .environmentObject(model)
+                    .backport.navigationTransitionZoom(sourceID: "filter_chain", in: filterChainCreatorAnimation)
             }
             .sheet(isPresented: $showGallery) {
                 GalleryView(animation: galleryAnimation)
@@ -526,5 +545,43 @@ private extension FilteredImage {
                 self?.status = .loading
             }
         }
+    }
+}
+
+private struct FilterPreview: View {
+    var filter: CameraFilter
+    var isSelected: Bool
+    
+    var body: some View {
+        FilteredImage(filter: filter, source: .donut)
+            .aspectRatio(1, contentMode: .fit)
+            .overlay {
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(Color.accentColor.gradient, lineWidth: isSelected ? 3 : 0)
+            }
+            .overlay(alignment: .bottomTrailing) {
+                if isSelected {
+                    Image(systemName: "gearshape.fill")
+                        .foregroundStyle(.secondary)
+                        .padding(12)
+                        .transition(.scale.combined(with: .blurReplace))
+                }
+            }
+            .animation(.smooth, value: isSelected)
+            .clipShape(.rect(cornerRadius: 12))
+            .overlay(alignment: .bottom) {
+                Text(filter.title)
+                    .font(.caption2.smallCaps())
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.5)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 6)
+                    .background(.background.secondary.opacity(0.5), in: .rect)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(height: 44, alignment: .top)
+                    .padding(.horizontal, -8)
+                    .offset(y: 44 + 8)
+            }
     }
 }

@@ -28,6 +28,8 @@ final actor CaptureService {
     
     private var activeVideoInput: AVCaptureDeviceInput?
     
+    private var activeAudioInput: AVCaptureDeviceInput?
+    
     private(set) var captureMode = CaptureMode.photo
     
     private let deviceLookup = DeviceLookup()
@@ -45,7 +47,7 @@ final actor CaptureService {
         sessionQueue.asUnownedSerialExecutor()
     }
     
-    private init(previewSource: some PreviewSource, previewTarget: some PreviewTarget, photoOutput: any PhotoOutputService, movieOutput: any MovieOutputService, session: AVCaptureSession) {
+    init(previewSource: some PreviewSource, previewTarget: some PreviewTarget, photoOutput: any PhotoOutputService, movieOutput: any MovieOutputService, session: AVCaptureSession) {
         self.previewSource = previewSource
         self.previewTarget = previewTarget
         self.photoOutput = photoOutput
@@ -84,6 +86,14 @@ final actor CaptureService {
     
     static func metalWithFilters() throws -> CaptureService {
         let filterStack: FilterStack = [.none, .haze(), .noir, .sepia(), .blur(), .lookup(image: .agfaVista), .lookup(image: .moodyFilm), .lookup(image: .portra800), .lookup(image: .classicChrome), .lookup(image: .eliteChrome), .lookup(image: .polaroidColor), .lookup(image: .velvia100)]
+        Task {
+            let database: DatabaseService = ProcessInfo.isRunningPreviews ? .inMemory : .default
+            let customFilters = (try? await database.list(CustomFilter.self, sortDescriptors: [.init(\.layoutIndex, order: .reverse)])) ?? []
+            for filter in customFilters {
+                filterStack.addTarget(for: .custom(filter))
+            }
+        }
+        
 #if DEBUG
         if ProcessInfo.isRunningPreviews || UserDefaults.shared.bool(forKey: UserDefaultsKey.mockCamera.rawValue) {
             return CaptureService(previewSource: .staticImage(.camPreview), previewTarget: filterStack, photoOutput: .metal(), movieOutput: .metal(), session: .init())
@@ -125,7 +135,7 @@ final actor CaptureService {
         guard !isSetUp, !session.isRunning else { return }
         captureMode = state.captureMode
         configurePipeline()
-        try await setUpSession()
+        try await setupSession()
         if let camera = previewSource as? MetalCameraSource {
             logger.debug("Starting metal camera")
             camera.start()
@@ -165,7 +175,7 @@ final actor CaptureService {
         }
     }
     
-    private func setUpSession() async throws {
+    private func setupSession() async throws {
         guard !isSetUp else { return }
         
         observeOutputServices()
@@ -180,8 +190,6 @@ final actor CaptureService {
                 defaultCamera = try deviceLookup.defaultCamera
                 activeVideoInput = try addInput(for: defaultCamera)
             }
-            let defaultMic = try deviceLookup.defaultMic
-            try addInput(for: defaultMic)
             
             session.sessionPreset = captureMode == .photo ? .photo : .high
             if let defaultOutput = photoOutput.output as? any DefaultCaptureOutput {
@@ -215,9 +223,15 @@ final actor CaptureService {
             if session.outputs.contains(defaultOutput.output) {
                 session.removeOutput(defaultOutput.output)
             }
+            if let activeAudioInput {
+                session.removeInput(activeAudioInput)
+                self.activeAudioInput = nil
+            }
         case .video:
             do {
                 try addOutput(defaultOutput.output)
+                let defaultMic = try deviceLookup.defaultMic
+                activeAudioInput = try addInput(for: defaultMic)
             } catch {
                 logger.error("Failed to add movie output to session.")
             }

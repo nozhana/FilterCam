@@ -67,6 +67,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		31218E602E5C54B70006A606 /* Exceptions for "FilterCam" folder in "FilterCam" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Models/CustomFilter+Noop.swift",
+			);
+			target = 31AB53202E54D66F00A51742 /* FilterCam */;
+		};
 		3174E16F2E552BE2006D6EB3 /* Exceptions for "FilterCamCaptureExtension" folder in "FilterCamCaptureExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -79,6 +86,7 @@
 			membershipExceptions = (
 				Environment/AppConfiguration.swift,
 				"Environment/CaptureExtension+Environment.swift",
+				"Environment/DatabaseService+Environment.swift",
 				"Environment/MediaStore+Environment.swift",
 				Extensions/CaptureExtensions.swift,
 				"Extensions/Logger+.swift",
@@ -86,8 +94,12 @@
 				"Extensions/UIImage+.swift",
 				"Extensions/URL+.swift",
 				"Extensions/View+.swift",
+				Models/CustomFilter.swift,
+				"Models/CustomFilter+FilterChain.swift",
 				"Preview Content/Preview Assets.xcassets",
 				"Preview Content/PreviewAssets.swift",
+				Protocols/DatabaseService.swift,
+				Protocols/FilterGenerator.swift,
 				Protocols/OutputMedium/AnyOutputMedium.swift,
 				Protocols/OutputMedium/OutputMedium.swift,
 				Protocols/OutputService/CaptureOutput.swift,
@@ -111,11 +123,15 @@
 				Types/CaptureOutputs/DefaultPhotoCaptureOutput.swift,
 				Types/CaptureOutputs/MetalMovieCaptureOutput.swift,
 				Types/CaptureOutputs/MetalPhotoCaptureOutput.swift,
+				Types/DatabaseServices/DefaultDatabaseService.swift,
+				Types/DatabaseServices/InMemoryDatabaseService.swift,
 				Types/Errors/CameraError.swift,
 				Types/Errors/PhotoCaptureError.swift,
 				Types/Errors/VideoRecordingError.swift,
 				Types/Filters/CameraFilter.swift,
+				"Types/Filters/CameraFilter+Configurations.swift",
 				Types/Filters/CameraFilterConfiguration.swift,
+				Types/Filters/FilterChain.swift,
 				Types/Filters/FilterConfiguratorView.swift,
 				Types/Filters/FilterStack.swift,
 				Types/OutputMedia/Photo.swift,
@@ -146,6 +162,7 @@
 				Views/CameraModel.swift,
 				Views/CameraOptionsView.swift,
 				Views/CameraViewFinder.swift,
+				Views/FilterChainCreatorView.swift,
 				Views/GalleryDetailView.swift,
 				Views/GalleryView.swift,
 				Views/MetalRenderView.swift,
@@ -192,8 +209,11 @@
 				"Extensions/UIImage+.swift",
 				"Extensions/URL+.swift",
 				"Extensions/View+.swift",
+				Models/CustomFilter.swift,
+				"Models/CustomFilter+Noop.swift",
 				"Preview Content/Preview Assets.xcassets",
 				"Preview Content/PreviewAssets.swift",
+				Protocols/FilterGenerator.swift,
 				Protocols/OutputMedium/AnyOutputMedium.swift,
 				Protocols/OutputMedium/OutputMedium.swift,
 				Resources/Assets.xcassets,
@@ -243,6 +263,7 @@
 		31AB53232E54D66F00A51742 /* FilterCam */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				31218E602E5C54B70006A606 /* Exceptions for "FilterCam" folder in "FilterCam" target */,
 				3174E1752E552C7F006D6EB3 /* Exceptions for "FilterCam" folder in "FilterCamCaptureExtension" target */,
 				3174E1B72E553246006D6EB3 /* Exceptions for "FilterCam" folder in "FilterCamWidgetsExtension" target */,
 			);

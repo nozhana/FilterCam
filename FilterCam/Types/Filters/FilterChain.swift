@@ -10,7 +10,7 @@ import Foundation
 @preconcurrency import GPUImage
 
 final class FilterChain: PreviewSource, PreviewTarget, ImageProcessingOperation, @unchecked Sendable {
-    private let filters: [ImageProcessingOperation]
+    private(set) var filters: [CameraFilter: ImageProcessingOperation]
     private let operationGroup: OperationGroup
     
     let maximumInputs: UInt = 1
@@ -20,17 +20,36 @@ final class FilterChain: PreviewSource, PreviewTarget, ImageProcessingOperation,
     
     var session: AVCaptureSession?
     
-    init(filters: [ImageProcessingOperation]) {
+    init(filters: [CameraFilter: ImageProcessingOperation]) {
         self.filters = filters
         self.operationGroup = OperationGroup()
         operationGroup.configureGroup { input, output in
-            var currentOperation: any ImageProcessingOperation = input
-            for filter in filters {
-                currentOperation --> filter
-                currentOperation = filter
+            var current: any ImageProcessingOperation = input
+            for filter in filters.sorted(using: KeyPathComparator(\.key)).map(\.value) {
+                current --> filter
+                current = filter
             }
-            currentOperation --> output
+            current --> output
         }
+    }
+    
+    func reset(with filters: [CameraFilter: ImageProcessingOperation]) {
+        self.filters.values.forEach { $0.removeAllTargets() }
+        self.filters.removeAll()
+        self.filters = filters
+        operationGroup.configureGroup { input, output in
+            input.removeAllTargets()
+            var current: any ImageProcessingOperation = input
+            for filter in filters.sorted(using: KeyPathComparator(\.key)).map(\.value) {
+                current --> filter
+                current = filter
+            }
+            current --> output
+        }
+    }
+    
+    func reset(with filters: [CameraFilter]) {
+        reset(with: Dictionary(uniqueKeysWithValues: filters.map { ($0, $0.makeOperation()) }))
     }
     
     func connect(to target: any PreviewTarget) {
@@ -58,6 +77,18 @@ final class FilterChain: PreviewSource, PreviewTarget, ImageProcessingOperation,
 
 extension FilterChain {
     convenience init(filters: [CameraFilter]) {
-        self.init(filters: filters.map { $0.makeOperation() })
+        self.init(filters: Dictionary(uniqueKeysWithValues: filters.map { ($0, $0.makeOperation()) }))
+    }
+}
+
+extension FilterChain: ExpressibleByArrayLiteral {
+    convenience init(arrayLiteral elements: CameraFilter...) {
+        self.init(filters: elements)
+    }
+}
+
+extension FilterChain: ExpressibleByDictionaryLiteral {
+    convenience init(dictionaryLiteral elements: (CameraFilter, ImageProcessingOperation)...) {
+        self.init(filters: Dictionary(uniqueKeysWithValues: elements))
     }
 }

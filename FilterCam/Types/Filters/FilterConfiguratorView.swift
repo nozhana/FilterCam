@@ -5,47 +5,49 @@
 //  Created by Nozhan A. on 8/24/25.
 //
 
+import GPUImage
 import SwiftUI
 
 struct FilterConfiguratorView: View {
     var filter: CameraFilter
-    var filterStack: FilterStack
+    var operation: ImageProcessingOperation
+    
+    @EnvironmentObject private var model: CameraModel
     
     var body: some View {
-        HStack(alignment: .center, spacing: 16) {
-            if filter.configurations.isEmpty {
-                Text("No configurations available")
-                    .font(.caption.bold().smallCaps())
-            } else {
-                ForEach(filter.configurations.enumerated().map(\.self), id: \.offset) { (offset, configuration) in
-                    switch configuration {
-                    case .slider(let title, let range, let step, let bindingFactory):
-                        if let operation = filterStack.operation(for: filter) {
-                            let floatBinding = bindingFactory(operation)
-                            let doubleBinding = Binding { Double(floatBinding.wrappedValue) } set: { floatBinding.wrappedValue = Float($0) }
-                            HStack(spacing: 16) {
-                                Text(title)
-                                    .foregroundStyle(.secondary)
-                                Slider(value: doubleBinding, in: range, step: step)
-                            }
-                            .font(.caption.smallCaps().weight(.heavy))
-                        }
-                    case .toggle(let title, let bindingFactory):
-                        if let operation = filterStack.operation(for: filter) {
-                            let boolBinding = bindingFactory(operation)
-                            Toggle(title, isOn: boolBinding)
-                                .font(.caption.smallCaps().weight(.heavy))
-                        }
+        if filter.configurations.isEmpty {
+            Label("No configurations available", systemImage: "questionmark.circle.dashed")
+                .foregroundStyle(.secondary)
+        } else {
+            ForEach(filter.configurations.enumerated().map(\.self), id: \.offset) { (offset, configuration) in
+                switch configuration {
+                case .slider(let title, let range, let step, let bindingFactory):
+                    let floatBinding = bindingFactory(operation)
+                    let doubleBinding = Binding { Double(floatBinding.wrappedValue) } set: { floatBinding.wrappedValue = Float($0) }
+                    HStack(spacing: 16) {
+                        Text(title)
+                            .foregroundStyle(.secondary)
+                        Slider(value: doubleBinding, in: range, step: step)
+                    }
+                case .toggle(let title, let bindingFactory):
+                    let boolBinding = bindingFactory(operation)
+                    Toggle(title, isOn: boolBinding)
+                case .button(let title, let systemImage, let role, let onTapped):
+                    let action = {
+                        guard let filterStack = model.previewTarget as? ImageProcessingOperation else { return }
+                        onTapped(filter, operation, filterStack)
+                    }
+                    if let systemImage {
+                        Button(title, systemImage: systemImage, role: role, action: action)
+                    } else {
+                        Button(title, role: role, action: action)
                     }
                 }
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(.background.secondary.opacity(0.5), in: .rect(cornerRadius: 12))
     }
 }
 
 #Preview {
-    FilterConfiguratorView(filter: .sepia(), filterStack: [.sepia()])
+    FilterConfiguratorView(filter: .sepia(), operation: CameraFilter.sepia().makeOperation())
 }

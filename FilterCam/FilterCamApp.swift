@@ -19,6 +19,7 @@ struct FilterCamApp: App {
         WindowGroup {
             CameraViewFinder()
                 .toasterContainer(toaster)
+                .databaseContainer()
                 .task(id: scenePhase, priority: .utility) {
                     guard scenePhase == .active else { return }
                     if #available(iOS 18.0, *) {
