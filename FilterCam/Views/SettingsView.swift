@@ -25,6 +25,8 @@ struct SettingsView: View {
     
     @EnvironmentObject private var cameraModel: CameraModel
     
+    @Environment(\.mediaStore) private var mediaStore
+    
     @State private var stepsToBecomeADeveloper = 10
     @State private var stepsResetTask: Task<Void, Error>?
     
@@ -67,10 +69,20 @@ struct SettingsView: View {
                 
                 if showDeveloperSettings {
                     Section {
+                        Button("Wipe Gallery", systemImage: "trash.fill", role: .destructive) {
+                            try? mediaStore.wipeGallery()
+                        }
+                        .foregroundStyle(.red)
+                    }
+                    
+                    Section {
                         Toggle("Mock Camera", systemImage: "camera.macro", isOn: $mockCamera)
                             .onChange(of: mockCamera) {
                                 refreshCaptureService()
                             }
+                    }
+                    
+                    Section {
                         Toggle("Use Metal Rendering", systemImage: "cpu.fill", isOn: $useMetalRendering.animation())
                         if useMetalRendering {
                             Toggle("Use Filters", systemImage: "camera.filters", isOn: $useFilters)

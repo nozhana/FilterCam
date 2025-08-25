@@ -16,7 +16,7 @@ struct MetalMovieCaptureOutput: MetalCaptureOutput {
     }
     
     init() {
-        output = try! .init(URL: .temporaryDirectory.appendingPathComponent(UUID().uuidString, conformingTo: .movie), size: .movieDefault)
+        output = try! .init(URL: .temporaryDirectory.appendingPathComponent(UUID().uuidString, conformingTo: .quickTimeMovie), size: .movieDefault)
     }
 }
 

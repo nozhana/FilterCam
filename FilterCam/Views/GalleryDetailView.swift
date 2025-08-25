@@ -65,9 +65,7 @@ private struct MediaPager: View {
                                     let player = AVPlayer(url: video.fileURL)
                                     CustomVideoPlayer(player: player)
                                         .task(id: model.selection) {
-                                            if model.selection == video.id {
-                                                player.play()
-                                            } else {
+                                            if model.selection != video.id {
                                                 player.pause()
                                             }
                                         }
@@ -144,10 +142,16 @@ private struct CustomVideoPlayer: UIViewRepresentable {
     final class PlaybackView: UIView {
         private var previewView: PreviewLayerView!
         private var playPauseButton: UIButton!
+        private var observers = Set<NSKeyValueObservation>()
         
         var player: AVPlayer? {
             get { previewView.player }
-            set { previewView.player = newValue }
+            set {
+                previewView.player = newValue
+                if let newValue {
+                    setupPlaybackObservation(with: newValue)
+                }
+            }
         }
         
         init() {
@@ -165,6 +169,11 @@ private struct CustomVideoPlayer: UIViewRepresentable {
         
         required init?(coder: NSCoder) {
             fatalError("init?(coder:) not implemented")
+        }
+        
+        deinit {
+            player?.pause()
+            player?.replaceCurrentItem(with: nil)
         }
         
         private let playButtonImage = {
@@ -196,12 +205,38 @@ private struct CustomVideoPlayer: UIViewRepresentable {
         
         @objc private func didTapPlayPauseButton(sender: UIButton) {
             if previewView.player?.rate == .zero || previewView.player?.currentItem == nil || previewView.player == nil {
-                previewView.player?.play()
+                if (player?.currentTime().seconds ?? .zero) >= (player?.currentItem?.duration.seconds ?? .zero) {
+                    Task {
+                        await player?.seek(to: CMTime(seconds: 0, preferredTimescale: 30))
+                        player?.play()
+                    }
+                } else {
+                    player?.play()
+                }
                 playPauseButton.setImage(pauseButtonImage, for: .normal)
             } else {
                 previewView.player?.pause()
                 playPauseButton.setImage(playButtonImage, for: .normal)
             }
+        }
+        
+        private func setupPlaybackObservation(with player: AVPlayer) {
+            player
+                .observe(\.rate, options: .new) { player, _ in
+                    switch player.rate {
+                    case .zero:
+                        DispatchQueue.main.async { [weak self] in
+                            guard let self else { return }
+                            playPauseButton.setImage(playButtonImage, for: .normal)
+                        }
+                    default:
+                        DispatchQueue.main.async { [weak self] in
+                            guard let self else { return }
+                            playPauseButton.setImage(pauseButtonImage, for: .normal)
+                        }
+                    }
+                }
+                .store(in: &observers)
         }
     }
     

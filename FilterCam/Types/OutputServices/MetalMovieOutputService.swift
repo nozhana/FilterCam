@@ -27,7 +27,7 @@ final class MetalMovieOutputService: MovieOutputService {
     
     func recordVideo(with features: VideoFeatures) async throws -> Video {
         let movieID = UUID()
-        outputURL = MediaStore.shared.moviesDirectory.appendingPathComponent(movieID.uuidString, conformingTo: .movie)
+        outputURL = MediaStore.shared.moviesDirectory.appendingPathComponent(movieID.uuidString, conformingTo: .quickTimeMovie)
         movieOutput = try .init(url: outputURL!)
         return try await withCheckedThrowingContinuation { continuation in
             self.continuation = continuation

@@ -22,7 +22,7 @@ final class DefaultMovieOutputService: MovieOutputService {
     func recordVideo(with features: VideoFeatures) async throws -> Video {
         try await withCheckedThrowingContinuation { continuation in
             let movieID = UUID()
-            let fileURL = MediaStore.shared.moviesDirectory.appendingPathComponent(movieID.uuidString, conformingTo: .mpeg4Movie)
+            let fileURL = MediaStore.shared.moviesDirectory.appendingPathComponent(movieID.uuidString, conformingTo: .quickTimeMovie)
             let delegate = FileOutputRecordingDelegate(continuation: continuation, movieID: movieID)
             monitorProgress(of: delegate)
             movieOutput.startRecording(to: fileURL, recordingDelegate: delegate)

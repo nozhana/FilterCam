@@ -62,7 +62,7 @@ struct MediaStore {
     func deleteItem(_ itemID: UUID) throws -> URL {
         let itemURL = captureDirectory.appendingPathComponent(itemID.uuidString, conformingTo: .json)
         try FileManager.default.removeItem(at: itemURL)
-        let possibleVideoFileURL = moviesDirectory.appendingPathComponent(itemID.uuidString, conformingTo: .mpeg4Movie)
+        let possibleVideoFileURL = moviesDirectory.appendingPathComponent(itemID.uuidString, conformingTo: .quickTimeMovie)
         try? FileManager.default.removeItem(at: possibleVideoFileURL)
         refreshThumbnail()
         return itemURL
@@ -87,5 +87,14 @@ struct MediaStore {
         } else {
             thumbnailContinuation.yield(nil)
         }
+    }
+    
+    func wipeGallery() throws {
+        try? FileManager.default.removeItem(at: moviesDirectory)
+        let contents = try FileManager.default.contentsOfDirectory(at: captureDirectory, includingPropertiesForKeys: nil)
+        for contentURL in contents {
+            try FileManager.default.removeItem(at: contentURL)
+        }
+        thumbnailContinuation.yield(nil)
     }
 }
