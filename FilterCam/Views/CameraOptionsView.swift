@@ -131,6 +131,17 @@ private struct CameraOptionView: View {
                             }
                             .foregroundStyle(model.aspectRatio == aspectRatio ? .orange : .primary)
                         }
+                    case .level:
+                        let items = [("Off", false), ("On", true)]
+                        ForEach(items, id: \.0) { item in
+                            Button(item.0) {
+                                withAnimation(.snappy) {
+                                    model.showLevel = item.1
+                                    isExpanded = false
+                                }
+                            }
+                            .foregroundStyle(model.showLevel == item.1 ? Color.accentColor : .primary)
+                        }
                     }
                 }
                 .font(.callout.smallCaps().weight(.light))
@@ -148,6 +159,7 @@ private enum CameraOption: Int, Identifiable, CaseIterable {
     case flashMode
     case qualityPrioritization
     case aspectRatio
+    case level
     
     var id: Int { rawValue }
     
@@ -159,6 +171,8 @@ private enum CameraOption: Int, Identifiable, CaseIterable {
             model.qualityPrioritization.title
         case .aspectRatio:
             model.aspectRatio.title
+        case .level:
+            model.showLevel ? "On" : "Off"
         }
     }
     
@@ -179,6 +193,8 @@ private enum CameraOption: Int, Identifiable, CaseIterable {
             return model.qualityPrioritization.nextElement.title
         case .aspectRatio:
             return model.aspectRatio.nextElement.title
+        case .level:
+            return model.showLevel ? "Off" : "On"
         }
     }
     
@@ -190,6 +206,8 @@ private enum CameraOption: Int, Identifiable, CaseIterable {
             model.qualityPrioritization.systemImage
         case .aspectRatio:
             model.aspectRatio.systemImage
+        case .level:
+            model.showLevel ? "level.fill" : "level"
         }
     }
     
@@ -210,6 +228,8 @@ private enum CameraOption: Int, Identifiable, CaseIterable {
             return model.qualityPrioritization.nextElement.systemImage
         case .aspectRatio:
             return model.aspectRatio.nextElement.systemImage
+        case .level:
+            return model.showLevel ? "level" : "level.fill"
         }
     }
     
@@ -228,6 +248,8 @@ private enum CameraOption: Int, Identifiable, CaseIterable {
             case .balanced: .cyan.gradient
             }
         case .aspectRatio: .primary
+        case .level:
+            model.showLevel ? .primary : .secondary
         }
         return AnyShapeStyle(anyStyle)
     }
@@ -248,6 +270,8 @@ private enum CameraOption: Int, Identifiable, CaseIterable {
             model.qualityPrioritization.cycle()
         case .aspectRatio:
             model.aspectRatio.cycle()
+        case .level:
+            model.showLevel.toggle()
         }
     }
 }

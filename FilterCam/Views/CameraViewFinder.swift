@@ -135,6 +135,16 @@ struct CameraViewFinder: View {
                         }
                 }
                 .overlay {
+                    Group {
+                        if model.isRunningAndActive && model.showLevel {
+                            LevelView()
+                                .frame(width: 150, height: 150)
+                                .transition(.scale.combined(with: .blurReplace))
+                        }
+                    }
+                    .animation(.smooth, value: model.isRunningAndActive != model.showLevel)
+                }
+                .overlay {
                     if let focusPoint = model.focusPoint {
                         TargetShape()
                             .foregroundStyle(.yellow)

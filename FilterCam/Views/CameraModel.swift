@@ -20,7 +20,10 @@ final class CameraModel: ObservableObject {
     @Published private(set) var isPaused = false
     @Published private(set) var focusPoint: CGPoint?
     
-    // TODO: Pending more capture modes
+    var isRunningAndActive: Bool {
+        status == .running && !isPaused && !isSwitchingCameras
+    }
+    
     @Published var captureMode = CaptureMode.photo {
         didSet {
             cameraState.captureMode = captureMode
@@ -50,6 +53,11 @@ final class CameraModel: ObservableObject {
     @Published var lastFilter = CameraFilter.none {
         didSet {
             cameraState.lastFilter = lastFilter
+        }
+    }
+    @Published var showLevel = false {
+        didSet {
+            cameraState.showLevel = showLevel
         }
     }
     
@@ -178,6 +186,7 @@ final class CameraModel: ObservableObject {
         aspectRatio = cameraState.aspectRatio
         renderMode = cameraState.renderMode
         lastFilter = cameraState.lastFilter
+        showLevel = cameraState.showLevel
     }
     
     @MainActor

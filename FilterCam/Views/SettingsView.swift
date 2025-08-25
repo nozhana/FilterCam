@@ -73,31 +73,22 @@ struct SettingsView: View {
                             try? mediaStore.wipeGallery()
                         }
                         .foregroundStyle(.red)
-                    }
-                    
-                    Section {
                         Toggle("Mock Camera", systemImage: "camera.macro", isOn: $mockCamera)
                             .onChange(of: mockCamera) {
                                 refreshCaptureService()
                             }
-                    }
-                    
-                    Section {
                         Toggle("Use Metal Rendering", systemImage: "cpu.fill", isOn: $useMetalRendering.animation())
                         if useMetalRendering {
                             Toggle("Use Filters", systemImage: "camera.filters", isOn: $useFilters)
+                        }
+                        Button("Hide Developer Settings", systemImage: "eye.slash.fill") {
+                            showDeveloperSettings = false
                         }
                     } header: {
                         Label("Developer Settings", systemImage: "hammer.fill")
                     }
                     .onChange(of: useMetalRendering != useFilters) {
                         refreshCaptureService()
-                    }
-                    
-                    Section {
-                        Button("Hide Developer Settings", systemImage: "eye.slash.fill") {
-                            showDeveloperSettings = false
-                        }
                     }
                 }
             }

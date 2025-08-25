@@ -16,6 +16,7 @@ struct CameraState: Codable {
         case aspectRatio
         case renderMode
         case lastFilter
+        case showLevel
     }
     
     init(from decoder: any Decoder) throws {
@@ -32,6 +33,7 @@ struct CameraState: Codable {
         aspectRatio = try container.decode(AspectRatio.self, forKey: .aspectRatio)
         renderMode = try container.decode(RenderMode.self, forKey: .renderMode)
         lastFilter = try container.decode(CameraFilter.self, forKey: .lastFilter)
+        showLevel = try container.decode(Bool.self, forKey: .showLevel)
     }
     
     init(contextProvider: some ContextProvider) {
@@ -91,6 +93,14 @@ struct CameraState: Codable {
     var lastFilter = CameraFilter.none {
         didSet {
             if oldValue != lastFilter {
+                updateContext()
+            }
+        }
+    }
+    
+    var showLevel = false {
+        didSet {
+            if oldValue != showLevel {
                 updateContext()
             }
         }
