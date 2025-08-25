@@ -143,8 +143,11 @@ private struct CameraOptionView: View {
                             .foregroundStyle(model.showLevel == item.1 ? Color.accentColor : .primary)
                         }
                     }
+                    Spacer()
                 }
                 .font(.callout.smallCaps().weight(.light))
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
                 .safeAreaPadding(.horizontal, 16)
                 .transition(.move(edge: .leading).combined(with: .blurReplace))
             }

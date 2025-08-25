@@ -191,6 +191,20 @@ final actor CaptureService {
                 activeVideoInput = try addInput(for: defaultCamera)
             }
             
+            if #available(iOS 18.0, *), session.supportsControls {
+                for control in session.controls {
+                    session.removeControl(control)
+                }
+                let zoomControl = AVCaptureSystemZoomSlider(device: defaultCamera)
+                if session.canAddControl(zoomControl) {
+                    session.addControl(zoomControl)
+                }
+                let exposureControl = AVCaptureSystemExposureBiasSlider(device: defaultCamera)
+                if session.canAddControl(exposureControl) {
+                    session.addControl(exposureControl)
+                }
+            }
+            
             session.sessionPreset = captureMode == .photo ? .photo : .high
             if let defaultOutput = photoOutput.output as? any DefaultCaptureOutput {
                 try addOutput(defaultOutput.output)
