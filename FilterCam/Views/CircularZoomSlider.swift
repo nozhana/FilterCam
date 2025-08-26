@@ -134,7 +134,7 @@ private struct ExpandedCircularZoomSlider: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(.ultraThinMaterial)
+                .fill(.background.secondary.opacity(0.75))
             RadialLayoutView(data: Array(0..<60)) { index in
                 let isFifth = index % 5 == 0
                 let zoom: Double = switch index {
