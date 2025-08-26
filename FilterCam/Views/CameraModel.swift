@@ -9,7 +9,7 @@ import AVFoundation
 import Combine
 import SwiftUI
 
-final class CameraModel: ObservableObject {
+final class CameraModel: CameraModelProtocol {
     // MARK: - Properties
     @Published private(set) var cameraState: CameraState = .logging
     @Published private(set) var status: CameraStatus = .unknown
@@ -180,38 +180,6 @@ final class CameraModel: ObservableObject {
     }
     
     @MainActor
-    private func syncState() async {
-        let oldState = cameraState
-        cameraState = await .current
-        if oldState.captureMode != cameraState.captureMode {
-            await captureService.setCaptureMode(cameraState.captureMode)
-        }
-        switch cameraState.renderMode {
-        case .default:
-            await switchCaptureService(.default())
-        case .metal:
-            do {
-                await switchCaptureService(try .metal())
-            } catch {
-                logger.error("Failed to switch capture service")
-            }
-        case .metalWithFilters:
-            do {
-                await switchCaptureService(try .metalWithFilters())
-            } catch {
-                logger.error("Failed to switch capture service")
-            }
-        }
-        captureMode = cameraState.captureMode
-        flashMode = cameraState.flashMode
-        qualityPrioritization = cameraState.qualityPrioritization
-        aspectRatio = cameraState.aspectRatio
-        renderMode = cameraState.renderMode
-        lastFilter = cameraState.lastFilter
-        showLevel = cameraState.showLevel
-    }
-    
-    @MainActor
     func switchCamera() async {
         if captureService.previewSource is MetalCameraSource {
             logger.warning("Metal camera doesn't support switching yet.")
@@ -265,14 +233,6 @@ final class CameraModel: ObservableObject {
         await captureService.stopRecording()
     }
     
-    @MainActor
-    private func flashFocusTarget(on layerPoint: CGPoint) {
-        focusPoint = layerPoint
-        withAnimation(.snappy.delay(3)) {
-            focusPoint = nil
-        }
-    }
-    
     func focusAndExpose(on devicePoint: CGPoint, layerPoint: CGPoint) async {
         do {
             try await captureService.focusAndExpose(on: devicePoint)
@@ -283,6 +243,38 @@ final class CameraModel: ObservableObject {
     }
     
     // MARK: - Private
+    @MainActor
+    private func syncState() async {
+        let oldState = cameraState
+        cameraState = await .current
+        if oldState.captureMode != cameraState.captureMode {
+            await captureService.setCaptureMode(cameraState.captureMode)
+        }
+        switch cameraState.renderMode {
+        case .default:
+            await switchCaptureService(.default())
+        case .metal:
+            do {
+                await switchCaptureService(try .metal())
+            } catch {
+                logger.error("Failed to switch capture service")
+            }
+        case .metalWithFilters:
+            do {
+                await switchCaptureService(try .metalWithFilters())
+            } catch {
+                logger.error("Failed to switch capture service")
+            }
+        }
+        captureMode = cameraState.captureMode
+        flashMode = cameraState.flashMode
+        qualityPrioritization = cameraState.qualityPrioritization
+        aspectRatio = cameraState.aspectRatio
+        renderMode = cameraState.renderMode
+        lastFilter = cameraState.lastFilter
+        showLevel = cameraState.showLevel
+    }
+    
     private func observeState() {
         Task {
             for await activity in await captureService.$captureActivity.values {
@@ -336,6 +328,14 @@ final class CameraModel: ObservableObject {
         shouldFlashScreen = true
         withAnimation(.linear(duration: 0.01)) {
             shouldFlashScreen = false
+        }
+    }
+    
+    @MainActor
+    private func flashFocusTarget(on layerPoint: CGPoint) {
+        focusPoint = layerPoint
+        withAnimation(.snappy.delay(3)) {
+            focusPoint = nil
         }
     }
 }

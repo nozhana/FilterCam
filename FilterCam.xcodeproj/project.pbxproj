@@ -101,6 +101,7 @@
 				"Models/CustomFilter+FilterChain.swift",
 				"Preview Content/Preview Assets.xcassets",
 				"Preview Content/PreviewAssets.swift",
+				Protocols/CameraModel/CameraModelProtocol.swift,
 				Protocols/DatabaseService.swift,
 				Protocols/FilterGenerator.swift,
 				Protocols/OutputMedium/AnyOutputMedium.swift,
