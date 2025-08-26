@@ -18,7 +18,7 @@ struct CircularZoomSlider: View {
     @State private var baseZoomFactor: Double?
     
     var body: some View {
-        let expandGesture = DragGesture()
+        let expandGesture = DragGesture(minimumDistance: 5)
             .updating($isDragging) { _, state, _ in
                 state = true
                 withAnimation(.snappy) {
@@ -29,7 +29,9 @@ struct CircularZoomSlider: View {
                 if baseZoomFactor == nil {
                     baseZoomFactor = zoomFactor
                 }
-                let interpolation = -value.translation.width / 40
+                let velocityInterpolation = simd_smoothstep(0, -50, value.translation.height)
+                let velocityFactor = 20.interpolated(towards: 70, amount: velocityInterpolation)
+                let interpolation = -value.translation.width / velocityFactor
                 zoomFactor = min(max(baseZoomFactor! + interpolation, hasPoint5X ? 0.5 : 1), 5.0)
             }
             .onEnded { _ in
