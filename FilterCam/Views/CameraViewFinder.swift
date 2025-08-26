@@ -90,8 +90,7 @@ struct CameraViewFinder: View {
                             if let filterStack = model.previewTarget as? FilterStack {
                                 ScrollView(.horizontal) {
                                     LazyHStack(alignment: .top, spacing: .zero) {
-                                        let screenBounds = UIScreen.main.bounds
-                                        ForEach(filterStack.targetsMap.mapValues(\.target).sorted(using: KeyPathComparator(\.key)), id: \.key) { (filter, target) in
+                                        ForEach(filterStack.targetsMap.mapValues(\.target).sorted(using: KeyPathComparator(\.key)), id: \.key) { (_, target) in
                                             Group {
                                                 if let metalTarget = target as? MetalPreviewTarget {
                                                     MetalRenderView(previewTarget: metalTarget)
@@ -99,14 +98,9 @@ struct CameraViewFinder: View {
                                                     cameraUnavailableView
                                                 }
                                             }
-                                            .scrollTransition(.interactive(timingCurve: .linear), axis: .horizontal) { content, phase in
-                                                content
-                                                    .brightness(phase.isIdentity ? 0 : 0.2)
-                                                    .opacity(phase.isIdentity ? 1 : 0)
-                                                    .offset(x: -phase.value * screenBounds.width)
-                                            }
                                         }
                                         .containerRelativeFrame(.horizontal)
+                                        .scrollRevealing()
                                     }
                                     .scrollTargetLayout()
                                 }
