@@ -19,9 +19,18 @@ final class CameraModel: ObservableObject {
     @Published private(set) var thumbnail: Thumbnail?
     @Published private(set) var isPaused = false
     @Published private(set) var focusPoint: CGPoint?
+    @Published private(set) var supportsUltraWideZoom = true
     
     var isRunningAndActive: Bool {
         status == .running && !isPaused && !isSwitchingCameras
+    }
+    
+    @Published var zoomFactor: Double = 1.0 {
+        didSet {
+            Task {
+                await captureService.zoom(to: zoomFactor)
+            }
+        }
     }
     
     @Published var captureMode = CaptureMode.photo {
@@ -123,6 +132,7 @@ final class CameraModel: ObservableObject {
         captureService = service
         do {
             try await captureService.start(with: cameraState)
+            zoomFactor = 1
         } catch {
             logger.error("Failed to switch capture service: \(error)")
             captureService = oldService
@@ -205,6 +215,7 @@ final class CameraModel: ObservableObject {
             }
         }
         await captureService.switchCamera()
+        zoomFactor = 1
         cameraState.cameraPosition = await captureService.activeCameraPosition
     }
     
@@ -281,6 +292,12 @@ final class CameraModel: ObservableObject {
                     }
                 }
             }
+        }
+        
+        Task {
+            await captureService.$supportsUltraWideZoom
+                .receive(on: DispatchQueue.main)
+                .assign(to: &$supportsUltraWideZoom)
         }
     }
     

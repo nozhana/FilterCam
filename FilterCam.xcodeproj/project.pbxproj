@@ -157,6 +157,7 @@
 				Utilities/Backport.swift,
 				Utilities/DeviceLookup.swift,
 				Utilities/KVOAsyncObserver.swift,
+				Utilities/Layouts/RadialLayout.swift,
 				Utilities/MediaStore.swift,
 				Utilities/SPCObserver.swift,
 				Utilities/Toasts/Toaster.swift,
@@ -166,6 +167,7 @@
 				Views/CameraModel.swift,
 				Views/CameraOptionsView.swift,
 				Views/CameraViewFinder.swift,
+				Views/CircularZoomSlider.swift,
 				Views/FilterChainCreatorView.swift,
 				Views/GalleryDetailView.swift,
 				Views/GalleryView.swift,
@@ -240,10 +242,12 @@
 				Utilities/AsyncSubject.swift,
 				Utilities/Backport.swift,
 				Utilities/KVOAsyncObserver.swift,
+				Utilities/Layouts/RadialLayout.swift,
 				Utilities/MediaStore.swift,
 				Utilities/Toasts/Toaster.swift,
 				Utilities/Toasts/ToasterContainerModifier.swift,
 				Views/CameraInteractiveView.swift,
+				Views/CircularZoomSlider.swift,
 			);
 			target = 3174E1952E55310D006D6EB3 /* FilterCamWidgetsExtension */;
 		};

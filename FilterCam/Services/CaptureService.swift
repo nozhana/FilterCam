@@ -13,6 +13,7 @@ import GPUImage
 final actor CaptureService {
     @Published private(set) var captureActivity: CaptureActivity = .idle
     @Published private(set) var isInterrupted = false
+    @Published private(set) var supportsUltraWideZoom = false
     
     nonisolated let previewSource: PreviewSource
     
@@ -26,7 +27,12 @@ final actor CaptureService {
     
     private var outputServices: [any OutputService] { [photoOutput, movieOutput] }
     
-    private var activeVideoInput: AVCaptureDeviceInput?
+    private var activeVideoInput: AVCaptureDeviceInput? {
+        didSet {
+            guard let device = activeVideoInput?.device else { return }
+            supportsUltraWideZoom = (device.deviceType == .builtInUltraWideCamera) || (device.isVirtualDevice && device.constituentDevices.contains(where: { $0.deviceType == .builtInUltraWideCamera }))
+        }
+    }
     
     private var activeAudioInput: AVCaptureDeviceInput?
     
@@ -220,6 +226,7 @@ final actor CaptureService {
                 }
             }
             
+            zoom(to: 1, ramp: false)
             monitorSystemPreferredCamera()
             updateOutputConfigurations()
             isSetUp = true
@@ -265,6 +272,31 @@ final actor CaptureService {
         changeCaptureDevice(to: nextDevice)
         
         AVCaptureDevice.userPreferredCamera = nextDevice
+    }
+    
+    func zoom(to factor: CGFloat, ramp: Bool = true) {
+        guard let device = activeVideoInput?.device else { return }
+        let normalizedFactor: CGFloat
+        if #available(iOS 18.0, *) {
+            normalizedFactor = factor / device.displayVideoZoomFactorMultiplier
+        } else if device.isVirtualDevice,
+               device.constituentDevices.contains(where: { $0.deviceType == .builtInUltraWideCamera }) {
+            normalizedFactor = factor / 0.5
+        } else {
+            normalizedFactor = factor
+        }
+        let clampedFactor = min(max(normalizedFactor, device.minAvailableVideoZoomFactor), device.maxAvailableVideoZoomFactor)
+        do {
+            try device.lockForConfiguration()
+            defer { device.unlockForConfiguration() }
+            if ramp {
+                device.ramp(toVideoZoomFactor: clampedFactor, withRate: 4)
+            } else {
+                device.videoZoomFactor = clampedFactor
+            }
+        } catch {
+            logger.error("Failed to zoom to factor \(factor): \(error)")
+        }
     }
     
     func capturePhoto(with features: PhotoFeatures) async throws -> Photo {
@@ -374,6 +406,7 @@ final actor CaptureService {
         session.removeInput(currentInput)
         do {
             activeVideoInput = try addInput(for: device)
+            zoom(to: 1, ramp: false)
             updateOutputConfigurations()
         } catch {
             session.addInput(currentInput)

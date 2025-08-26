@@ -152,6 +152,9 @@ struct CameraViewFinder: View {
                             .position(focusPoint)
                     }
                 }
+                .overlay(alignment: .bottom) {
+                    CircularZoomSlider(zoomFactor: $model.zoomFactor, hasPoint5X: model.supportsUltraWideZoom)
+                }
                 .overlay(.black.opacity(model.shouldFlashScreen ? 1 : 0))
                 .overlay(.black.opacity(model.isSwitchingCameras ? 1 : 0))
                 .overlay(.ultraThinMaterial.opacity(model.isPaused && model.status == .running ? 1 : 0))
