@@ -7,6 +7,7 @@
 
 import AVFoundation
 import GPUImage
+import SwiftData
 import SwiftUI
 
 struct CameraViewFinder: View {
@@ -14,14 +15,21 @@ struct CameraViewFinder: View {
     @Environment(\.appConfiguration) private var appConfiguration
     @Environment(\.openMainApp) private var openMainApp
     @Environment(\.isCaptureExtension) private var isCaptureExtension
+    @Environment(\.thermalState) private var thermalState
+    
+    @Query(sort: [.init(\CustomFilter.layoutIndex, order: .reverse)], animation: .smooth)
+    private var customFilters: [CustomFilter]
     
     @StateObject private var model = CameraModel()
     
     @Namespace private var galleryAnimation
+    @Namespace private var filterChainCreatorAnimation
     
     @State private var showGallery = false
     @State private var showOptions = false
     @State private var showSettings = false
+    @State private var showFilterConfigurator = false
+    @State private var showFilterChainCreator = false
     
     @AppStorage(UserDefaultsKey.cameraSwitchRotationEffect.rawValue, store: .shared)
     private var rotateCamera = true
@@ -39,80 +47,86 @@ struct CameraViewFinder: View {
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {
-                let showOptionsGesture = DragGesture()
+                let previewGesture = DragGesture()
                     .onEnded { value in
                         withAnimation(.smooth) {
-                            if value.predictedEndTranslation.height > 100 {
+                            if value.predictedEndTranslation.height > 70 {
                                 showOptions = true
-                            } else if value.predictedEndTranslation.height < -100 {
+                            } else if value.predictedEndTranslation.height < -70 {
                                 showOptions = false
                             }
                         }
                     }
                 
                 Group {
-                    switch model.status {
-                    case .unknown:
-                        ContentUnavailableView("Pending setup", systemImage: "ellipsis")
-                    case .loading:
-                        ProgressView("Loading")
-                            .font(.title2.bold())
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    case .failed:
-                        ContentUnavailableView("Failed to setup camera", systemImage: "exclamationmark.circle.fill", description: Text("Try restarting or reinstalling the app.").foregroundStyle(.secondary))
-                            .foregroundStyle(.red)
-                    case .unauthorized:
-                        ContentUnavailableView {
-                            Label("Unauthorized", systemImage: "eye.slash.fill")
-                        } description: {
-                            Text("Please authorize FilterCam in Settings to continue.")
-                                .foregroundStyle(.secondary)
-                        } actions: {
-                            Link(destination: .appSettingsOrGeneralSettings) {
-                                Label("Open Settings", systemImage: "arrow.up.right")
+                    if thermalState == .critical {
+                        ContentUnavailableView("Too hot to handle!", systemImage: "flame.fill", description: Text("Your device is too hot for using the camera. Please let it cool down first."))
+                    } else {
+                        switch model.status {
+                        case .unknown:
+                            ContentUnavailableView("Pending setup", systemImage: "ellipsis")
+                        case .loading:
+                            ProgressView("Loading")
+                                .font(.title2.bold())
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        case .failed:
+                            ContentUnavailableView("Failed to setup camera", systemImage: "exclamationmark.circle.fill", description: Text("Try restarting or reinstalling the app.").foregroundStyle(.secondary))
+                                .foregroundStyle(.red)
+                        case .unauthorized:
+                            ContentUnavailableView {
+                                Label("Unauthorized", systemImage: "eye.slash.fill")
+                            } description: {
+                                Text("Please authorize FilterCam in Settings to continue.")
+                                    .foregroundStyle(.secondary)
+                            } actions: {
+                                Link(destination: .appSettingsOrGeneralSettings) {
+                                    Label("App Settings", systemImage: "arrow.up.right")
+                                }
                             }
-                        }
-                    case .interrupted:
-                        ContentUnavailableView("Interrupted", systemImage: "circle.slash")
-                            .foregroundStyle(.orange.gradient)
-                    case .running:
-                        if let filterStack = model.previewTarget as? FilterStack {
-                            ScrollView(.horizontal) {
-                                LazyHStack(alignment: .top, spacing: .zero) {
-                                    let screenBounds = UIScreen.main.bounds
-                                    ForEach(filterStack.targetsMap.mapValues(\.target).sorted(using: KeyPathComparator(\.key)), id: \.key) { (filter, target) in
-                                        Group {
-                                            if let metalTarget = target as? MetalPreviewTarget {
-                                                MetalRenderView(previewTarget: metalTarget)
-                                            } else {
-                                                cameraUnavailableView
+                        case .interrupted:
+                            ContentUnavailableView("Interrupted", systemImage: "circle.slash")
+                                .foregroundStyle(.orange.gradient)
+                        case .running:
+                            if let filterStack = model.previewTarget as? FilterStack {
+                                ScrollView(.horizontal) {
+                                    LazyHStack(alignment: .top, spacing: .zero) {
+                                        let screenBounds = UIScreen.main.bounds
+                                        ForEach(filterStack.targetsMap.mapValues(\.target).sorted(using: KeyPathComparator(\.key)), id: \.key) { (filter, target) in
+                                            Group {
+                                                if let metalTarget = target as? MetalPreviewTarget {
+                                                    MetalRenderView(previewTarget: metalTarget)
+                                                } else {
+                                                    cameraUnavailableView
+                                                }
+                                            }
+                                            .scrollTransition(.interactive(timingCurve: .linear), axis: .horizontal) { content, phase in
+                                                content
+                                                    .brightness(phase.isIdentity ? 0 : 0.2)
+                                                    .opacity(phase.isIdentity ? 1 : 0)
+                                                    .offset(x: -phase.value * screenBounds.width)
                                             }
                                         }
-                                        .scrollTransition(.interactive(timingCurve: .linear), axis: .horizontal) { content, phase in
-                                            content
-                                                .brightness(phase.isIdentity ? 0 : 0.2)
-                                                .opacity(phase.isIdentity ? 1 : 0)
-                                                .offset(x: -phase.value * screenBounds.width)
-                                        }
+                                        .containerRelativeFrame(.horizontal)
                                     }
-                                    .containerRelativeFrame(.horizontal)
+                                    .scrollTargetLayout()
                                 }
-                                .scrollTargetLayout()
+                                .scrollIndicators(.hidden)
+                                .scrollTargetBehavior(.viewAligned(limitBehavior: .backport.alwaysByOne))
+                                .scrollPosition(id: Binding($model.lastFilter), anchor: .center)
+                            } else if let metalTarget = model.previewTarget as? MetalPreviewTarget {
+                                MetalRenderView(previewTarget: metalTarget)
+                            } else if let defaultTarget = model.previewTarget as? DefaultPreviewTarget,
+                                      let session = defaultTarget.session {
+                                CameraPreview(session: session, onFocus: onFocus)
+                            } else if let staticTarget = model.previewTarget as? StaticImageTarget {
+                                Image(uiImage: staticTarget.image)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .clipped()
+                                    .containerRelativeFrame(.horizontal)
+                            } else {
+                                cameraUnavailableView
                             }
-                            .scrollIndicators(.hidden)
-                            .scrollTargetBehavior(.viewAligned(limitBehavior: .backport.alwaysByOne))
-                            .scrollPosition(id: Binding($model.lastFilter), anchor: .center)
-                        } else if let metalTarget = model.previewTarget as? MetalPreviewTarget {
-                            MetalRenderView(previewTarget: metalTarget)
-                        } else if let defaultTarget = model.previewTarget as? DefaultPreviewTarget,
-                                  let session = defaultTarget.session {
-                            CameraPreview(session: session, onFocus: onFocus)
-                        } else if let staticTarget = model.previewTarget as? StaticImageTarget {
-                            Image(uiImage: staticTarget.image)
-                                .resizable()
-                                .scaledToFill()
-                        } else {
-                            cameraUnavailableView
                         }
                     }
                 }
@@ -126,12 +140,25 @@ struct CameraViewFinder: View {
                         }
                 }
                 .overlay {
+                    Group {
+                        if model.isRunningAndActive && model.showLevel {
+                            LevelView()
+                                .frame(width: 150, height: 150)
+                                .transition(.scale.combined(with: .blurReplace))
+                        }
+                    }
+                    .animation(.smooth, value: model.isRunningAndActive != model.showLevel)
+                }
+                .overlay {
                     if let focusPoint = model.focusPoint {
                         TargetShape()
                             .foregroundStyle(.yellow)
                             .frame(width: 100, height: 100)
                             .position(focusPoint)
                     }
+                }
+                .overlay(alignment: .bottom) {
+                    CircularZoomSlider(zoomFactor: $model.zoomFactor, hasPoint5X: model.supportsUltraWideZoom)
                 }
                 .overlay(.black.opacity(model.shouldFlashScreen ? 1 : 0))
                 .overlay(.black.opacity(model.isSwitchingCameras ? 1 : 0))
@@ -143,34 +170,34 @@ struct CameraViewFinder: View {
                         .clipped()
                         .offset(y: model.aspectRatio.previewOffsetY)
                 }
-                .gesture(showOptionsGesture)
+                .gesture(previewGesture)
                 .onTapGesture(count: 2) {
                     Task { await model.switchCamera() }
                 }
                 .zIndex(0)
-                VStack(spacing: 44) {
+                VStack(spacing: 36) {
                     if showOptions {
-                        CameraOptionsView()
-                            .environmentObject(model)
-                            .padding(16)
-                            .frame(maxWidth: .infinity)
-                            .safeAreaInset(edge: .bottom, spacing: 8) {
-                                Button {
-                                    withAnimation(.smooth) {
-                                        showOptions = false
-                                    }
-                                } label: {
-                                    Image(systemName: "chevron.up")
-                                        .font(.caption.weight(.light))
-                                        .foregroundStyle(.yellow)
-                                        .padding(12)
-                                        .background(.background.secondary.opacity(0.5), in: .circle)
+                        VStack(spacing: 16) {
+                            CameraOptionsView()
+                                .environmentObject(model)
+                            CameraSecondaryOptionsView()
+                                .environmentObject(model)
+                            Button {
+                                withAnimation(.smooth) {
+                                    showOptions = false
                                 }
-                                .buttonStyle(.plain)
-                                .padding(.bottom, 8)
+                            } label: {
+                                Image(systemName: "chevron.up")
+                                    .font(.caption.weight(.light))
+                                    .foregroundStyle(.yellow)
+                                    .padding(12)
+                                    .background(.background.secondary.opacity(0.5), in: .circle)
                             }
-                            .background(.ultraThinMaterial)
-                            .transition(.move(edge: .top).combined(with: .offset(y: -64)))
+                            .buttonStyle(.plain)
+                        }
+                        .padding(16)
+                        .frame(maxWidth: .infinity)
+                        .transition(.move(edge: .top).combined(with: .offset(y: -64)))
                     } else {
                         Button {
                             withAnimation(.smooth) {
@@ -262,6 +289,7 @@ struct CameraViewFinder: View {
                                     .padding(12)
                                     .background(.background.secondary.opacity(0.5), in: .rect(cornerRadius: 12, style: .continuous))
                             }
+                            .frame(maxWidth: .infinity, alignment: .trailing)
                         } else {
                             Button {
                                 showSettings = true
@@ -272,59 +300,107 @@ struct CameraViewFinder: View {
                                     .padding(12)
                                     .background(.background.secondary.opacity(0.5), in: .circle)
                             }
-                            .padding(.leading, 20)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
                     if let filterStack = model.previewTarget as? FilterStack {
-                        let margin: CGFloat = (UIScreen.main.bounds.width - 64) / 2
-                        ScrollViewReader { proxy in
-                            ScrollView(.horizontal) {
-                                HStack(spacing: 16) {
-                                    ForEach(filterStack.targetsMap.keys.sorted(), id: \.self) { filter in
-                                        FilteredImage(filter: filter, source: .donut)
-                                            .aspectRatio(1, contentMode: .fit)
-                                            .overlay {
-                                                let isSelected = model.lastFilter == filter
-                                                RoundedRectangle(cornerRadius: 12)
-                                                    .strokeBorder(Color.accentColor.gradient, lineWidth: isSelected ? 2 : 0)
-                                            }
-                                            .clipShape(.rect(cornerRadius: 12))
-                                            .overlay(alignment: .bottom) {
-                                                Text(filter.title)
-                                                    .font(.caption2.smallCaps())
-                                                    .multilineTextAlignment(.leading)
-                                                    .lineLimit(2)
-                                                    .minimumScaleFactor(0.5)
-                                                    .padding(.horizontal, 8)
-                                                    .padding(.vertical, 6)
-                                                    .background(.background.secondary.opacity(0.5), in: .rect)
-                                                    .fixedSize(horizontal: false, vertical: true)
-                                                    .frame(height: 44, alignment: .top)
-                                                    .padding(.horizontal, -8)
-                                                    .offset(y: 44 + 8)
-                                            }
+                        if showFilterConfigurator,
+                           let operation = filterStack.operation(for: model.lastFilter) {
+                            HStack(spacing: 16) {
+                                FilterConfiguratorView(filter: model.lastFilter, operation: operation)
+                                    .environmentObject(model)
+                            }
+                            .font(.caption.smallCaps().weight(.heavy))
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(.background.secondary.opacity(0.5), in: .rect(cornerRadius: 12))
+                            .overlay(alignment: .topTrailing) {
+                                Button {
+                                    withAnimation(.smooth) {
+                                        showFilterConfigurator = false
+                                    }
+                                } label: {
+                                    Image(systemName: "xmark")
+                                        .bold()
+                                        .foregroundStyle(.secondary)
+                                        .padding(10)
+                                        .background(.background.secondary.opacity(0.75), in: .circle)
+                                }
+                                .offset(y: -44)
+                            }
+                            .transition(.move(edge: .bottom).combined(with: .blurReplace))
+                        } else {
+                            let margin: CGFloat = (UIScreen.main.bounds.width - 64 - 40) / 2
+                            ScrollViewReader { proxy in
+                                ScrollView(.horizontal) {
+                                    HStack(spacing: 16) {
+                                        let filters = customFilters.map { CameraFilter.custom($0) }
+                                        ForEach(filters, id: \.self) { filter in
+                                            FilterPreview(filter: filter, isSelected: model.lastFilter == filter)
+                                                .onTapGesture {
+                                                    guard model.lastFilter == filter else { return }
+                                                    withAnimation(.smooth) {
+                                                        showFilterConfigurator = true
+                                                    }
+                                                }
+                                        }
+                                        let isFilterChainDisabled = model.status != .running || model.isPaused || model.isSwitchingCameras
+                                        Button {
+                                            guard !isFilterChainDisabled else { return }
+                                            showFilterChainCreator = true
+                                        } label: {
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .fill(.ultraThinMaterial)
+                                                .aspectRatio(1, contentMode: .fit)
+                                                .overlay {
+                                                    RoundedRectangle(cornerRadius: 12)
+                                                        .strokeBorder(.primary.opacity(0.5), lineWidth: 4)
+                                                }
+                                                .overlay {
+                                                    Image(systemName: "plus.circle.fill")
+                                                }
+                                        }
+                                        .foregroundStyle(Color.primary)
+                                        .opacity(isFilterChainDisabled ? 0.5 : 1)
+                                        .animation(.smooth, value: isFilterChainDisabled)
+                                        .disabled(isFilterChainDisabled)
+                                        .backport.matchedTransitionSource(id: "filter_chain", in: filterChainCreatorAnimation)
+                                        ForEach(filterStack.targetsMap.keys.filter { !$0.isCustom }.sorted(), id: \.self) { filter in
+                                            FilterPreview(filter: filter, isSelected: model.lastFilter == filter)
+                                                .onTapGesture {
+                                                    guard model.lastFilter == filter else { return }
+                                                    withAnimation(.smooth) {
+                                                        showFilterConfigurator = true
+                                                    }
+                                                }
+                                        }
+                                    }
+                                    .scrollTargetLayout()
+                                }
+                                .scrollIndicators(.hidden)
+                                .scrollTargetBehavior(.viewAligned(limitBehavior: .backport.alwaysByOne))
+                                .scrollDisabled(true)
+                                .safeAreaPadding(.horizontal, margin)
+                                .onChange(of: model.lastFilter, initial: true) { _, newValue in
+                                    withAnimation(.smooth) {
+                                        proxy.scrollTo(newValue, anchor: .center)
                                     }
                                 }
-                                .scrollTargetLayout()
                             }
-                            .scrollIndicators(.hidden)
-                            .scrollTargetBehavior(.viewAligned(limitBehavior: .backport.alwaysByOne))
-                            .scrollDisabled(true)
-                            .safeAreaPadding(.horizontal, margin)
-                            .onChange(of: model.lastFilter) { _, newValue in
-                                withAnimation(.smooth) {
-                                    proxy.scrollTo(newValue, anchor: .center)
-                                }
-                            }
+                            .frame(height: 64)
+                            .transition(.move(edge: .top).combined(with: .blurReplace))
                         }
-                        .frame(height: 64)
-                        .allowsHitTesting(false)
                     }
                 }
                 .safeAreaPadding(.bottom, 144)
+                .safeAreaPadding(.horizontal, 20)
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .zIndex(2)
+            }
+            .sheet(isPresented: $showFilterChainCreator) {
+                FilterChainCreatorView()
+                    .environmentObject(model)
+                    .backport.navigationTransitionZoom(sourceID: "filter_chain", in: filterChainCreatorAnimation)
             }
             .sheet(isPresented: $showGallery) {
                 GalleryView(animation: galleryAnimation)
@@ -335,8 +411,34 @@ struct CameraViewFinder: View {
             }
         }
         .backport.onCameraCaptureEvent {
+            if model.captureActivity.willCapture { return }
+            if model.captureActivity.isRecording {
+                Task { await model.stopRecording() }
+                return
+            }
+            
+            if model.captureMode == .video {
+                model.captureMode = .photo
+                return
+            }
+            
             Task {
                 await model.capturePhoto()
+            }
+        } secondaryAction: {
+            if model.captureActivity.willCapture { return }
+            if model.captureActivity.isRecording {
+                Task { await model.stopRecording() }
+                return
+            }
+            
+            if model.captureMode == .photo {
+                model.captureMode = .video
+                return
+            }
+            
+            Task {
+                await model.startRecording()
             }
         }
         .task(id: scenePhase) {
@@ -488,5 +590,43 @@ private extension FilteredImage {
                 self?.status = .loading
             }
         }
+    }
+}
+
+private struct FilterPreview: View {
+    var filter: CameraFilter
+    var isSelected: Bool
+    
+    var body: some View {
+        FilteredImage(filter: filter, source: .donut)
+            .aspectRatio(1, contentMode: .fit)
+            .overlay {
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(Color.accentColor.gradient, lineWidth: isSelected ? 3 : 0)
+            }
+            .overlay(alignment: .bottomTrailing) {
+                if isSelected {
+                    Image(systemName: "gearshape.fill")
+                        .foregroundStyle(.secondary)
+                        .padding(12)
+                        .transition(.scale.combined(with: .blurReplace))
+                }
+            }
+            .animation(.smooth, value: isSelected)
+            .clipShape(.rect(cornerRadius: 12))
+            .overlay(alignment: .bottom) {
+                Text(filter.title)
+                    .font(.caption2.smallCaps())
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.5)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 6)
+                    .background(.background.secondary.opacity(0.5), in: .rect)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(height: 44, alignment: .top)
+                    .padding(.horizontal, -8)
+                    .offset(y: 44 + 8)
+            }
     }
 }

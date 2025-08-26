@@ -14,7 +14,7 @@ struct PhotoFeatures {
     static let `default` = PhotoFeatures()
 }
 
-protocol CameraOptionable: CaseIterable, Equatable, Identifiable {
+protocol CameraOptionable: Equatable, Identifiable {
     var title: String { get }
     var systemImage: String { get }
 }

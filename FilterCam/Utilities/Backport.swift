@@ -43,6 +43,27 @@ extension Backport where V: View {
     }
     
     @ViewBuilder
+    func onCameraCaptureEvent(primaryAction: @escaping () -> Void, secondaryAction: @escaping () -> Void) -> some View {
+        if #available(iOS 18.0, *) {
+            wrappedValue.onCameraCaptureEvent { event in
+                if event.phase == .ended {
+                    primaryAction()
+                }
+            } secondaryAction: { event in
+                if event.phase == .ended {
+                    secondaryAction()
+                }
+            }
+        } else if #available(iOS 17.2, *) {
+            wrappedValue.background(
+                CameraInteractiveView(onCapture: primaryAction)
+            )
+        } else {
+            wrappedValue
+        }
+    }
+    
+    @ViewBuilder
     func matchedTransitionSource(id: some Hashable, in namespace: Namespace.ID) -> some View {
         if #available(iOS 18.0, *) {
             wrappedValue.matchedTransitionSource(id: id, in: namespace)

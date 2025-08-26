@@ -19,8 +19,48 @@ final class CameraModel: ObservableObject {
     @Published private(set) var thumbnail: Thumbnail?
     @Published private(set) var isPaused = false
     @Published private(set) var focusPoint: CGPoint?
+    @Published private(set) var supportsUltraWideZoom = false
+    @Published private(set) var supportsCustomExposure = false
+    @Published private(set) var supportsCustomWhiteBalance = false
+    @Published private(set) var activeDeviceExposure = 0.5
+    @Published private(set) var activeDeviceWhiteBalance: Double = 4000
     
-    // TODO: Pending more capture modes
+    var isRunningAndActive: Bool {
+        status == .running && !isPaused && !isSwitchingCameras
+    }
+    
+    @Published var zoomFactor: Double = 1.0 {
+        didSet {
+            Task {
+                await captureService.zoom(to: zoomFactor)
+            }
+        }
+    }
+    
+    @Published var exposure: Double? {
+        didSet {
+            Task {
+                await captureService.setExposure(to: exposure.map { CGFloat($0) })
+            }
+        }
+    }
+    
+    @Published var whiteBalance: Double? {
+        didSet {
+            Task {
+                await captureService.setWhiteBalance(to: whiteBalance.map { Float($0) })
+            }
+        }
+    }
+    
+    @Published var proRAW = false {
+        didSet {
+            Task {
+                // TODO: Set Pro RAW on capture service
+            }
+        }
+    }
+    
     @Published var captureMode = CaptureMode.photo {
         didSet {
             cameraState.captureMode = captureMode
@@ -52,10 +92,19 @@ final class CameraModel: ObservableObject {
             cameraState.lastFilter = lastFilter
         }
     }
+    @Published var showLevel = false {
+        didSet {
+            cameraState.showLevel = showLevel
+        }
+    }
     
     private var captureService = CaptureService.default()
     private var captureDirectory: URL!
     private var mediaStore: MediaStore!
+    
+    var previewSource: any PreviewSource {
+        captureService.previewSource
+    }
     
     var previewTarget: any PreviewTarget {
         captureService.previewTarget
@@ -111,6 +160,7 @@ final class CameraModel: ObservableObject {
         captureService = service
         do {
             try await captureService.start(with: cameraState)
+            zoomFactor = 1
         } catch {
             logger.error("Failed to switch capture service: \(error)")
             captureService = oldService
@@ -174,6 +224,7 @@ final class CameraModel: ObservableObject {
         aspectRatio = cameraState.aspectRatio
         renderMode = cameraState.renderMode
         lastFilter = cameraState.lastFilter
+        showLevel = cameraState.showLevel
     }
     
     @MainActor
@@ -192,6 +243,7 @@ final class CameraModel: ObservableObject {
             }
         }
         await captureService.switchCamera()
+        zoomFactor = 1
         cameraState.cameraPosition = await captureService.activeCameraPosition
     }
     
@@ -268,6 +320,30 @@ final class CameraModel: ObservableObject {
                     }
                 }
             }
+        }
+        
+        Task {
+            await captureService.$supportsUltraWideZoom
+                .receive(on: DispatchQueue.main)
+                .assign(to: &$supportsUltraWideZoom)
+            await captureService.$supportsCustomExposure
+                .receive(on: DispatchQueue.main)
+                .assign(to: &$supportsCustomExposure)
+            await captureService.$supportsCustomWhiteBalance
+                .receive(on: DispatchQueue.main)
+                .assign(to: &$supportsCustomWhiteBalance)
+        }
+        
+        Task {
+            await captureService.$activeDeviceExposure
+                .receive(on: DispatchQueue.main)
+                .assign(to: &$activeDeviceExposure)
+        }
+        
+        Task {
+            await captureService.$activeDeviceWhiteBalanceTemperature
+                .receive(on: DispatchQueue.main)
+                .assign(to: &$activeDeviceWhiteBalance)
         }
     }
     

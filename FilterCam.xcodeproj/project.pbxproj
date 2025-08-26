@@ -67,6 +67,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		31218E602E5C54B70006A606 /* Exceptions for "FilterCam" folder in "FilterCam" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Models/CustomFilter+Noop.swift",
+			);
+			target = 31AB53202E54D66F00A51742 /* FilterCam */;
+		};
 		3174E16F2E552BE2006D6EB3 /* Exceptions for "FilterCamCaptureExtension" folder in "FilterCamCaptureExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -79,30 +86,36 @@
 			membershipExceptions = (
 				Environment/AppConfiguration.swift,
 				"Environment/CaptureExtension+Environment.swift",
+				"Environment/DatabaseService+Environment.swift",
 				"Environment/MediaStore+Environment.swift",
+				"Environment/ThermalState+Environment.swift",
+				"Extensions/BinaryFloatingPoint+.swift",
 				Extensions/CaptureExtensions.swift,
+				"Extensions/KVO+.swift",
 				"Extensions/Logger+.swift",
 				"Extensions/ProcessInfo+.swift",
 				"Extensions/UIImage+.swift",
 				"Extensions/URL+.swift",
 				"Extensions/View+.swift",
+				Models/CustomFilter.swift,
+				"Models/CustomFilter+FilterChain.swift",
 				"Preview Content/Preview Assets.xcassets",
 				"Preview Content/PreviewAssets.swift",
+				Protocols/DatabaseService.swift,
+				Protocols/FilterGenerator.swift,
 				Protocols/OutputMedium/AnyOutputMedium.swift,
 				Protocols/OutputMedium/OutputMedium.swift,
-				Protocols/OutputService/MovieOutput.swift,
+				Protocols/OutputService/CaptureOutput.swift,
+				Protocols/OutputService/MovieOutputService.swift,
 				Protocols/OutputService/OutputService.swift,
-				Protocols/OutputService/PhotoOutput.swift,
-				Protocols/PreviewSource/MetalCameraSource.swift,
+				Protocols/OutputService/PhotoOutputService.swift,
 				Protocols/PreviewSource/PreviewSource.swift,
-				Protocols/PreviewSource/StaticImageSource.swift,
-				Protocols/PreviewTarget/MetalPreviewTarget.swift,
 				Protocols/PreviewTarget/PreviewTarget.swift,
-				Protocols/PreviewTarget/StaticImageTarget.swift,
 				Resources/Assets.xcassets,
 				Resources/LUTs.xcassets,
 				Services/CaptureService.swift,
 				Services/MotionService.swift,
+				Shapes/LevelShape.swift,
 				Shapes/TargetShape.swift,
 				Types/CameraPosition.swift,
 				Types/CameraState/CameraState.swift,
@@ -110,32 +123,62 @@
 				Types/CameraStatus.swift,
 				Types/CaptureActivity.swift,
 				Types/CaptureMode.swift,
+				Types/CaptureOutputs/DefaultMovieCaptureOutput.swift,
+				Types/CaptureOutputs/DefaultPhotoCaptureOutput.swift,
+				Types/CaptureOutputs/MetalMovieCaptureOutput.swift,
+				Types/CaptureOutputs/MetalPhotoCaptureOutput.swift,
+				Types/DatabaseServices/DefaultDatabaseService.swift,
+				Types/DatabaseServices/InMemoryDatabaseService.swift,
 				Types/Errors/CameraError.swift,
 				Types/Errors/PhotoCaptureError.swift,
+				Types/Errors/VideoRecordingError.swift,
 				Types/Filters/CameraFilter.swift,
+				"Types/Filters/CameraFilter+Configurations.swift",
+				Types/Filters/CameraFilterConfiguration.swift,
+				Types/Filters/FilterChain.swift,
 				Types/Filters/FilterStack.swift,
-				Types/Photo.swift,
+				Types/OutputMedia/Photo.swift,
+				Types/OutputMedia/Video.swift,
+				Types/OutputServices/DefaultMovieOutputService.swift,
+				Types/OutputServices/DefaultPhotoOutputService.swift,
+				Types/OutputServices/MetalMovieOutputService.swift,
+				Types/OutputServices/MetalPhotoOutputService.swift,
 				Types/PhotoFeatures.swift,
+				Types/PreviewSources/DefaultPreviewSource.swift,
+				Types/PreviewSources/MetalCameraSource.swift,
+				Types/PreviewSources/StaticImageSource.swift,
+				Types/PreviewTargets/DefaultPreviewTarget.swift,
+				Types/PreviewTargets/MetalPreviewTarget.swift,
+				Types/PreviewTargets/StaticImageTarget.swift,
 				Types/RenderMode.swift,
 				Types/Thumbnail.swift,
 				Types/UserDefaults/UserDefaultsKey.swift,
-				Types/Video.swift,
 				Types/VideoFeatures.swift,
+				Utilities/AsyncSubject.swift,
 				Utilities/Backport.swift,
 				Utilities/DeviceLookup.swift,
+				Utilities/KVOAsyncObserver.swift,
+				Utilities/Layouts/RadialLayout.swift,
 				Utilities/MediaStore.swift,
 				Utilities/SPCObserver.swift,
+				Utilities/ThermalStateObserver.swift,
 				Utilities/Toasts/Toaster.swift,
 				Utilities/Toasts/ToasterContainerModifier.swift,
 				Views/CameraActionButton.swift,
 				Views/CameraInteractiveView.swift,
 				Views/CameraModel.swift,
 				Views/CameraOptionsView.swift,
+				Views/CameraSecondaryOptionsView.swift,
 				Views/CameraViewFinder.swift,
+				Views/CircularZoomSlider.swift,
+				Views/FilterChainCreatorView.swift,
+				Views/FilterConfiguratorView.swift,
 				Views/GalleryDetailView.swift,
 				Views/GalleryView.swift,
+				Views/LevelView.swift,
 				Views/MetalRenderView.swift,
 				Views/SettingsView.swift,
+				Views/Ticker.swift,
 			);
 			target = 3174E1642E552BE2006D6EB3 /* FilterCamCaptureExtension */;
 		};
@@ -173,33 +216,46 @@
 				Environment/AppConfiguration.swift,
 				"Environment/CaptureExtension+Environment.swift",
 				"Environment/MediaStore+Environment.swift",
+				"Environment/ThermalState+Environment.swift",
+				"Extensions/BinaryFloatingPoint+.swift",
+				"Extensions/KVO+.swift",
 				"Extensions/Logger+.swift",
 				"Extensions/ProcessInfo+.swift",
 				"Extensions/UIImage+.swift",
 				"Extensions/URL+.swift",
 				"Extensions/View+.swift",
+				Models/CustomFilter.swift,
+				"Models/CustomFilter+Noop.swift",
 				"Preview Content/Preview Assets.xcassets",
 				"Preview Content/PreviewAssets.swift",
+				Protocols/FilterGenerator.swift,
 				Protocols/OutputMedium/AnyOutputMedium.swift,
 				Protocols/OutputMedium/OutputMedium.swift,
 				Resources/Assets.xcassets,
 				Resources/LUTs.xcassets,
+				Shapes/LevelShape.swift,
 				Types/CameraPosition.swift,
 				Types/CameraState/CameraState.swift,
 				Types/CameraState/CameraStateContextProvider.swift,
 				Types/CaptureMode.swift,
 				Types/Filters/CameraFilter.swift,
-				Types/Photo.swift,
+				Types/Filters/CameraFilterConfiguration.swift,
+				Types/OutputMedia/Photo.swift,
+				Types/OutputMedia/Video.swift,
 				Types/PhotoFeatures.swift,
 				Types/RenderMode.swift,
 				Types/Thumbnail.swift,
-				Types/Video.swift,
 				Types/VideoFeatures.swift,
+				Utilities/AsyncSubject.swift,
 				Utilities/Backport.swift,
+				Utilities/KVOAsyncObserver.swift,
+				Utilities/Layouts/RadialLayout.swift,
 				Utilities/MediaStore.swift,
+				Utilities/ThermalStateObserver.swift,
 				Utilities/Toasts/Toaster.swift,
 				Utilities/Toasts/ToasterContainerModifier.swift,
 				Views/CameraInteractiveView.swift,
+				Views/CircularZoomSlider.swift,
 			);
 			target = 3174E1952E55310D006D6EB3 /* FilterCamWidgetsExtension */;
 		};
@@ -228,6 +284,7 @@
 		31AB53232E54D66F00A51742 /* FilterCam */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				31218E602E5C54B70006A606 /* Exceptions for "FilterCam" folder in "FilterCam" target */,
 				3174E1752E552C7F006D6EB3 /* Exceptions for "FilterCam" folder in "FilterCamCaptureExtension" target */,
 				3174E1B72E553246006D6EB3 /* Exceptions for "FilterCam" folder in "FilterCamWidgetsExtension" target */,
 			);
@@ -728,8 +785,8 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -767,8 +824,8 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
