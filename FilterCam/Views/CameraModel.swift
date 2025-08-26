@@ -114,22 +114,6 @@ final class CameraModel: ObservableObject {
     func configure(with configuration: AppConfiguration) async {
         captureDirectory = configuration.captureDirectory
         mediaStore = MediaStore(appConfiguration: configuration)
-        // let useMetalRendering = UserDefaults.shared.bool(forKey: UserDefaultsKey.useMetalRendering.rawValue)
-        // let useFilters = UserDefaults.shared.bool(forKey: UserDefaultsKey.useFilters.rawValue)
-        // let oldStatus = status
-        // status = .loading
-        // do {
-        //     captureService = useMetalRendering ? (useFilters ? try .metalWithFilters() : try .metal()) : .default()
-        //     let currentState = await CameraState.current
-        //     captureService = switch currentState.renderMode {
-        //     case .default: .default()
-        //     case .metal: try .metal()
-        //     case .metalWithFilters: try .metalWithFilters()
-        //     }
-        //     status = oldStatus
-        // } catch {
-        //     status = .failed
-        // }
     }
     
     @MainActor
