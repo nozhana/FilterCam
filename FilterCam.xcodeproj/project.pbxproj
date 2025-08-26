@@ -88,6 +88,8 @@
 				"Environment/CaptureExtension+Environment.swift",
 				"Environment/DatabaseService+Environment.swift",
 				"Environment/MediaStore+Environment.swift",
+				"Environment/ThermalState+Environment.swift",
+				"Extensions/BinaryFloatingPoint+.swift",
 				Extensions/CaptureExtensions.swift,
 				"Extensions/KVO+.swift",
 				"Extensions/Logger+.swift",
@@ -159,12 +161,14 @@
 				Utilities/Layouts/RadialLayout.swift,
 				Utilities/MediaStore.swift,
 				Utilities/SPCObserver.swift,
+				Utilities/ThermalStateObserver.swift,
 				Utilities/Toasts/Toaster.swift,
 				Utilities/Toasts/ToasterContainerModifier.swift,
 				Views/CameraActionButton.swift,
 				Views/CameraInteractiveView.swift,
 				Views/CameraModel.swift,
 				Views/CameraOptionsView.swift,
+				Views/CameraSecondaryOptionsView.swift,
 				Views/CameraViewFinder.swift,
 				Views/CircularZoomSlider.swift,
 				Views/FilterChainCreatorView.swift,
@@ -174,6 +178,7 @@
 				Views/LevelView.swift,
 				Views/MetalRenderView.swift,
 				Views/SettingsView.swift,
+				Views/Ticker.swift,
 			);
 			target = 3174E1642E552BE2006D6EB3 /* FilterCamCaptureExtension */;
 		};
@@ -211,6 +216,8 @@
 				Environment/AppConfiguration.swift,
 				"Environment/CaptureExtension+Environment.swift",
 				"Environment/MediaStore+Environment.swift",
+				"Environment/ThermalState+Environment.swift",
+				"Extensions/BinaryFloatingPoint+.swift",
 				"Extensions/KVO+.swift",
 				"Extensions/Logger+.swift",
 				"Extensions/ProcessInfo+.swift",
@@ -244,6 +251,7 @@
 				Utilities/KVOAsyncObserver.swift,
 				Utilities/Layouts/RadialLayout.swift,
 				Utilities/MediaStore.swift,
+				Utilities/ThermalStateObserver.swift,
 				Utilities/Toasts/Toaster.swift,
 				Utilities/Toasts/ToasterContainerModifier.swift,
 				Views/CameraInteractiveView.swift,
@@ -777,8 +785,8 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -816,8 +824,8 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (

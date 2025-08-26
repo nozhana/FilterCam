@@ -14,7 +14,16 @@ struct Video: OutputMedium {
     var thumbnailData: Data?
     
     var data: Data {
-        try! Data(contentsOf: fileURL)
+        var shouldStopAccessingSecureResource = false
+        defer {
+            if shouldStopAccessingSecureResource {
+                fileURL.stopAccessingSecurityScopedResource()
+            }
+        }
+        if fileURL.startAccessingSecurityScopedResource() {
+            shouldStopAccessingSecureResource = true
+        }
+        return try! Data(contentsOf: fileURL)
     }
     
     init(id: UUID = UUID(), fileURL: URL, timestamp: Date = .now, thumbnailData: Data? = nil) {

@@ -19,7 +19,11 @@ final class CameraModel: ObservableObject {
     @Published private(set) var thumbnail: Thumbnail?
     @Published private(set) var isPaused = false
     @Published private(set) var focusPoint: CGPoint?
-    @Published private(set) var supportsUltraWideZoom = true
+    @Published private(set) var supportsUltraWideZoom = false
+    @Published private(set) var supportsCustomExposure = false
+    @Published private(set) var supportsCustomWhiteBalance = false
+    @Published private(set) var activeDeviceExposure = 0.5
+    @Published private(set) var activeDeviceWhiteBalance: Double = 4000
     
     var isRunningAndActive: Bool {
         status == .running && !isPaused && !isSwitchingCameras
@@ -29,6 +33,30 @@ final class CameraModel: ObservableObject {
         didSet {
             Task {
                 await captureService.zoom(to: zoomFactor)
+            }
+        }
+    }
+    
+    @Published var exposure: Double? {
+        didSet {
+            Task {
+                await captureService.setExposure(to: exposure.map { CGFloat($0) })
+            }
+        }
+    }
+    
+    @Published var whiteBalance: Double? {
+        didSet {
+            Task {
+                await captureService.setWhiteBalance(to: whiteBalance.map { Float($0) })
+            }
+        }
+    }
+    
+    @Published var proRAW = false {
+        didSet {
+            Task {
+                // TODO: Set Pro RAW on capture service
             }
         }
     }
@@ -298,6 +326,24 @@ final class CameraModel: ObservableObject {
             await captureService.$supportsUltraWideZoom
                 .receive(on: DispatchQueue.main)
                 .assign(to: &$supportsUltraWideZoom)
+            await captureService.$supportsCustomExposure
+                .receive(on: DispatchQueue.main)
+                .assign(to: &$supportsCustomExposure)
+            await captureService.$supportsCustomWhiteBalance
+                .receive(on: DispatchQueue.main)
+                .assign(to: &$supportsCustomWhiteBalance)
+        }
+        
+        Task {
+            await captureService.$activeDeviceExposure
+                .receive(on: DispatchQueue.main)
+                .assign(to: &$activeDeviceExposure)
+        }
+        
+        Task {
+            await captureService.$activeDeviceWhiteBalanceTemperature
+                .receive(on: DispatchQueue.main)
+                .assign(to: &$activeDeviceWhiteBalance)
         }
     }
     

@@ -14,10 +14,13 @@ struct FilterCamApp: App {
     @Environment(\.scenePhase) private var scenePhase
     
     @ObservedObject private var toaster  = Toaster.shared
+    @StateObject private var thermalStateObserver = ThermalStateObserver()
     
     var body: some Scene {
         WindowGroup {
             CameraViewFinder()
+                .environment(\.thermalState, thermalStateObserver.thermalState)
+                .environmentObject(thermalStateObserver)
                 .toasterContainer(toaster)
                 .databaseContainer()
                 .task(id: scenePhase, priority: .utility) {

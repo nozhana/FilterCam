@@ -14,6 +14,10 @@ final actor CaptureService {
     @Published private(set) var captureActivity: CaptureActivity = .idle
     @Published private(set) var isInterrupted = false
     @Published private(set) var supportsUltraWideZoom = false
+    @Published private(set) var supportsCustomExposure = false
+    @Published private(set) var supportsCustomWhiteBalance = false
+    @Published private(set) var activeDeviceExposure = 0.5
+    @Published private(set) var activeDeviceWhiteBalanceTemperature: Double = 4000
     
     nonisolated let previewSource: PreviewSource
     
@@ -31,6 +35,8 @@ final actor CaptureService {
         didSet {
             guard let device = activeVideoInput?.device else { return }
             supportsUltraWideZoom = (device.deviceType == .builtInUltraWideCamera) || (device.isVirtualDevice && device.constituentDevices.contains(where: { $0.deviceType == .builtInUltraWideCamera }))
+            supportsCustomExposure = device.isExposureModeSupported(.locked)
+            supportsCustomWhiteBalance = device.isWhiteBalanceModeSupported(.locked) && device.isLockingWhiteBalanceWithCustomDeviceGainsSupported
         }
     }
     
@@ -48,6 +54,8 @@ final actor CaptureService {
     private var isSetUp = false
     
     private let sessionQueue = DispatchSerialQueue(label: "com.nozhana.FilterCam.sessionQueue")
+    
+    private var observers = Set<NSKeyValueObservation>()
     
     nonisolated var unownedExecutor: UnownedSerialExecutor {
         sessionQueue.asUnownedSerialExecutor()
@@ -228,6 +236,8 @@ final actor CaptureService {
             
             zoom(to: 1, ramp: false)
             monitorSystemPreferredCamera()
+            monitorExposureUpdates()
+            monitorWhiteBalanceUpdates()
             updateOutputConfigurations()
             isSetUp = true
         } catch {
@@ -237,12 +247,13 @@ final actor CaptureService {
     
     func setCaptureMode(_ captureMode: CaptureMode) {
         session.sessionPreset = captureMode == .photo ? .photo : .high
+        zoom(to: 1, ramp: false)
         self.captureMode = captureMode
-        guard let defaultOutput = movieOutput.output as? any DefaultCaptureOutput else { return }
+        guard let defaultMovieOutput = movieOutput.output as? any DefaultCaptureOutput else { return }
         switch captureMode {
         case .photo:
-            if session.outputs.contains(defaultOutput.output) {
-                session.removeOutput(defaultOutput.output)
+            if session.outputs.contains(defaultMovieOutput.output) {
+                session.removeOutput(defaultMovieOutput.output)
             }
             if let activeAudioInput {
                 session.removeInput(activeAudioInput)
@@ -250,7 +261,7 @@ final actor CaptureService {
             }
         case .video:
             do {
-                try addOutput(defaultOutput.output)
+                try addOutput(defaultMovieOutput.output)
                 let defaultMic = try deviceLookup.defaultMic
                 activeAudioInput = try addInput(for: defaultMic)
             } catch {
@@ -296,6 +307,51 @@ final actor CaptureService {
             }
         } catch {
             logger.error("Failed to zoom to factor \(factor): \(error)")
+        }
+    }
+    
+    func setExposure(to value: CGFloat?) {
+        guard let device = activeVideoInput?.device else { return }
+        do {
+            try device.lockForConfiguration()
+            defer { device.unlockForConfiguration() }
+            if let value {
+                let clampedValue = min(max(value, 0), 1)
+                let normalizedBias = device.minExposureTargetBias.interpolated(towards: device.maxExposureTargetBias, amount: clampedValue)
+                guard device.isExposureModeSupported(.locked) else { return }
+                device.exposureMode = .locked
+                device.setExposureTargetBias(normalizedBias)
+            } else {
+                if device.isExposureModeSupported(.continuousAutoExposure) {
+                    device.exposureMode = .continuousAutoExposure
+                }
+                device.setExposureTargetBias(.zero)
+            }
+        } catch {
+            logger.error("Failed to set exposure to \(String(describing: value)): \(error)")
+        }
+    }
+    
+    func setWhiteBalance(to temperature: Float?) {
+        guard let device = activeVideoInput?.device else { return }
+        do {
+            try device.lockForConfiguration()
+            defer { device.unlockForConfiguration() }
+            if let temperature {
+                let clampedValue = min(max(temperature, 3000), 7000)
+                var temperatureAndTint = device.temperatureAndTintValues(for: device.deviceWhiteBalanceGains)
+                temperatureAndTint.temperature = temperature
+                let targetGains = device.deviceWhiteBalanceGains(for: temperatureAndTint)
+                if device.isWhiteBalanceModeSupported(.locked), device.isLockingWhiteBalanceWithCustomDeviceGainsSupported {
+                    device.setWhiteBalanceModeLocked(with: targetGains)
+                }
+            } else {
+                if device.isWhiteBalanceModeSupported(.continuousAutoWhiteBalance) {
+                    device.whiteBalanceMode = .continuousAutoWhiteBalance
+                }
+            }
+        } catch {
+            logger.error("Failed to set white balance to \(String(describing: temperature)): \(error)")
         }
     }
     
@@ -397,6 +453,26 @@ final actor CaptureService {
         }
     }
     
+    private func monitorExposureUpdates() {
+        currentDevice.observe(\.exposureTargetOffset, options: [.initial, .new]) { [weak self] device, _ in
+            let offset = device.exposureTargetOffset
+            let exposureValue = device.exposureTargetBias + offset
+            let minBias = device.minExposureTargetBias
+            let maxBias = device.maxExposureTargetBias
+            let normalizedInterpolation = (exposureValue - minBias) / (maxBias - minBias)
+            self?.activeDeviceExposure = Double(normalizedInterpolation)
+        }
+        .store(in: &observers)
+    }
+    
+    private func monitorWhiteBalanceUpdates() {
+        currentDevice.observe(\.deviceWhiteBalanceGains, options: [.initial, .new]) { [weak self] device, _ in
+            let temperature = device.temperatureAndTintValues(for: device.deviceWhiteBalanceGains).temperature
+            self?.activeDeviceWhiteBalanceTemperature = Double(temperature)
+        }
+        .store(in: &observers)
+    }
+    
     private func changeCaptureDevice(to device: AVCaptureDevice) {
         guard let currentInput = activeVideoInput else { fatalError("No active video input device found") }
         
@@ -408,6 +484,8 @@ final actor CaptureService {
             activeVideoInput = try addInput(for: device)
             zoom(to: 1, ramp: false)
             updateOutputConfigurations()
+            monitorExposureUpdates()
+            monitorWhiteBalanceUpdates()
         } catch {
             session.addInput(currentInput)
         }

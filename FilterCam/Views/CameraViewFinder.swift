@@ -15,6 +15,7 @@ struct CameraViewFinder: View {
     @Environment(\.appConfiguration) private var appConfiguration
     @Environment(\.openMainApp) private var openMainApp
     @Environment(\.isCaptureExtension) private var isCaptureExtension
+    @Environment(\.thermalState) private var thermalState
     
     @Query(sort: [.init(\CustomFilter.layoutIndex, order: .reverse)], animation: .smooth)
     private var customFilters: [CustomFilter]
@@ -58,70 +59,74 @@ struct CameraViewFinder: View {
                     }
                 
                 Group {
-                    switch model.status {
-                    case .unknown:
-                        ContentUnavailableView("Pending setup", systemImage: "ellipsis")
-                    case .loading:
-                        ProgressView("Loading")
-                            .font(.title2.bold())
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    case .failed:
-                        ContentUnavailableView("Failed to setup camera", systemImage: "exclamationmark.circle.fill", description: Text("Try restarting or reinstalling the app.").foregroundStyle(.secondary))
-                            .foregroundStyle(.red)
-                    case .unauthorized:
-                        ContentUnavailableView {
-                            Label("Unauthorized", systemImage: "eye.slash.fill")
-                        } description: {
-                            Text("Please authorize FilterCam in Settings to continue.")
-                                .foregroundStyle(.secondary)
-                        } actions: {
-                            Link(destination: .appSettingsOrGeneralSettings) {
-                                Label("App Settings", systemImage: "arrow.up.right")
+                    if thermalState == .critical {
+                        ContentUnavailableView("Too hot to handle!", systemImage: "flame.fill", description: Text("Your device is too hot for using the camera. Please let it cool down first."))
+                    } else {
+                        switch model.status {
+                        case .unknown:
+                            ContentUnavailableView("Pending setup", systemImage: "ellipsis")
+                        case .loading:
+                            ProgressView("Loading")
+                                .font(.title2.bold())
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        case .failed:
+                            ContentUnavailableView("Failed to setup camera", systemImage: "exclamationmark.circle.fill", description: Text("Try restarting or reinstalling the app.").foregroundStyle(.secondary))
+                                .foregroundStyle(.red)
+                        case .unauthorized:
+                            ContentUnavailableView {
+                                Label("Unauthorized", systemImage: "eye.slash.fill")
+                            } description: {
+                                Text("Please authorize FilterCam in Settings to continue.")
+                                    .foregroundStyle(.secondary)
+                            } actions: {
+                                Link(destination: .appSettingsOrGeneralSettings) {
+                                    Label("App Settings", systemImage: "arrow.up.right")
+                                }
                             }
-                        }
-                    case .interrupted:
-                        ContentUnavailableView("Interrupted", systemImage: "circle.slash")
-                            .foregroundStyle(.orange.gradient)
-                    case .running:
-                        if let filterStack = model.previewTarget as? FilterStack {
-                            ScrollView(.horizontal) {
-                                LazyHStack(alignment: .top, spacing: .zero) {
-                                    let screenBounds = UIScreen.main.bounds
-                                    ForEach(filterStack.targetsMap.mapValues(\.target).sorted(using: KeyPathComparator(\.key)), id: \.key) { (filter, target) in
-                                        Group {
-                                            if let metalTarget = target as? MetalPreviewTarget {
-                                                MetalRenderView(previewTarget: metalTarget)
-                                            } else {
-                                                cameraUnavailableView
+                        case .interrupted:
+                            ContentUnavailableView("Interrupted", systemImage: "circle.slash")
+                                .foregroundStyle(.orange.gradient)
+                        case .running:
+                            if let filterStack = model.previewTarget as? FilterStack {
+                                ScrollView(.horizontal) {
+                                    LazyHStack(alignment: .top, spacing: .zero) {
+                                        let screenBounds = UIScreen.main.bounds
+                                        ForEach(filterStack.targetsMap.mapValues(\.target).sorted(using: KeyPathComparator(\.key)), id: \.key) { (filter, target) in
+                                            Group {
+                                                if let metalTarget = target as? MetalPreviewTarget {
+                                                    MetalRenderView(previewTarget: metalTarget)
+                                                } else {
+                                                    cameraUnavailableView
+                                                }
+                                            }
+                                            .scrollTransition(.interactive(timingCurve: .linear), axis: .horizontal) { content, phase in
+                                                content
+                                                    .brightness(phase.isIdentity ? 0 : 0.2)
+                                                    .opacity(phase.isIdentity ? 1 : 0)
+                                                    .offset(x: -phase.value * screenBounds.width)
                                             }
                                         }
-                                        .scrollTransition(.interactive(timingCurve: .linear), axis: .horizontal) { content, phase in
-                                            content
-                                                .brightness(phase.isIdentity ? 0 : 0.2)
-                                                .opacity(phase.isIdentity ? 1 : 0)
-                                                .offset(x: -phase.value * screenBounds.width)
-                                        }
+                                        .containerRelativeFrame(.horizontal)
                                     }
-                                    .containerRelativeFrame(.horizontal)
+                                    .scrollTargetLayout()
                                 }
-                                .scrollTargetLayout()
+                                .scrollIndicators(.hidden)
+                                .scrollTargetBehavior(.viewAligned(limitBehavior: .backport.alwaysByOne))
+                                .scrollPosition(id: Binding($model.lastFilter), anchor: .center)
+                            } else if let metalTarget = model.previewTarget as? MetalPreviewTarget {
+                                MetalRenderView(previewTarget: metalTarget)
+                            } else if let defaultTarget = model.previewTarget as? DefaultPreviewTarget,
+                                      let session = defaultTarget.session {
+                                CameraPreview(session: session, onFocus: onFocus)
+                            } else if let staticTarget = model.previewTarget as? StaticImageTarget {
+                                Image(uiImage: staticTarget.image)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .clipped()
+                                    .containerRelativeFrame(.horizontal)
+                            } else {
+                                cameraUnavailableView
                             }
-                            .scrollIndicators(.hidden)
-                            .scrollTargetBehavior(.viewAligned(limitBehavior: .backport.alwaysByOne))
-                            .scrollPosition(id: Binding($model.lastFilter), anchor: .center)
-                        } else if let metalTarget = model.previewTarget as? MetalPreviewTarget {
-                            MetalRenderView(previewTarget: metalTarget)
-                        } else if let defaultTarget = model.previewTarget as? DefaultPreviewTarget,
-                                  let session = defaultTarget.session {
-                            CameraPreview(session: session, onFocus: onFocus)
-                        } else if let staticTarget = model.previewTarget as? StaticImageTarget {
-                            Image(uiImage: staticTarget.image)
-                                .resizable()
-                                .scaledToFill()
-                                .clipped()
-                                .containerRelativeFrame(.horizontal)
-                        } else {
-                            cameraUnavailableView
                         }
                     }
                 }
@@ -170,29 +175,29 @@ struct CameraViewFinder: View {
                     Task { await model.switchCamera() }
                 }
                 .zIndex(0)
-                VStack(spacing: 44) {
+                VStack(spacing: 36) {
                     if showOptions {
-                        CameraOptionsView()
-                            .environmentObject(model)
-                            .padding(16)
-                            .frame(maxWidth: .infinity)
-                            .safeAreaInset(edge: .bottom, spacing: 8) {
-                                Button {
-                                    withAnimation(.smooth) {
-                                        showOptions = false
-                                    }
-                                } label: {
-                                    Image(systemName: "chevron.up")
-                                        .font(.caption.weight(.light))
-                                        .foregroundStyle(.yellow)
-                                        .padding(12)
-                                        .background(.background.secondary.opacity(0.5), in: .circle)
+                        VStack(spacing: 16) {
+                            CameraOptionsView()
+                                .environmentObject(model)
+                            CameraSecondaryOptionsView()
+                                .environmentObject(model)
+                            Button {
+                                withAnimation(.smooth) {
+                                    showOptions = false
                                 }
-                                .buttonStyle(.plain)
-                                .padding(.bottom, 8)
+                            } label: {
+                                Image(systemName: "chevron.up")
+                                    .font(.caption.weight(.light))
+                                    .foregroundStyle(.yellow)
+                                    .padding(12)
+                                    .background(.background.secondary.opacity(0.5), in: .circle)
                             }
-                            .background(.ultraThinMaterial)
-                            .transition(.move(edge: .top).combined(with: .offset(y: -64)))
+                            .buttonStyle(.plain)
+                        }
+                        .padding(16)
+                        .frame(maxWidth: .infinity)
+                        .transition(.move(edge: .top).combined(with: .offset(y: -64)))
                     } else {
                         Button {
                             withAnimation(.smooth) {
@@ -284,6 +289,7 @@ struct CameraViewFinder: View {
                                     .padding(12)
                                     .background(.background.secondary.opacity(0.5), in: .rect(cornerRadius: 12, style: .continuous))
                             }
+                            .frame(maxWidth: .infinity, alignment: .trailing)
                         } else {
                             Button {
                                 showSettings = true
@@ -405,8 +411,34 @@ struct CameraViewFinder: View {
             }
         }
         .backport.onCameraCaptureEvent {
+            if model.captureActivity.willCapture { return }
+            if model.captureActivity.isRecording {
+                Task { await model.stopRecording() }
+                return
+            }
+            
+            if model.captureMode == .video {
+                model.captureMode = .photo
+                return
+            }
+            
             Task {
                 await model.capturePhoto()
+            }
+        } secondaryAction: {
+            if model.captureActivity.willCapture { return }
+            if model.captureActivity.isRecording {
+                Task { await model.stopRecording() }
+                return
+            }
+            
+            if model.captureMode == .photo {
+                model.captureMode = .video
+                return
+            }
+            
+            Task {
+                await model.startRecording()
             }
         }
         .task(id: scenePhase) {

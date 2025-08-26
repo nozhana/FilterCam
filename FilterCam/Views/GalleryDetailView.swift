@@ -69,6 +69,10 @@ private struct MediaPager: View {
                                                 player.pause()
                                             }
                                         }
+                                        .onDisappear {
+                                            player.pause()
+                                            player.replaceCurrentItem(with: nil)
+                                        }
                                 }
                             }
                         }
@@ -172,8 +176,10 @@ private struct CustomVideoPlayer: UIViewRepresentable {
         }
         
         deinit {
+            observers.removeAll()
             player?.pause()
             player?.replaceCurrentItem(with: nil)
+            player = nil
         }
         
         private let playButtonImage = {
