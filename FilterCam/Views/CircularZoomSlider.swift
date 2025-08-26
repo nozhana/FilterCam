@@ -156,12 +156,14 @@ private struct ExpandedCircularZoomSlider: View {
                             .scaleEffect(interpolation, anchor: .top)
                     }
                     .overlay(alignment: .top) {
-                        if isFifth {
-                            let isInRange = ((zoomFactor - 0.1)...(zoomFactor + 0.1)) ~= zoom
+                        if [0.5, 1, 3, 5].contains(zoom) {
+                            let delta = abs(zoomFactor - zoom)
+                            let interpolation = simd_smoothstep(0, zoom < 1 ? 0.2 : 0.4, delta)
                             (Text(zoom, format: .number.precision(.fractionLength(0...1))) + Text(verbatim: "x"))
-                                .font(.caption.lowercaseSmallCaps().weight(isInRange ? .medium : .light))
-                                .foregroundStyle(isInRange ? .yellow : .primary)
-                                .scaleEffect(isInRange ? 1.25 : 1, anchor: .top)
+                                .font(.caption.lowercaseSmallCaps().weight(.light))
+                                .foregroundStyle(.primary)
+                                .scaleEffect(interpolation)
+                                .opacity(interpolation)
                                 .animation(.smooth, value: zoomFactor)
                                 .fixedSize()
                                 .rotationEffect(.degrees(180))
@@ -172,11 +174,20 @@ private struct ExpandedCircularZoomSlider: View {
                     .opacity((0.5...5) ~= zoom ? 1 : 0)
             }
             .rotationEffect(.degrees((zoomFactor - 1) * -30 * (zoomFactor < 1 ? 2 : 1)))
-            Image(systemName: "arrowtriangle.down.fill")
-                .resizable()
-                .frame(width: 8, height: 12)
-                .foregroundStyle(.yellow)
-                .frame(maxHeight: .infinity, alignment: .top)
+            VStack(spacing: 16) {
+                Image(systemName: "arrowtriangle.down.fill")
+                    .resizable()
+                    .frame(width: 8, height: 12)
+                    .foregroundStyle(.yellow)
+                let isInIntegerRange = abs(zoomFactor - zoomFactor.rounded()) < 0.1
+                (Text(zoomFactor, format: .number.precision(.fractionLength(1)))
+                 + Text(verbatim: "x"))
+                .font(.caption.lowercaseSmallCaps().weight(isInIntegerRange ? .regular : .light))
+                .scaleEffect(isInIntegerRange ? 1.1 : 1, anchor: .top)
+                .foregroundStyle(isInIntegerRange ? .yellow : .primary)
+                .animation(.smooth, value: isInIntegerRange)
+            }
+            .frame(maxHeight: .infinity, alignment: .top)
         }
         .frame(width: 300, height: 300)
         .fixedSize(horizontal: false, vertical: true)
