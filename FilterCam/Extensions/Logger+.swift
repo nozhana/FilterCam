@@ -9,7 +9,7 @@ import Foundation
 import OSLog
 
 extension Logger {
-    static let shared = Logger(subsystem: "com.nozhana.FilterCam.logger", category: "shared")
+    static let main = Logger(subsystem: "com.nozhana.FilterCam.logger", category: "main")
 }
 
-let logger = Logger.shared
+let logger = Logger.main
