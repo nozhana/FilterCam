@@ -28,15 +28,6 @@ struct AppConfiguration: Sendable {
         try? FileManager.default.removeItem(at: url)
         try! FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         
-        PreviewAssets.initialPhotos
-            .compactMap {
-                if let data = try? JSONEncoder().encode($0) {
-                    return ($0, data)
-                }
-                return nil
-            }
-            .forEach { try? $0.1.write(to: url.appendingPathComponent($0.0.id.uuidString, conformingTo: .json)) }
-        
         let config = AppConfiguration(captureDirectory: url)
         return config
     }()
