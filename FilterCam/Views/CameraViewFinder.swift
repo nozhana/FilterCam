@@ -6,10 +6,13 @@
 //
 
 import AVFoundation
+import FilterCamBase
+import FilterCamMacros
 import GPUImage
 import SwiftData
 import SwiftUI
 
+@DependencyProvider(.cameraModel, create: true)
 struct CameraViewFinder: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.appConfiguration) private var appConfiguration
@@ -20,8 +23,6 @@ struct CameraViewFinder: View {
     @Query(sort: [.init(\CustomFilter.layoutIndex, order: .reverse)], animation: .smooth)
     private var customFilters: [CustomFilter]
     
-    @StateObject private var model = CameraModel()
-    
     @Namespace private var galleryAnimation
     @Namespace private var filterChainCreatorAnimation
     
@@ -31,8 +32,7 @@ struct CameraViewFinder: View {
     @State private var showFilterConfigurator = false
     @State private var showFilterChainCreator = false
     
-    @AppStorage(UserDefaultsKey.cameraSwitchRotationEffect.rawValue, store: .shared)
-    private var rotateCamera = true
+    @Storage(.cameraSwitchRotationEffect) private var rotateCamera = true
     
     private func onFocus(devicePoint: CGPoint, layerPoint: CGPoint) {
         Task {

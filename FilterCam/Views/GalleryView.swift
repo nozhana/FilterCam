@@ -5,15 +5,16 @@
 //  Created by Nozhan A. on 8/21/25.
 //
 
+import FilterCamMacros
 import simd
 import SwiftUI
 
+@DependencyProvider(.mediaStore)
 struct GalleryView: View {
     var animation: Namespace.ID?
     
     @StateObject private var model = Model()
     
-    @Environment(\.mediaStore) private var mediaStore
     @Environment(\.openMainApp) private var openMainApp
     
     private let columns = Array(repeating: GridItem(spacing: 0), count: 3)

@@ -1,5 +1,5 @@
 {
-  "originHash" : "c9abdcb482ac90279de8237de96bb7ae46b57d786224db9bae76bcf22c73bb24",
+  "originHash" : "0f421e0695ed8979e94875b9abce6906e8825e4972d70af2e054fcd0bd75f00d",
   "pins" : [
     {
       "identity" : "gpuimage3",
@@ -8,6 +8,15 @@
       "state" : {
         "branch" : "main",
         "revision" : "84466fc344e1220238c1c07e94e91207caaabe51"
+      }
+    },
+    {
+      "identity" : "swift-syntax",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-syntax.git",
+      "state" : {
+        "revision" : "0687f71944021d616d34d922343dcef086855920",
+        "version" : "600.0.1"
       }
     }
   ],

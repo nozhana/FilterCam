@@ -5,11 +5,11 @@
 //  Created by Nozhan A. on 8/26/25.
 //
 
+import FilterCamMacros
 import SwiftUI
 
+@DependencyProvider(.cameraModel)
 struct CameraSecondaryOptionsView: View {
-    @EnvironmentObject private var model: CameraModel
-    
     @State private var expandedOption: CameraOption?
     
     var body: some View {
@@ -26,11 +26,14 @@ struct CameraSecondaryOptionsView: View {
     }
 }
 
+#Preview {
+    CameraSecondaryOptionsView()
+}
+
+@DependencyProvider(.cameraModel)
 private struct CameraOptionView: View {
     var option: CameraOption
     @Binding var expandedOption: CameraOption?
-    
-    @EnvironmentObject private var model: CameraModel
     
     private var isExpanded: Bool {
         get { expandedOption == option }
@@ -113,6 +116,13 @@ private struct CameraOptionView: View {
     }
 }
 
+#Preview {
+    @Previewable @State var expandedOption: CameraOption?
+    CameraOptionView(option: .exposure, expandedOption: $expandedOption)
+    CameraOptionView(option: .whiteBalance, expandedOption: $expandedOption)
+    CameraOptionView(option: .proRAW, expandedOption: $expandedOption)
+}
+
 private enum CameraOption: Int, Identifiable, Comparable, CaseIterable {
     case exposure
     case whiteBalance
@@ -120,7 +130,7 @@ private enum CameraOption: Int, Identifiable, Comparable, CaseIterable {
     
     var id: Int { rawValue }
     
-    func title(model: CameraModel) -> String {
+    func title(model: some CameraModelProtocol) -> String {
         switch self {
         case .exposure:
             Exposure(value: model.exposure).title
@@ -131,7 +141,7 @@ private enum CameraOption: Int, Identifiable, Comparable, CaseIterable {
         }
     }
     
-    func systemImage(model: CameraModel) -> String {
+    func systemImage(model: some CameraModelProtocol) -> String {
         switch self {
         case .exposure:
             Exposure(value: model.exposure).systemImage

@@ -1,19 +1,11 @@
 //
-//  UserDefaultsKey.swift
+//  UserDefaults+.swift
 //  FilterCam
 //
-//  Created by Nozhan A. on 8/22/25.
+//  Created by Nozhan A. on 8/28/25.
 //
 
 import Foundation
-
-enum UserDefaultsKey: String {
-    case cameraSwitchRotationEffect = "cam_switch_rotation"
-    case showDeveloperSettings = "show_dev_settings"
-    case useMetalRendering = "use_metal"
-    case useFilters = "use_filters"
-    case mockCamera = "mock_camera"
-}
 
 extension UserDefaults {
 #if DEBUG

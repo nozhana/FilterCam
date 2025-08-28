@@ -25,10 +25,6 @@ final class CameraModel: CameraModelProtocol {
     @Published private(set) var activeDeviceExposure = 0.5
     @Published private(set) var activeDeviceWhiteBalance: Double = 4000
     
-    var isRunningAndActive: Bool {
-        status == .running && !isPaused && !isSwitchingCameras
-    }
-    
     @Published var zoomFactor: Double = 1.0 {
         didSet {
             Task {

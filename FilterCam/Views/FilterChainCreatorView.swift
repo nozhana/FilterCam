@@ -6,18 +6,17 @@
 //
 
 import AVFoundation
+import FilterCamMacros
 import Combine
 import GPUImage
 import SwiftUI
 
+@DependencyProvider(.cameraModel, .database, name: "cameraModel")
 struct FilterChainCreatorView: View {
     @StateObject private var model = Model()
     
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.database) private var database
-    
-    @EnvironmentObject private var cameraModel: CameraModel
     
     @State private var controlPanelDetent = PresentationDetent.medium
     
@@ -148,7 +147,7 @@ private extension FilterChainCreatorView {
         }
         
         @MainActor
-        func save(on database: DatabaseService, cameraModel: CameraModel) throws {
+        func save(on database: DatabaseService, cameraModel: some CameraModelProtocol) throws {
             let filtersCount = (try? database.count(CustomFilter.self)) ?? 0
             let filterIndex = (try? database.max(CustomFilter.self, by: \.layoutIndex)).map { $0.layoutIndex + 1 } ?? 0
             
@@ -240,6 +239,7 @@ private extension FilterChainCreatorView {
     }
 }
 
+@DependencyProvider(.database)
 private struct FilterChainControlPanelView: View {
     @ObservedObject var model: FilterChainCreatorView.Model
     var saveFilter: () -> Void
@@ -247,7 +247,6 @@ private struct FilterChainControlPanelView: View {
     @State private var filterConfigurationsExpanded: [CameraFilter: Bool] = [:]
     
     @Environment(\.editMode) private var editMode
-    @Environment(\.database) private var database
     
     var body: some View {
         NavigationStack {

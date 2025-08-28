@@ -6,11 +6,12 @@
 //
 
 import simd
+import FilterCamBase
+import FilterCamMacros
 import SwiftUI
 
+@DependencyProvider(.cameraModel)
 struct CameraActionButton: View {
-    @EnvironmentObject private var model: CameraModel
-    
     @State private var dragXOffset = CGFloat.zero
     
     var body: some View {
@@ -97,5 +98,4 @@ struct CameraActionButton: View {
 
 #Preview {
     CameraActionButton()
-        .environmentObject(CameraModel())
 }

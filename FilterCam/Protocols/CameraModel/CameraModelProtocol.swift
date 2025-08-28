@@ -9,6 +9,7 @@ import Foundation
 
 protocol CameraModelProtocol: AnyObject, ObservableObject {
     var cameraState: CameraState { get }
+    var captureActivity: CaptureActivity { get }
     var status: CameraStatus { get }
     var isSwitchingCameras: Bool { get }
     var shouldFlashScreen: Bool { get }
@@ -49,7 +50,19 @@ protocol CameraModelProtocol: AnyObject, ObservableObject {
 }
 
 extension CameraModelProtocol {
+    func configure(with configuration: AppConfiguration) async {}
+    func switchCaptureService(_ service: some CaptureService) async {}
+    func pauseStream() async {}
+    func unpauseStream() async {}
+    func switchCamera() async {}
+    func capturePhoto() async {}
+    func startRecording() async {}
+    func stopRecording() async {}
+    func focusAndExpose(on devicePoint: CGPoint, layerPoint: CGPoint) async {}
+}
+
+extension CameraModelProtocol {
     var isRunningAndActive: Bool {
-        status == .running && !isPaused && !isSwitchingCamera
+        status == .running && !isPaused && !isSwitchingCameras
     }
 }

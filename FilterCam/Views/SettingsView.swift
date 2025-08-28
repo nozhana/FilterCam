@@ -5,25 +5,17 @@
 //  Created by Nozhan A. on 8/22/25.
 //
 
+import FilterCamBase
+import FilterCamMacros
 import SwiftUI
 
+@DependencyProvider(.cameraModel, .mediaStore, name: "cameraModel")
 struct SettingsView: View {
-    @AppStorage(UserDefaultsKey.cameraSwitchRotationEffect.rawValue, store: .shared)
-    private var rotateCamera = true
-    
-    @AppStorage(UserDefaultsKey.showDeveloperSettings.rawValue, store: .shared)
-    private var showDeveloperSettings = false
-    
-    @AppStorage(UserDefaultsKey.useMetalRendering.rawValue, store: .shared)
-    private var useMetalRendering = false
-    
-    @AppStorage(UserDefaultsKey.useFilters.rawValue, store: .shared)
-    private var useFilters = false
-    
-    @AppStorage(UserDefaultsKey.mockCamera.rawValue, store: .shared)
-    private var mockCamera = false
-    
-    @EnvironmentObject private var cameraModel: CameraModel
+    @Storage(.cameraSwitchRotationEffect) private var rotateCamera = true
+    @Storage(.showDeveloperSettings) private var showDeveloperSettings = false
+    @Storage(.useMetalRendering) private var useMetalRendering = false
+    @Storage(.useFilters) private var useFilters = false
+    @Storage(.mockCamera) private var mockCamera = false
     
     @State private var stepsToBecomeADeveloper = 10
     @State private var stepsResetTask: Task<Void, Error>?
@@ -67,6 +59,10 @@ struct SettingsView: View {
                 
                 if showDeveloperSettings {
                     Section {
+                        Button("Wipe Gallery", systemImage: "trash.fill", role: .destructive) {
+                            try? mediaStore.wipeGallery()
+                        }
+                        .foregroundStyle(.red)
                         Toggle("Mock Camera", systemImage: "camera.macro", isOn: $mockCamera)
                             .onChange(of: mockCamera) {
                                 refreshCaptureService()
@@ -75,17 +71,14 @@ struct SettingsView: View {
                         if useMetalRendering {
                             Toggle("Use Filters", systemImage: "camera.filters", isOn: $useFilters)
                         }
+                        Button("Hide Developer Settings", systemImage: "eye.slash.fill") {
+                            showDeveloperSettings = false
+                        }
                     } header: {
                         Label("Developer Settings", systemImage: "hammer.fill")
                     }
                     .onChange(of: useMetalRendering != useFilters) {
                         refreshCaptureService()
-                    }
-                    
-                    Section {
-                        Button("Hide Developer Settings", systemImage: "eye.slash.fill") {
-                            showDeveloperSettings = false
-                        }
                     }
                 }
             }
