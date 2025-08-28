@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "lut_velvia_100.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

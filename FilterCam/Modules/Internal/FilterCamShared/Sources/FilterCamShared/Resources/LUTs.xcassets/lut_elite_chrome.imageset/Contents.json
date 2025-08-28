@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "lut_elite_chrome.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

@@ -14,12 +14,14 @@ let package = Package(
     dependencies: [
         .package(path: "../Internal/FilterCamBase"),
         .package(path: "../Internal/FilterCamMacros"),
+        .package(path: "../Internal/FilterCamShared"),
     ],
     targets: [
         .target(
             name: "FilterCamDependencies", dependencies: [
                 "FilterCamBase",
-                "FilterCamMacros"
+                "FilterCamMacros",
+                "FilterCamShared",
             ]
         ),
     ]

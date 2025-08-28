@@ -3,3 +3,4 @@
 
 @_exported import FilterCamBase
 @_exported import FilterCamMacros
+@_exported import FilterCamShared
