@@ -6,12 +6,14 @@
 //
 
 import AVFoundation
-import FilterCamMacros
 import Combine
+import FilterCamBase
+import FilterCamMacros
 import GPUImage
 import SwiftUI
 
-@DependencyProvider(.cameraModel, .database, name: "cameraModel")
+@DependencyProvider(\.database)
+@DependencyProvider(\.cameraModel, observed: true)
 struct FilterChainCreatorView: View {
     @StateObject private var model = Model()
     
@@ -239,7 +241,6 @@ private extension FilterChainCreatorView {
     }
 }
 
-@DependencyProvider(.database)
 private struct FilterChainControlPanelView: View {
     @ObservedObject var model: FilterChainCreatorView.Model
     var saveFilter: () -> Void

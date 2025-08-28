@@ -1,8 +1,8 @@
 //
 //  ProcessInfo+.swift
-//  FilterCamBase
+//  FilterCam
 //
-//  Created by Nozhan A. on 8/28/25.
+//  Created by Nozhan A. on 8/19/25.
 //
 
 import Foundation

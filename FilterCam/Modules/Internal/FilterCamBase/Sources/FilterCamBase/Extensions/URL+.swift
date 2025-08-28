@@ -5,9 +5,10 @@
 //  Created by Nozhan A. on 8/24/25.
 //
 
+#if canImport(UIKit)
 import UIKit
 
-extension URL {
+public extension URL {
     static let appSettingsOrGeneralSettings = {
         let urlString = UIApplication.openSettingsURLString
         let settingsURL = URL(string: urlString)!
@@ -15,3 +16,5 @@ extension URL {
         return appSettingsURL ?? settingsURL
     }()
 }
+
+#endif

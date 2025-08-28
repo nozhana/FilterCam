@@ -5,6 +5,7 @@
 //  Created by Nozhan A. on 8/26/25.
 //
 
+import FilterCamBase
 import SwiftUI
 
 struct Ticker<V>: View where V: BinaryFloatingPoint, V.Stride: BinaryFloatingPoint {

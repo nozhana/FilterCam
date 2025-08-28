@@ -5,13 +5,18 @@
 //  Created by Nozhan A. on 8/21/25.
 //
 
+import FilterCamBase
 import FilterCamMacros
 import simd
 import SwiftUI
 
-@DependencyProvider(.mediaStore)
+@DependencyProvider(\.mediaStore)
 struct GalleryView: View {
-    var animation: Namespace.ID?
+    private var animation: Namespace.ID?
+    
+    init(animation: Namespace.ID? = nil) {
+        self.animation = animation
+    }
     
     @StateObject private var model = Model()
     

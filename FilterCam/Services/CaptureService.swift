@@ -73,7 +73,7 @@ final actor CaptureService {
     static func `default`() -> CaptureService {
         let session = AVCaptureSession()
 #if DEBUG
-        if ProcessInfo.isRunningPreviews || UserDefaults.shared.bool(forKey: UserDefaultsKey.mockCamera.rawValue) {
+        if ProcessInfo.isRunningPreviews || UserDefaults.mockCamera {
             return CaptureService(previewSource: .staticImage(.camPreview), previewTarget: .staticImage(.camPreview), photoOutput: .default(), movieOutput: .default(), session: session)
         } else {
             return CaptureService(previewSource: .default(session: session), previewTarget: .default(), photoOutput: .default(), movieOutput: .default(), session: session)
@@ -85,7 +85,7 @@ final actor CaptureService {
     
     static func metal() throws -> CaptureService {
 #if DEBUG
-        if ProcessInfo.isRunningPreviews || UserDefaults.shared.bool(forKey: UserDefaultsKey.mockCamera.rawValue) {
+        if ProcessInfo.isRunningPreviews || UserDefaults.mockCamera {
             return CaptureService(previewSource: .staticImage(.camPreview), previewTarget: .metal(), photoOutput: .metal(), movieOutput: .metal(), session: .init())
         } else {
             let metalCamera = try MetalCameraSource()
@@ -110,7 +110,7 @@ final actor CaptureService {
         }
         
 #if DEBUG
-        if ProcessInfo.isRunningPreviews || UserDefaults.shared.bool(forKey: UserDefaultsKey.mockCamera.rawValue) {
+        if ProcessInfo.isRunningPreviews || UserDefaults.mockCamera {
             return CaptureService(previewSource: .staticImage(.camPreview), previewTarget: filterStack, photoOutput: .metal(), movieOutput: .metal(), session: .init())
         } else {
             let metalCamera = try MetalCameraSource()

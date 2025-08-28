@@ -9,7 +9,7 @@ import AVFoundation
 
 extension CMVideoDimensions: @retroactive Equatable, @retroactive Comparable {
     
-    static let zero = CMVideoDimensions()
+    public static let zero = CMVideoDimensions()
     
     public static func == (lhs: CMVideoDimensions, rhs: CMVideoDimensions) -> Bool {
         lhs.width == rhs.width && lhs.height == rhs.height
@@ -20,7 +20,7 @@ extension CMVideoDimensions: @retroactive Equatable, @retroactive Comparable {
     }
 }
 
-extension AVCaptureDevice {
+public extension AVCaptureDevice {
     var activeFormat10BitVariant: AVCaptureDevice.Format? {
         formats.filter {
             $0.maxFrameRate == activeFormat.maxFrameRate &&
@@ -30,7 +30,7 @@ extension AVCaptureDevice {
     }
 }
 
-extension AVCaptureDevice.Format {
+public extension AVCaptureDevice.Format {
     var isTenBitFormat: Bool {
         formatDescription.mediaSubType.rawValue == kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
     }

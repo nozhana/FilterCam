@@ -6,5 +6,6 @@ struct FilterCamMacrosPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         OptionSetMacro.self,
         DependencyProviderMacro.self,
+        DependencyEntryMacro.self,
     ]
 }

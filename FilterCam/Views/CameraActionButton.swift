@@ -5,12 +5,12 @@
 //  Created by Nozhan A. on 8/22/25.
 //
 
-import simd
 import FilterCamBase
 import FilterCamMacros
+import simd
 import SwiftUI
 
-@DependencyProvider(.cameraModel)
+@DependencyProvider(\.cameraModel, name: "model", observed: true)
 struct CameraActionButton: View {
     @State private var dragXOffset = CGFloat.zero
     

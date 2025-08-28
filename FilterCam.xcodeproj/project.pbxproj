@@ -10,6 +10,7 @@
 		312EE4EE2E5B606900CF131D /* GPUImage in Frameworks */ = {isa = PBXBuildFile; productRef = 312EE4ED2E5B606900CF131D /* GPUImage */; };
 		314232582E5F841A006C11F9 /* FilterCamDependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 314232572E5F841A006C11F9 /* FilterCamDependencies */; };
 		3142325A2E5F8422006C11F9 /* FilterCamDependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 314232592E5F8422006C11F9 /* FilterCamDependencies */; };
+		315A67182E60EF0F00358C5D /* FilterCamBase in Frameworks */ = {isa = PBXBuildFile; productRef = 315A67172E60EF0F00358C5D /* FilterCamBase */; };
 		3174E16E2E552BE2006D6EB3 /* FilterCamCaptureExtension.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = 3174E1652E552BE2006D6EB3 /* FilterCamCaptureExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3174E1992E55310D006D6EB3 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3174E1982E55310D006D6EB3 /* WidgetKit.framework */; };
 		3174E19B2E55310D006D6EB3 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3174E19A2E55310D006D6EB3 /* SwiftUI.framework */; };
@@ -89,20 +90,15 @@
 		3174E1752E552C7F006D6EB3 /* Exceptions for "FilterCam" folder in "FilterCamCaptureExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"Dependencies/CameraModel+Dependency.swift",
+				"Dependencies/DatabaseService+Dependency.swift",
+				"Dependencies/MediaStore+Dependency.swift",
 				Environment/AppConfiguration.swift,
 				"Environment/CaptureExtension+Environment.swift",
 				"Environment/DatabaseService+Environment.swift",
 				"Environment/MediaStore+Environment.swift",
 				"Environment/ThermalState+Environment.swift",
-				"Extensions/BinaryFloatingPoint+.swift",
-				Extensions/CaptureExtensions.swift,
-				"Extensions/KVO+.swift",
 				"Extensions/Logger+.swift",
-				"Extensions/ProcessInfo+.swift",
-				"Extensions/UIImage+.swift",
-				"Extensions/URL+.swift",
-				"Extensions/UserDefaults+.swift",
-				"Extensions/View+.swift",
 				Models/CustomFilter.swift,
 				"Models/CustomFilter+FilterChain.swift",
 				"Preview Content/Preview Assets.xcassets",
@@ -226,14 +222,7 @@
 				"Environment/CaptureExtension+Environment.swift",
 				"Environment/MediaStore+Environment.swift",
 				"Environment/ThermalState+Environment.swift",
-				"Extensions/BinaryFloatingPoint+.swift",
-				"Extensions/KVO+.swift",
 				"Extensions/Logger+.swift",
-				"Extensions/ProcessInfo+.swift",
-				"Extensions/UIImage+.swift",
-				"Extensions/URL+.swift",
-				"Extensions/UserDefaults+.swift",
-				"Extensions/View+.swift",
 				Models/CustomFilter.swift,
 				"Models/CustomFilter+Noop.swift",
 				"Preview Content/Preview Assets.xcassets",
@@ -320,6 +309,7 @@
 				3174E19B2E55310D006D6EB3 /* SwiftUI.framework in Frameworks */,
 				312EE4EE2E5B606900CF131D /* GPUImage in Frameworks */,
 				3174E1992E55310D006D6EB3 /* WidgetKit.framework in Frameworks */,
+				315A67182E60EF0F00358C5D /* FilterCamBase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -410,6 +400,7 @@
 			name = FilterCamWidgetsExtension;
 			packageProductDependencies = (
 				312EE4ED2E5B606900CF131D /* GPUImage */,
+				315A67172E60EF0F00358C5D /* FilterCamBase */,
 			);
 			productName = FilterCamWidgetsExtension;
 			productReference = 3174E1962E55310D006D6EB3 /* FilterCamWidgetsExtension.appex */;
@@ -924,6 +915,10 @@
 		314232592E5F8422006C11F9 /* FilterCamDependencies */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = FilterCamDependencies;
+		};
+		315A67172E60EF0F00358C5D /* FilterCamBase */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FilterCamBase;
 		};
 		31DF54562E592C8D00790201 /* GPUImage */ = {
 			isa = XCSwiftPackageProductDependency;

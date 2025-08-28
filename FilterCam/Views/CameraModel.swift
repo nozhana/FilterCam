@@ -7,6 +7,7 @@
 
 import AVFoundation
 import Combine
+import FilterCamBase
 import SwiftUI
 
 final class CameraModel: CameraModelProtocol {

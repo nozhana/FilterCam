@@ -5,6 +5,7 @@
 //  Created by Nozhan A. on 8/19/25.
 //
 
+import FilterCamBase
 import SwiftUI
 
 struct AppConfiguration: Sendable {

@@ -5,9 +5,10 @@
 //  Created by Nozhan A. on 8/21/25.
 //
 
+#if canImport(SwiftUI)
 import SwiftUI
 
-extension View {
+public extension View {
     @ViewBuilder
     func `if`(_ predicate: Bool, @ViewBuilder content: @escaping (Self) -> some View) -> some View {
         if predicate {
@@ -44,3 +45,5 @@ extension View {
         }
     }
 }
+
+#endif

@@ -12,7 +12,7 @@ import GPUImage
 import SwiftData
 import SwiftUI
 
-@DependencyProvider(.cameraModel, create: true)
+@DependencyProvider(\.cameraModel, name: "model", observed: true)
 struct CameraViewFinder: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.appConfiguration) private var appConfiguration

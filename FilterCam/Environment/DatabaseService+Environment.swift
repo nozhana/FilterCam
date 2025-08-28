@@ -5,6 +5,7 @@
 //  Created by Nozhan A. on 8/25/25.
 //
 
+import FilterCamBase
 import SwiftUI
 
 extension EnvironmentValues {

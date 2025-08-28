@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension NSKeyValueObservation {
+public extension NSKeyValueObservation {
     func store(in collection: inout some RangeReplaceableCollection<NSKeyValueObservation>) {
         collection.append(self)
     }
