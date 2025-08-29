@@ -15,3 +15,11 @@ extension EnvironmentValues {
     @Entry var database: DatabaseService = .default
 #endif
 }
+
+extension View {
+    func databaseContainer(_ database: some DatabaseService = .default) -> some View {
+        self
+            .modelContainer(database.container)
+            .environment(\.database, database)
+    }
+}

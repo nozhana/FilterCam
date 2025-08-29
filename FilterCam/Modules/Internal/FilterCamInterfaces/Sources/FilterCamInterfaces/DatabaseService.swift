@@ -56,10 +56,20 @@ public extension DatabaseService {
     }
     
     @MainActor
+    func fetch<T, V>(_ model: T.Type = T.self, sortBy keyPath: KeyPath<T, V>, order: SortOrder = .forward, predicate: Predicate<T>? = nil) throws -> T? where T: PersistentModel, V: Comparable {
+        try fetch(model, sortDescriptors: [.init(keyPath, order: order)], predicate: predicate)
+    }
+    
+    @MainActor
     func list<T>(_ model: T.Type = T.self, sortDescriptors: [SortDescriptor<T>] = [], predicate: Predicate<T>? = nil, fetchCount: Int? = nil) throws -> [T] where T: PersistentModel {
         var descriptor = FetchDescriptor(predicate: predicate, sortBy: sortDescriptors)
         descriptor.fetchLimit = fetchCount
         return try container.mainContext.fetch(descriptor)
+    }
+    
+    @MainActor
+    func list<T, V>(_ model: T.Type = T.self, sortBy keyPath: KeyPath<T, V>, order: SortOrder = .forward, predicate: Predicate<T>? = nil) throws -> [T] where T: PersistentModel, V: Comparable {
+        try list(model, sortDescriptors: [.init(keyPath, order: order)], predicate: predicate)
     }
     
     @MainActor
@@ -70,19 +80,11 @@ public extension DatabaseService {
     
     @MainActor
     func min<M, T>(_ model: M.Type = M.self, by keyPath: KeyPath<M, T>) throws -> M? where M: PersistentModel, T: Comparable {
-        try fetch(sortDescriptors: [.init(keyPath)])
+        try fetch(sortBy: keyPath)
     }
     
     @MainActor
     func max<M, T>(_ model: M.Type = M.self, by keyPath: KeyPath<M, T>) throws -> M? where M: PersistentModel, T: Comparable {
-        try fetch(sortDescriptors: [.init(keyPath, order: .reverse)])
-    }
-}
-
-public extension View {
-    func databaseContainer(_ database: some DatabaseService = .default) -> some View {
-        self
-            .modelContainer(database.container)
-            .environment(\.database, database)
+        try fetch(sortBy: keyPath, order: .reverse)
     }
 }
