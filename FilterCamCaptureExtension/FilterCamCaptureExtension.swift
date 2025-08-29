@@ -5,6 +5,7 @@
 //  Created by Nozhan A. on 8/20/25.
 //
 
+import FilterCamShared
 import Foundation
 import LockedCameraCapture
 import SwiftUI

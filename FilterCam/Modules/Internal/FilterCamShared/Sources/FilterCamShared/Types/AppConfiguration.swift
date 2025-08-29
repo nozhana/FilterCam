@@ -7,10 +7,14 @@
 
 import Foundation
 
-struct AppConfiguration: Sendable {
-    let captureDirectory: URL
+public struct AppConfiguration: Sendable {
+    public let captureDirectory: URL
     
-    static let shared = {
+    public init(captureDirectory: URL) {
+        self.captureDirectory = captureDirectory
+    }
+    
+    public static let shared = {
         var url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         url.append(component: "capture")
         if !FileManager.default.fileExists(atPath: url.path()) {
@@ -21,7 +25,7 @@ struct AppConfiguration: Sendable {
     }()
     
 #if DEBUG
-    static let preview = {
+    public static let preview = {
         var url = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
         url.append(component: "capture")
         try? FileManager.default.removeItem(at: url)
