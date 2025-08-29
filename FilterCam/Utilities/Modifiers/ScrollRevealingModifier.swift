@@ -72,12 +72,12 @@ extension View {
 }
 
 #Preview("Horizontal") {
-    let images: [ImageResource] = [.camPreview, .donut]
+    let images: [Image] = [R.camPreview, R.donut]
     
     ScrollView(.horizontal) {
         HStack(spacing: .zero) {
-            ForEach(images, id: \.self) { resource in
-                Image(resource)
+            ForEach(Array(0..<images.count), id: \.self) { index in
+                images[index]
                     .resizable()
                     .scaledToFill()
                     .containerRelativeFrame(.horizontal)
@@ -91,13 +91,16 @@ extension View {
     // .contentMargins(20, for: .scrollContent)
 }
 
+import FilterCamResources
+
 #Preview("Vertical") {
-    let images: [ImageResource] = [.camPreview, .donut]
+    let images: [Image] = [R.camPreview, R.donut]
     
     ScrollView {
         VStack(spacing: .zero) {
-            ForEach(images, id: \.self) { resource in
-                Image(resource)
+            ForEach(Array(0..<images.count), id: \.self) { index in
+                let image = images[index]
+                image
                     .resizable()
                     .scaledToFill()
                     .containerRelativeFrame(.vertical)

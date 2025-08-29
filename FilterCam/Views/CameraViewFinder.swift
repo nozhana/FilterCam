@@ -8,6 +8,7 @@
 import AVFoundation
 import FilterCamCore
 import FilterCamMacros
+import FilterCamResources
 import FilterCamShared
 import FilterCamUtilities
 import GPUImage
@@ -600,7 +601,7 @@ private struct FilterPreview: View {
     var isSelected: Bool
     
     var body: some View {
-        FilteredImage(filter: filter, source: .donut)
+        FilteredImage(filter: filter, source: R.donut)
             .aspectRatio(1, contentMode: .fit)
             .overlay {
                 RoundedRectangle(cornerRadius: 12)

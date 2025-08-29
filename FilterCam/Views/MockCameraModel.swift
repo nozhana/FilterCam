@@ -6,6 +6,7 @@
 //
 
 import FilterCamInterfaces
+import FilterCamResources
 import FilterCamShared
 import FilterCamUtilities
 import Foundation
@@ -38,9 +39,9 @@ final class MockCameraModel: CameraModelProtocol {
     @Published var lastFilter: CameraFilter = .none
     @Published var showLevel: Bool = false
     
-    private(set) var previewSource: any PreviewSource = .staticImage(.camPreview)
+    private(set) var previewSource: any PreviewSource = .staticImage(R.camPreview)
     
-    private(set) var previewTarget: any PreviewTarget = .staticImage(.camPreview)
+    private(set) var previewTarget: any PreviewTarget = .staticImage(R.camPreview)
     
     private let photoOutput = StaticPhotoOutputService()
     

@@ -10,6 +10,7 @@
 		312EE4EE2E5B606900CF131D /* GPUImage in Frameworks */ = {isa = PBXBuildFile; productRef = 312EE4ED2E5B606900CF131D /* GPUImage */; };
 		315A6A1C2E61024200358C5D /* FilterCamDependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 315A6A1B2E61024200358C5D /* FilterCamDependencies */; };
 		315A6A1E2E61024E00358C5D /* FilterCamDependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 315A6A1D2E61024E00358C5D /* FilterCamDependencies */; };
+		315D40E52E620F24003363B5 /* FilterCamResources in Frameworks */ = {isa = PBXBuildFile; productRef = 315D40E42E620F24003363B5 /* FilterCamResources */; };
 		3174E16E2E552BE2006D6EB3 /* FilterCamCaptureExtension.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = 3174E1652E552BE2006D6EB3 /* FilterCamCaptureExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3174E1992E55310D006D6EB3 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3174E1982E55310D006D6EB3 /* WidgetKit.framework */; };
 		3174E19B2E55310D006D6EB3 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3174E19A2E55310D006D6EB3 /* SwiftUI.framework */; };
@@ -263,6 +264,7 @@
 				31AD54762E61F0C900ED5453 /* FilterCamCore in Frameworks */,
 				3174E1992E55310D006D6EB3 /* WidgetKit.framework in Frameworks */,
 				31AD54722E61EF3F00ED5453 /* FilterCamUtilities in Frameworks */,
+				315D40E52E620F24003363B5 /* FilterCamResources in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -356,6 +358,7 @@
 				31AD532B2E61DE7E00ED5453 /* FilterCamShared */,
 				31AD54712E61EF3F00ED5453 /* FilterCamUtilities */,
 				31AD54752E61F0C900ED5453 /* FilterCamCore */,
+				315D40E42E620F24003363B5 /* FilterCamResources */,
 			);
 			productName = FilterCamWidgetsExtension;
 			productReference = 3174E1962E55310D006D6EB3 /* FilterCamWidgetsExtension.appex */;
@@ -870,6 +873,10 @@
 		315A6A1D2E61024E00358C5D /* FilterCamDependencies */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = FilterCamDependencies;
+		};
+		315D40E42E620F24003363B5 /* FilterCamResources */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FilterCamResources;
 		};
 		31AD532B2E61DE7E00ED5453 /* FilterCamShared */ = {
 			isa = XCSwiftPackageProductDependency;

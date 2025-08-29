@@ -15,6 +15,7 @@ let package = Package(
         .package(path: "../Internal/FilterCamCore"),
         .package(path: "../Internal/FilterCamInterfaces"),
         .package(path: "../Internal/FilterCamMacros"),
+        .package(path: "../Internal/FilterCamResources"),
         .package(path: "../Internal/FilterCamShared"),
         .package(path: "../Internal/FilterCamUtilities"),
     ],
@@ -24,6 +25,7 @@ let package = Package(
                 "FilterCamCore",
                 "FilterCamInterfaces",
                 "FilterCamMacros",
+                "FilterCamResources",
                 "FilterCamShared",
                 "FilterCamUtilities",
             ]

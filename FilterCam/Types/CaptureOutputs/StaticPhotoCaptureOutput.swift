@@ -6,6 +6,7 @@
 //
 
 import FilterCamInterfaces
+import FilterCamResources
 import UIKit
 
 struct StaticPhotoCaptureOutput: CaptureOutput {
@@ -13,7 +14,7 @@ struct StaticPhotoCaptureOutput: CaptureOutput {
 }
 
 extension CaptureOutput where Self == StaticPhotoCaptureOutput {
-    static var staticPhoto: StaticPhotoCaptureOutput { .init(output: .camPreview) }
+    static var staticPhoto: StaticPhotoCaptureOutput { .init(output: R.camPreview) }
     
     static func staticPhoto(_ image: UIImage) -> StaticPhotoCaptureOutput { .init(output: image) }
 }
