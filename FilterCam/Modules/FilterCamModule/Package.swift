@@ -4,12 +4,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "FilterCamDependencies",
+    name: "FilterCamModule",
     platforms: [.iOS(.v17)],
     products: [
         .library(
-            name: "FilterCamDependencies",
-            targets: ["FilterCamDependencies"]),
+            name: "FilterCamModule",
+            targets: ["FilterCamModule"]),
     ],
     dependencies: [
         .package(path: "../FilterCamDomain"),
@@ -21,7 +21,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "FilterCamDependencies", dependencies: [
+            name: "FilterCamModule", dependencies: [
                 "FilterCamDomain",
                 "FilterCamCore",
                 "FilterCamMacros",

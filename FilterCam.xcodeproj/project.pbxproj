@@ -8,9 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		312EE4EE2E5B606900CF131D /* GPUImage in Frameworks */ = {isa = PBXBuildFile; productRef = 312EE4ED2E5B606900CF131D /* GPUImage */; };
-		315A6A1C2E61024200358C5D /* FilterCamDependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 315A6A1B2E61024200358C5D /* FilterCamDependencies */; };
-		315A6A1E2E61024E00358C5D /* FilterCamDependencies in Frameworks */ = {isa = PBXBuildFile; productRef = 315A6A1D2E61024E00358C5D /* FilterCamDependencies */; };
 		315D40E52E620F24003363B5 /* FilterCamResources in Frameworks */ = {isa = PBXBuildFile; productRef = 315D40E42E620F24003363B5 /* FilterCamResources */; };
+		315D47B12E6237BA003363B5 /* FilterCamModule in Frameworks */ = {isa = PBXBuildFile; productRef = 315D47B02E6237BA003363B5 /* FilterCamModule */; };
+		315D47B32E6237C8003363B5 /* FilterCamModule in Frameworks */ = {isa = PBXBuildFile; productRef = 315D47B22E6237C8003363B5 /* FilterCamModule */; };
 		3174E16E2E552BE2006D6EB3 /* FilterCamCaptureExtension.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = 3174E1652E552BE2006D6EB3 /* FilterCamCaptureExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3174E1992E55310D006D6EB3 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3174E1982E55310D006D6EB3 /* WidgetKit.framework */; };
 		3174E19B2E55310D006D6EB3 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3174E19A2E55310D006D6EB3 /* SwiftUI.framework */; };
@@ -77,7 +77,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"Models/CustomFilter+Noop.swift",
-				Modules/FilterCamDependencies,
 				Modules/FilterCamDomain,
 				Modules/Internal/FilterCamInterfaces,
 				Modules/Internal/FilterCamMacros,
@@ -244,8 +243,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				315D47B32E6237C8003363B5 /* FilterCamModule in Frameworks */,
 				31DF54722E593DE000790201 /* GPUImage in Frameworks */,
-				315A6A1C2E61024200358C5D /* FilterCamDependencies in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -267,8 +266,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				315D47B12E6237BA003363B5 /* FilterCamModule in Frameworks */,
 				31DF54572E592C8D00790201 /* GPUImage in Frameworks */,
-				315A6A1E2E61024E00358C5D /* FilterCamDependencies in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -326,7 +325,7 @@
 			name = FilterCamCaptureExtension;
 			packageProductDependencies = (
 				31DF54712E593DE000790201 /* GPUImage */,
-				315A6A1B2E61024200358C5D /* FilterCamDependencies */,
+				315D47B22E6237C8003363B5 /* FilterCamModule */,
 			);
 			productName = FilterCamCaptureExtension;
 			productReference = 3174E1652E552BE2006D6EB3 /* FilterCamCaptureExtension.appex */;
@@ -381,7 +380,7 @@
 			name = FilterCam;
 			packageProductDependencies = (
 				31DF54562E592C8D00790201 /* GPUImage */,
-				315A6A1D2E61024E00358C5D /* FilterCamDependencies */,
+				315D47B02E6237BA003363B5 /* FilterCamModule */,
 			);
 			productName = FilterCam;
 			productReference = 31AB53212E54D66F00A51742 /* FilterCam.app */;
@@ -861,17 +860,17 @@
 			package = 31DF54552E592C8D00790201 /* XCRemoteSwiftPackageReference "GPUImage3" */;
 			productName = GPUImage;
 		};
-		315A6A1B2E61024200358C5D /* FilterCamDependencies */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = FilterCamDependencies;
-		};
-		315A6A1D2E61024E00358C5D /* FilterCamDependencies */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = FilterCamDependencies;
-		};
 		315D40E42E620F24003363B5 /* FilterCamResources */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = FilterCamResources;
+		};
+		315D47B02E6237BA003363B5 /* FilterCamModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FilterCamModule;
+		};
+		315D47B22E6237C8003363B5 /* FilterCamModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FilterCamModule;
 		};
 		31AD532B2E61DE7E00ED5453 /* FilterCamShared */ = {
 			isa = XCSwiftPackageProductDependency;
