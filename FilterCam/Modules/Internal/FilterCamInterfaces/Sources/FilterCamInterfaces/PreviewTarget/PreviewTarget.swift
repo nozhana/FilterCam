@@ -7,7 +7,6 @@
 
 @preconcurrency import AVFoundation
 import Foundation
-@preconcurrency import GPUImage
 
 public protocol PreviewTarget {
     func setSession(_ session: AVCaptureSession)
