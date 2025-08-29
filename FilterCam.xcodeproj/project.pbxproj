@@ -77,6 +77,7 @@
 				"Models/CustomFilter+Noop.swift",
 				Modules/FilterCamDependencies,
 				Modules/Internal/FilterCamBase,
+				Modules/Internal/FilterCamInterfaces,
 				Modules/Internal/FilterCamMacros,
 			);
 			target = 31AB53202E54D66F00A51742 /* FilterCam */;
