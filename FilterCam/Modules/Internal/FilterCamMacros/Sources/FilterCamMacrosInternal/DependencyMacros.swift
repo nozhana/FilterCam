@@ -45,16 +45,10 @@ public enum DependencyProviderMacro: MemberMacro {
                     .as(StringSegmentSyntax.self)?.content.text
             }
         
-        let observed: Bool
-        if let boolExpr = arguments.first(labeled: "observed")?.expression.as(BooleanLiteralExprSyntax.self) {
-            switch boolExpr.literal.text {
-            case "true":
-                observed = true
-            default:
-                observed = false
-            }
-        } else {
-            observed = false
+        var observed = false
+        if let boolExpr = arguments.first(labeled: "observed")?.expression.as(BooleanLiteralExprSyntax.self),
+           boolExpr.literal.text == "true" {
+            observed = true
         }
         
         return dependencyKeys.enumerated()
@@ -122,6 +116,7 @@ public enum DependencyResolverMacro: ExpressionMacro {
     }
 }
 
+// MARK: - Error
 enum DependencyMacroError: LocalizedError, CustomStringConvertible {
     case typeMismatch(String)
     case parentTypeMismatch(String)
@@ -140,6 +135,7 @@ enum DependencyMacroError: LocalizedError, CustomStringConvertible {
     var errorDescription: String? { description }
 }
 
+// MARK: - Private extensions
 private extension Array {
     subscript(safe index: Int) -> Element? {
         get { indices.contains(index) ? self[index] : nil }
