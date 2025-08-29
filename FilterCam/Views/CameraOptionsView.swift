@@ -5,12 +5,13 @@
 //  Created by Nozhan A. on 8/21/25.
 //
 
+import FilterCamBase
+import FilterCamMacros
 import FilterCamShared
 import SwiftUI
 
+@Provider(\.cameraModel, name: "model", observed: true)
 struct CameraOptionsView: View {
-    @EnvironmentObject private var model: CameraModel
-    
     @State private var expandedOption: CameraOption?
     
     var body: some View {
@@ -25,14 +26,12 @@ struct CameraOptionsView: View {
 
 #Preview {
     CameraOptionsView()
-        .environmentObject(CameraModel())
 }
 
+@Provider(\.cameraModel, name: "model", observed: true)
 private struct CameraOptionView: View {
     var option: CameraOption
     @Binding var isExpanded: Bool
-    
-    @EnvironmentObject private var model: CameraModel
     
     var body: some View {
         HStack(spacing: 16) {

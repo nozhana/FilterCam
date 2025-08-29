@@ -5,15 +5,16 @@
 //  Created by Nozhan A. on 8/24/25.
 //
 
+import FilterCamBase
 import FilterCamShared
+import FilterCamMacros
 import GPUImage
 import SwiftUI
 
+@Provider(\.cameraModel, name: "model", observed: true)
 struct FilterConfiguratorView: View {
     var filter: CameraFilter
     var operation: ImageProcessingOperation
-    
-    @EnvironmentObject private var model: CameraModel
     
     var body: some View {
         if filter.configurations.isEmpty {
