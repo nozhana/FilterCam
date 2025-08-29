@@ -36,7 +36,7 @@ private struct CameraOptionView: View {
     var body: some View {
         HStack(spacing: 16) {
             Button {
-                withAnimation(.snappy) {
+                withAnimation(.interactiveSpring) {
                     isExpanded.toggle()
                 }
             } label: {
@@ -63,7 +63,7 @@ private struct CameraOptionView: View {
                     case .flashMode:
                         ForEach(FlashMode.allCases) { flashMode in
                             Button(flashMode.title) {
-                                withAnimation(.snappy) {
+                                withAnimation(.interactiveSpring) {
                                     model.flashMode = flashMode
                                     isExpanded = false
                                 }
@@ -73,12 +73,32 @@ private struct CameraOptionView: View {
                     case .qualityPrioritization:
                         ForEach(QualityPrioritization.allCases) { qualityPrioritization in
                             Button(qualityPrioritization.title) {
-                                withAnimation(.snappy) {
+                                withAnimation(.interactiveSpring) {
                                     model.qualityPrioritization = qualityPrioritization
                                     isExpanded = false
                                 }
                             }
                             .foregroundStyle(model.qualityPrioritization == qualityPrioritization ? .teal : .primary)
+                        }
+                    case .aspectRatio:
+                        ForEach(AspectRatio.allCases) { aspectRatio in
+                            Button(aspectRatio.title) {
+                                withAnimation(.interactiveSpring) {
+                                    model.aspectRatio = aspectRatio
+                                    isExpanded = false
+                                }
+                            }
+                            .foregroundStyle(model.aspectRatio == aspectRatio ? .primary : .secondary)
+                        }
+                    case .level:
+                        ForEach([false, true], id: \.self) { boolean in
+                            Button(boolean ? "On" : "Off") {
+                                withAnimation(.interactiveSpring) {
+                                    model.showLevel = boolean
+                                    isExpanded = false
+                                }
+                            }
+                            .foregroundStyle(model.showLevel == boolean ? (boolean ? .yellow : .primary) : .secondary)
                         }
                     }
                 }
@@ -96,6 +116,8 @@ private struct CameraOptionView: View {
 private enum CameraOption: Int, Identifiable, CaseIterable {
     case flashMode
     case qualityPrioritization
+    case aspectRatio
+    case level
     
     var id: Int { rawValue }
     
@@ -105,6 +127,10 @@ private enum CameraOption: Int, Identifiable, CaseIterable {
             model.flashMode.title
         case .qualityPrioritization:
             model.qualityPrioritization.title
+        case .aspectRatio:
+            model.aspectRatio.title
+        case .level:
+            model.showLevel ? "On" : "Off"
         }
     }
     
@@ -114,6 +140,10 @@ private enum CameraOption: Int, Identifiable, CaseIterable {
             model.flashMode.systemImage
         case .qualityPrioritization:
             model.qualityPrioritization.systemImage
+        case .aspectRatio:
+            model.aspectRatio.systemImage
+        case .level:
+            model.showLevel ? "level.fill" : "level"
         }
     }
     
@@ -131,6 +161,10 @@ private enum CameraOption: Int, Identifiable, CaseIterable {
             case .quality: .purple.gradient
             case .balanced: .cyan.gradient
             }
+        case .aspectRatio:
+                .primary
+        case .level:
+            model.showLevel ? .primary : .secondary
         }
         return AnyShapeStyle(anyStyle)
     }
@@ -141,6 +175,10 @@ private enum CameraOption: Int, Identifiable, CaseIterable {
             model.flashMode.cycle()
         case .qualityPrioritization:
             model.qualityPrioritization.cycle()
+        case .aspectRatio:
+            model.aspectRatio.cycle()
+        case .level:
+            model.showLevel.toggle()
         }
     }
 }

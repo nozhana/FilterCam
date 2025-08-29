@@ -102,14 +102,9 @@ struct CameraViewFinder: View {
                                                     cameraUnavailableView
                                                 }
                                             }
-                                            .scrollTransition(.interactive(timingCurve: .linear), axis: .horizontal) { content, phase in
-                                                content
-                                                    .brightness(phase.isIdentity ? 0 : 0.2)
-                                                    .opacity(phase.isIdentity ? 1 : 0)
-                                                    .offset(x: -phase.value * screenBounds.width)
-                                            }
                                         }
                                         .containerRelativeFrame(.horizontal)
+                                        .scrollRevealing()
                                     }
                                     .scrollTargetLayout()
                                 }
