@@ -8,6 +8,7 @@
 import AVFoundation
 import Combine
 import FilterCamBase
+import FilterCamShared
 import Foundation
 import GPUImage
 

@@ -6,6 +6,7 @@
 //
 
 @preconcurrency import AVFoundation
+import FilterCamShared
 import Foundation
 @preconcurrency import GPUImage
 

@@ -9,6 +9,7 @@ import AVFoundation
 import Combine
 import FilterCamBase
 import FilterCamMacros
+import FilterCamShared
 import GPUImage
 import SwiftUI
 

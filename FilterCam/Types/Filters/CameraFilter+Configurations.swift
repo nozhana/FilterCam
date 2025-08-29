@@ -6,6 +6,7 @@
 //
 
 import GPUImage
+import FilterCamShared
 import SwiftUI
 
 extension CameraFilter {

@@ -6,6 +6,7 @@
 //
 
 import AppIntents
+import FilterCamShared
 import SwiftUI
 import WidgetKit
 

@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum CaptureMode: String, Codable {
+public enum CaptureMode: String, Codable {
     case photo
     case video
 }

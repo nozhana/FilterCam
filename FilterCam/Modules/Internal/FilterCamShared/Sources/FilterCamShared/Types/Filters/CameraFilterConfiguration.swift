@@ -8,13 +8,13 @@
 import SwiftUI
 import GPUImage
 
-enum CameraFilterConfiguration {
+public enum CameraFilterConfiguration {
     case slider(title: LocalizedStringKey, range: ClosedRange<Double>, step: Double = 0.1, bindingFactory: (_ operation: ImageProcessingOperation) -> Binding<Float>)
     case toggle(title: LocalizedStringKey, bindingFactory: (_ operation: ImageProcessingOperation) -> Binding<Bool>)
     case button(title: LocalizedStringKey, systemImage: String? = nil, role: ButtonRole? = nil, onTapped: (_ filter: CameraFilter, _ operation: ImageProcessingOperation, _ filterStack: ImageProcessingOperation) -> Void)
 }
 
-extension CameraFilterConfiguration {
+public extension CameraFilterConfiguration {
     var title: LocalizedStringKey {
         switch self {
         case .slider(let title, _, _, _): title

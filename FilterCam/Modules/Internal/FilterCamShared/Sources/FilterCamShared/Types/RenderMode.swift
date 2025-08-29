@@ -7,6 +7,6 @@
 
 import Foundation
 
-enum RenderMode: Int, Codable {
+public enum RenderMode: Int, Codable {
     case `default`, metal, metalWithFilters
 }

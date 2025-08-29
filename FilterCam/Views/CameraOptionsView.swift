@@ -5,6 +5,7 @@
 //  Created by Nozhan A. on 8/21/25.
 //
 
+import FilterCamShared
 import SwiftUI
 
 struct CameraOptionsView: View {

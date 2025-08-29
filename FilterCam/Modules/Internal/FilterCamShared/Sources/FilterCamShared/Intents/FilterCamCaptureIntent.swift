@@ -9,13 +9,15 @@ import AppIntents
 import LockedCameraCapture
 
 @available(iOS 18.0, *)
-struct FilterCamCaptureIntent: CameraCaptureIntent {
-    static let title: LocalizedStringResource = "FilterCam Capture Intent"
-    static let description: IntentDescription? = "Camera Capture Intent"
+public struct FilterCamCaptureIntent: CameraCaptureIntent {
+    public init() {}
     
-    typealias AppContext = CameraState
+    public static let title: LocalizedStringResource = "FilterCam Capture Intent"
+    public static let description: IntentDescription? = "Camera Capture Intent"
     
-    func perform() async throws -> some IntentResult {
+    public typealias AppContext = CameraState
+    
+    public func perform() async throws -> some IntentResult {
         .result()
     }
 }

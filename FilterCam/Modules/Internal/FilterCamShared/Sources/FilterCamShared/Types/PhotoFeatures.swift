@@ -9,24 +9,29 @@ import AVFoundation
 import Foundation
 import CoreGraphics
 
-struct PhotoFeatures {
-    var flashMode: FlashMode = .firstAvailable
-    var qualityPrioritization: QualityPrioritization = .balanced
+public struct PhotoFeatures {
+    public var flashMode: FlashMode = .firstAvailable
+    public var qualityPrioritization: QualityPrioritization = .balanced
     
-    static let `default` = PhotoFeatures()
+    public init(flashMode: FlashMode = .firstAvailable, qualityPrioritization: QualityPrioritization = .balanced) {
+        self.flashMode = flashMode
+        self.qualityPrioritization = qualityPrioritization
+    }
+    
+    public static let `default` = PhotoFeatures()
 }
 
-protocol CameraOptionable: Equatable, Identifiable {
+public protocol CameraOptionable: Equatable, Identifiable {
     var title: String { get }
     var systemImage: String { get }
 }
 
-enum FlashMode: Int, Codable, CaseIterable, CameraOptionable {
+public enum FlashMode: Int, Codable, CaseIterable, CameraOptionable {
     case off = 0, on, auto
     
-    var id: Int { rawValue }
+    public var id: Int { rawValue }
     
-    var title: String {
+    public var title: String {
         switch self {
         case .off: String(localized: "Off")
         case .on: String(localized: "On")
@@ -34,7 +39,7 @@ enum FlashMode: Int, Codable, CaseIterable, CameraOptionable {
         }
     }
     
-    var systemImage: String {
+    public var systemImage: String {
         switch self {
         case .off: "bolt.slash.fill"
         case .on: "bolt.fill"
@@ -42,7 +47,7 @@ enum FlashMode: Int, Codable, CaseIterable, CameraOptionable {
         }
     }
     
-    static var availableFlashModes: [FlashMode] {
+    public static var availableFlashModes: [FlashMode] {
         if let systemPreferredCamera = AVCaptureDevice.systemPreferredCamera,
            systemPreferredCamera.hasFlash,
            systemPreferredCamera.isFlashAvailable {
@@ -51,17 +56,17 @@ enum FlashMode: Int, Codable, CaseIterable, CameraOptionable {
         return [.off]
     }
     
-    static let firstAvailable = availableFlashModes.first!
+    public static let firstAvailable = availableFlashModes.first!
 }
 
-enum QualityPrioritization: Int, Codable, CaseIterable, CameraOptionable {
+public enum QualityPrioritization: Int, Codable, CaseIterable, CameraOptionable {
     case speed = 1
     case balanced
     case quality
     
-    var id: Int { rawValue }
+    public var id: Int { rawValue }
     
-    var title: String {
+    public var title: String {
         switch self {
         case .speed: String(localized: "Speed")
         case .balanced: String(localized: "Balanced")
@@ -69,7 +74,7 @@ enum QualityPrioritization: Int, Codable, CaseIterable, CameraOptionable {
         }
     }
     
-    var systemImage: String {
+    public var systemImage: String {
         switch self {
         case .speed: "bolt.horizontal.fill"
         case .balanced: "equal"
@@ -78,15 +83,15 @@ enum QualityPrioritization: Int, Codable, CaseIterable, CameraOptionable {
     }
 }
 
-enum AspectRatio: CGFloat, Codable, CaseIterable, CameraOptionable {
+public enum AspectRatio: CGFloat, Codable, CaseIterable, CameraOptionable {
     case fourToThree
     case sixteenToNine
     case threeToTwo
     case square
     
-    var id: CGFloat { rawValue }
+    public var id: CGFloat { rawValue }
     
-    var rawValue: CGFloat {
+    public var rawValue: CGFloat {
         switch self {
         case .fourToThree: 4.0/3
         case .sixteenToNine: 16.0/9
@@ -95,7 +100,7 @@ enum AspectRatio: CGFloat, Codable, CaseIterable, CameraOptionable {
         }
     }
     
-    init?(rawValue: CGFloat) {
+    public init?(rawValue: CGFloat) {
         if let value: AspectRatio = switch rawValue {
         case 4.0/3: .fourToThree
         case 16.0/9: .sixteenToNine
@@ -109,7 +114,7 @@ enum AspectRatio: CGFloat, Codable, CaseIterable, CameraOptionable {
         }
     }
     
-    var title: String {
+    public var title: String {
         switch self {
         case .fourToThree: "4:3"
         case .sixteenToNine: "16:9"
@@ -118,7 +123,7 @@ enum AspectRatio: CGFloat, Codable, CaseIterable, CameraOptionable {
         }
     }
     
-    var systemImage: String {
+    public var systemImage: String {
         switch self {
         case .fourToThree: "rectangle.ratio.3.to.4"
         case .sixteenToNine: "rectangle.ratio.9.to.16"
@@ -127,7 +132,7 @@ enum AspectRatio: CGFloat, Codable, CaseIterable, CameraOptionable {
         }
     }
     
-    var previewOffsetY: CGFloat {
+    public var previewOffsetY: CGFloat {
         switch self {
         case .fourToThree: 110
         case .threeToTwo: 60

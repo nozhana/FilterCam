@@ -7,6 +7,6 @@
 
 import Foundation
 
-enum CameraPosition: Int, Codable {
+public enum CameraPosition: Int, Codable {
     case unspecified, back, front
 }

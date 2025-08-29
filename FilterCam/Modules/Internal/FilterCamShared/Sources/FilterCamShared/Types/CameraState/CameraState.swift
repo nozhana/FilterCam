@@ -7,8 +7,8 @@
 
 import Foundation
 
-struct CameraState: Codable {
-    enum CodingKeys: String, CodingKey {
+public struct CameraState: Codable {
+    public enum CodingKeys: String, CodingKey {
         case captureMode
         case cameraPosition
         case qualityPrioritization
@@ -19,7 +19,7 @@ struct CameraState: Codable {
         case showLevel
     }
     
-    init(from decoder: any Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         if #available(iOS 18.0, *) {
             self.contextProvider = .intent(FilterCamCaptureIntent.self).chain(to: .logging)
         } else {
@@ -36,13 +36,13 @@ struct CameraState: Codable {
         showLevel = try container.decode(Bool.self, forKey: .showLevel)
     }
     
-    init(contextProvider: some ContextProvider) {
+    public init(contextProvider: some ContextProvider) {
         self.contextProvider = contextProvider
     }
     
     private let contextProvider: ContextProvider
     
-    var captureMode = CaptureMode.photo {
+    public var captureMode = CaptureMode.photo {
         didSet {
             if oldValue != captureMode {
                 updateContext()
@@ -50,7 +50,7 @@ struct CameraState: Codable {
         }
     }
     
-    var cameraPosition = CameraPosition.back {
+    public var cameraPosition = CameraPosition.back {
         didSet {
             if oldValue != cameraPosition {
                 updateContext()
@@ -58,7 +58,7 @@ struct CameraState: Codable {
         }
     }
     
-    var qualityPrioritization = QualityPrioritization.balanced {
+    public var qualityPrioritization = QualityPrioritization.balanced {
         didSet {
             if oldValue != qualityPrioritization {
                 updateContext()
@@ -66,7 +66,7 @@ struct CameraState: Codable {
         }
     }
     
-    var flashMode = FlashMode.firstAvailable {
+    public var flashMode = FlashMode.firstAvailable {
         didSet {
             if oldValue != flashMode {
                 updateContext()
@@ -74,7 +74,7 @@ struct CameraState: Codable {
         }
     }
     
-    var aspectRatio = AspectRatio.fourToThree {
+    public var aspectRatio = AspectRatio.fourToThree {
         didSet {
             if oldValue != aspectRatio {
                 updateContext()
@@ -82,7 +82,7 @@ struct CameraState: Codable {
         }
     }
     
-    var renderMode = RenderMode.default {
+    public var renderMode = RenderMode.default {
         didSet {
             if oldValue != renderMode {
                 updateContext()
@@ -90,7 +90,7 @@ struct CameraState: Codable {
         }
     }
     
-    var lastFilter = CameraFilter.none {
+    public var lastFilter = CameraFilter.none {
         didSet {
             if oldValue != lastFilter {
                 updateContext()
@@ -98,7 +98,7 @@ struct CameraState: Codable {
         }
     }
     
-    var showLevel = false {
+    public var showLevel = false {
         didSet {
             if oldValue != showLevel {
                 updateContext()
@@ -116,7 +116,7 @@ struct CameraState: Codable {
         }
     }
     
-    static var current: CameraState {
+    public static var current: CameraState {
         get async {
             if #available(iOS 18.0, *) {
                 return await .intent(FilterCamCaptureIntent.self)
@@ -126,7 +126,7 @@ struct CameraState: Codable {
         }
     }
     
-    static func update<T>(_ keyPath: WritableKeyPath<CameraState, T>, with newValue: T) async {
+    public static func update<T>(_ keyPath: WritableKeyPath<CameraState, T>, with newValue: T) async {
         var current = await current
         current[keyPath: keyPath] = newValue
     }

@@ -105,7 +105,6 @@
 				"Preview Content/Preview Assets.xcassets",
 				Protocols/CameraModel/CameraModelProtocol.swift,
 				Protocols/DatabaseService.swift,
-				Protocols/FilterGenerator.swift,
 				Protocols/OutputMedium/AnyOutputMedium.swift,
 				Protocols/OutputMedium/OutputMedium.swift,
 				Protocols/OutputService/CaptureOutput.swift,
@@ -115,17 +114,12 @@
 				Protocols/PreviewSource/PreviewSource.swift,
 				Protocols/PreviewTarget/PreviewTarget.swift,
 				Resources/Assets.xcassets,
-				Resources/LUTs.xcassets,
 				Services/CaptureService.swift,
 				Services/MotionService.swift,
 				Shapes/LevelShape.swift,
 				Shapes/TargetShape.swift,
-				Types/CameraPosition.swift,
-				Types/CameraState/CameraState.swift,
-				Types/CameraState/CameraStateContextProvider.swift,
 				Types/CameraStatus.swift,
 				Types/CaptureActivity.swift,
-				Types/CaptureMode.swift,
 				Types/CaptureOutputs/DefaultMovieCaptureOutput.swift,
 				Types/CaptureOutputs/DefaultPhotoCaptureOutput.swift,
 				Types/CaptureOutputs/MetalMovieCaptureOutput.swift,
@@ -136,9 +130,7 @@
 				Types/Errors/CameraError.swift,
 				Types/Errors/PhotoCaptureError.swift,
 				Types/Errors/VideoRecordingError.swift,
-				Types/Filters/CameraFilter.swift,
 				"Types/Filters/CameraFilter+Configurations.swift",
-				Types/Filters/CameraFilterConfiguration.swift,
 				Types/Filters/FilterChain.swift,
 				Types/Filters/FilterStack.swift,
 				Types/OutputMedia/Photo.swift,
@@ -148,16 +140,13 @@
 				Types/OutputServices/MetalMovieOutputService.swift,
 				Types/OutputServices/MetalPhotoOutputService.swift,
 				Types/OutputServices/StaticPhotoOutputService.swift,
-				Types/PhotoFeatures.swift,
 				Types/PreviewSources/DefaultPreviewSource.swift,
 				Types/PreviewSources/MetalCameraSource.swift,
 				Types/PreviewSources/StaticImageSource.swift,
 				Types/PreviewTargets/DefaultPreviewTarget.swift,
 				Types/PreviewTargets/MetalPreviewTarget.swift,
 				Types/PreviewTargets/StaticImageTarget.swift,
-				Types/RenderMode.swift,
 				Types/Thumbnail.swift,
-				Types/VideoFeatures.swift,
 				Utilities/AsyncSubject.swift,
 				Utilities/Backport.swift,
 				Utilities/DeviceLookup.swift,
@@ -202,20 +191,6 @@
 			);
 			target = 3174E1952E55310D006D6EB3 /* FilterCamWidgetsExtension */;
 		};
-		3174E1B42E553182006D6EB3 /* Exceptions for "FilterCamWidgets" folder in "FilterCam" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				FilterCamCaptureIntent.swift,
-			);
-			target = 31AB53202E54D66F00A51742 /* FilterCam */;
-		};
-		3174E1B52E553182006D6EB3 /* Exceptions for "FilterCamWidgets" folder in "FilterCamCaptureExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				FilterCamCaptureIntent.swift,
-			);
-			target = 3174E1642E552BE2006D6EB3 /* FilterCamCaptureExtension */;
-		};
 		3174E1B72E553246006D6EB3 /* Exceptions for "FilterCam" folder in "FilterCamWidgetsExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -226,18 +201,8 @@
 				Models/CustomFilter.swift,
 				"Models/CustomFilter+Noop.swift",
 				"Preview Content/Preview Assets.xcassets",
-				Protocols/FilterGenerator.swift,
 				Resources/Assets.xcassets,
-				Resources/LUTs.xcassets,
 				Shapes/LevelShape.swift,
-				Types/CameraPosition.swift,
-				Types/CameraState/CameraState.swift,
-				Types/CameraState/CameraStateContextProvider.swift,
-				Types/CaptureMode.swift,
-				Types/Filters/CameraFilter.swift,
-				Types/Filters/CameraFilterConfiguration.swift,
-				Types/PhotoFeatures.swift,
-				Types/RenderMode.swift,
 				Utilities/AsyncSubject.swift,
 				Utilities/Backport.swift,
 				Utilities/KVOAsyncObserver.swift,
@@ -266,8 +231,6 @@
 		3174E19C2E55310D006D6EB3 /* FilterCamWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				3174E1B42E553182006D6EB3 /* Exceptions for "FilterCamWidgets" folder in "FilterCam" target */,
-				3174E1B52E553182006D6EB3 /* Exceptions for "FilterCamWidgets" folder in "FilterCamCaptureExtension" target */,
 				3174E1AC2E553110006D6EB3 /* Exceptions for "FilterCamWidgets" folder in "FilterCamWidgetsExtension" target */,
 			);
 			path = FilterCamWidgets;

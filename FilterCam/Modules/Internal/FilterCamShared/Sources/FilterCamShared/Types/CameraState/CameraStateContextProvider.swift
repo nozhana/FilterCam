@@ -8,7 +8,7 @@
 import Foundation
 import AppIntents
 
-extension CameraState {
+public extension CameraState {
     protocol ContextProvider {
         var currentState: CameraState? { get async throws }
         func update(with state: CameraState) async throws
@@ -18,23 +18,23 @@ extension CameraState {
     struct IntentContextProvider<Intent>: ContextProvider where Intent: CameraCaptureIntent, Intent.AppContext == CameraState {
         private let intent: Intent.Type
         
-        init(intent: Intent.Type) {
+        public init(intent: Intent.Type) {
             self.intent = intent
         }
         
-        var currentState: CameraState? {
+        public var currentState: CameraState? {
             get async throws {
                 try await intent.appContext
             }
         }
         
-        func update(with state: CameraState) async throws {
+        public func update(with state: CameraState) async throws {
             try await intent.updateAppContext(state)
         }
     }
     
     struct LoggingContextProvider: ContextProvider {
-        func update(with state: CameraState) async throws {
+        public func update(with state: CameraState) async throws {
             logger.debug("""
 New camera state:
 Capture mode: \(String(describing: state.captureMode))
@@ -45,15 +45,15 @@ Aspect Ratio: \(String(describing: state.aspectRatio))
 """)
         }
         
-        var currentState: CameraState? {
+        public var currentState: CameraState? {
             logger.debug("Called camera state getter")
             return nil
         }
     }
     
     struct NoopContextProvider: ContextProvider {
-        func update(with state: CameraState) async throws {}
-        var currentState: CameraState? { nil }
+        public func update(with state: CameraState) async throws {}
+        public var currentState: CameraState? { nil }
     }
 }
 
@@ -81,7 +81,7 @@ private extension CameraState {
     }
 }
 
-extension CameraState.ContextProvider {
+public extension CameraState.ContextProvider {
     func chain(to otherProvider: some CameraState.ContextProvider) -> some CameraState.ContextProvider {
         return CameraState.ChainContextProvider(provider1: self, provider2: otherProvider)
     }
@@ -89,20 +89,20 @@ extension CameraState.ContextProvider {
 
 @available(iOS 18.0, *)
 extension CameraState.ContextProvider where Self == CameraState.NoopContextProvider {
-    static func intent<I>(_ intent: I.Type) -> CameraState.IntentContextProvider<I> where I: CameraCaptureIntent, I.AppContext == CameraState {
+    public static func intent<I>(_ intent: I.Type) -> CameraState.IntentContextProvider<I> where I: CameraCaptureIntent, I.AppContext == CameraState {
         .init(intent: intent)
     }
 }
 
 extension CameraState.ContextProvider where Self == CameraState.LoggingContextProvider {
-    static var logging: CameraState.LoggingContextProvider { .init() }
+    public static var logging: CameraState.LoggingContextProvider { .init() }
 }
 
 extension CameraState.ContextProvider where Self == CameraState.NoopContextProvider {
-    static var noop: CameraState.NoopContextProvider { .init() }
+    public static var noop: CameraState.NoopContextProvider { .init() }
 }
 
-extension CameraState {
+public extension CameraState {
     static let idle = CameraState(contextProvider: .noop)
     static let logging = CameraState(contextProvider: .logging)
     @available(iOS 18.0, *)

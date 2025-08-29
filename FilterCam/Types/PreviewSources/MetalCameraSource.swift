@@ -7,6 +7,7 @@
 
 @preconcurrency import AVFoundation
 import Foundation
+import FilterCamShared
 @preconcurrency import GPUImage
 
 struct MetalCameraSource: PreviewSource, ImageSource {

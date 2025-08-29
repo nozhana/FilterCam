@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FilterCamShared
 
 protocol CameraModelProtocol: AnyObject, ObservableObject {
     var cameraState: CameraState { get }

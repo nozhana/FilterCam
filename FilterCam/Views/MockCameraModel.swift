@@ -6,6 +6,7 @@
 //
 
 import FilterCamBase
+import FilterCamShared
 import Foundation
 import GPUImage
 

@@ -8,7 +8,7 @@
 import GPUImage
 import SwiftUI
 
-enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable, FilterGenerator {
+public enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable, FilterGenerator {
     case none
     case noir
     case blur(radius: Float = 20.0)
@@ -18,14 +18,14 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable, FilterGenera
     case lookup(image: LookupImage, intensity: Float = 1.0)
     case custom(FilterGenerator)
     
-    var isCustom: Bool {
+    public var isCustom: Bool {
         if case .custom = self {
             return true
         }
         return false
     }
     
-    var rawValue: String {
+    public var rawValue: String {
         switch self {
         case .none:
             "none"
@@ -46,7 +46,7 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable, FilterGenera
         }
     }
     
-    var title: String {
+    public var title: String {
         switch self {
         case .none:
             "Original"
@@ -67,7 +67,7 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable, FilterGenera
         }
     }
     
-    var layoutIndex: Int {
+    public var layoutIndex: Int {
         switch self {
         case .none: 0
         case .noir: 1
@@ -80,11 +80,11 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable, FilterGenera
         }
     }
     
-    static func < (lhs: CameraFilter, rhs: CameraFilter) -> Bool {
+    public static func < (lhs: CameraFilter, rhs: CameraFilter) -> Bool {
         lhs.layoutIndex < rhs.layoutIndex
     }
     
-    init?(rawValue: String) {
+    public init?(rawValue: String) {
         if let value: CameraFilter = switch rawValue {
         case "none": CameraFilter.none
         case "noir": .noir
@@ -107,7 +107,7 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable, FilterGenera
         }
     }
     
-    func makeOperation() -> any ImageProcessingOperation {
+    public func makeOperation() -> any ImageProcessingOperation {
         switch self {
         case .none: return ImageRelay()
         case .custom(let customFilter): return customFilter.makeOperation()
@@ -138,7 +138,7 @@ enum CameraFilter: Hashable, Codable, RawRepresentable, Comparable, FilterGenera
     }
 }
 
-extension CameraFilter {
+public extension CameraFilter {
     enum LookupImage: Int, Codable, CaseIterable, Identifiable {
         case portrait35mm
         case agfaVista
@@ -150,9 +150,9 @@ extension CameraFilter {
         case portra800
         case velvia100
         
-        var id: Int { rawValue }
+        public var id: Int { rawValue }
         
-        var title: String {
+        public var title: String {
             switch self {
             case .portrait35mm:
                 "Portrait 35mm"
@@ -191,7 +191,7 @@ extension CameraFilter {
     }
 }
 
-extension CameraFilter {
+public extension CameraFilter {
     mutating func update(with floatValue: Float, atIndex index: Int = 0) {
         switch self {
         case .none: break
