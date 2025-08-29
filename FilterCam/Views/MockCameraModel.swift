@@ -55,6 +55,8 @@ final class MockCameraModel: CameraModelProtocol {
         status = .running
     }
     
+    func configure(with configuration: AppConfiguration) async {}
+    
     func switchCaptureService(_ service: some CaptureService) async {
         if let imageSource = previewSource as? ImageSource {
             imageSource.removeAllTargets()

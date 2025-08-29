@@ -38,9 +38,6 @@ public protocol CameraModelProtocol: AnyObject, ObservableObject {
     var previewSource: any PreviewSource { get }
     var previewTarget: any PreviewTarget { get }
     
-    func configure(with configuration: AppConfiguration) async
-    @MainActor func start() async
-    func switchCaptureService(_ service: some CaptureService) async
     @MainActor func pauseStream() async
     @MainActor func unpauseStream() async
     @MainActor func switchCamera() async
@@ -51,8 +48,6 @@ public protocol CameraModelProtocol: AnyObject, ObservableObject {
 }
 
 extension CameraModelProtocol {
-    func configure(with configuration: AppConfiguration) async {}
-    func switchCaptureService(_ service: some CaptureService) async {}
     func pauseStream() async {}
     func unpauseStream() async {}
     func switchCamera() async {}
