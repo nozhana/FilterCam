@@ -78,6 +78,7 @@
 			membershipExceptions = (
 				"Models/CustomFilter+Noop.swift",
 				Modules/FilterCamDependencies,
+				Modules/FilterCamDomain,
 				Modules/Internal/FilterCamInterfaces,
 				Modules/Internal/FilterCamMacros,
 				Modules/Internal/FilterCamResources,

@@ -1,8 +1,9 @@
 // The Swift Programming Language
 // https://docs.swift.org/swift-book
 
+@_exported import FilterCamDomain
+
 @_exported import FilterCamCore
-@_exported import FilterCamInterfaces
 @_exported import FilterCamMacros
 @_exported import FilterCamResources
 @_exported import FilterCamShared
