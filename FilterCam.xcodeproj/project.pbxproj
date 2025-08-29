@@ -79,6 +79,7 @@
 				Modules/FilterCamDependencies,
 				Modules/Internal/FilterCamInterfaces,
 				Modules/Internal/FilterCamMacros,
+				Modules/Internal/FilterCamResources,
 				Modules/Internal/FilterCamUtilities,
 			);
 			target = 31AB53202E54D66F00A51742 /* FilterCam */;
