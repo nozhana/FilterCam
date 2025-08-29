@@ -8,5 +8,6 @@ struct FilterCamMacrosPlugin: CompilerPlugin {
         DependencyProviderMacro.self,
         DependencyEntryMacro.self,
         DependencyResolverMacro.self,
+        DependencyInjectorMacro.self,
     ]
 }

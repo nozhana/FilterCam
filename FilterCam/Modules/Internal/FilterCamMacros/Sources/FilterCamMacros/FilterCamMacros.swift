@@ -13,7 +13,10 @@ public macro DependencyProvider(_ keyPaths: PartialKeyPath<Dependencies>..., nam
 
 @freestanding(expression)
 public macro resolve<T>(_ keyPath: KeyPath<Dependencies, T>) -> T = #externalMacro(module: "FilterCamMacrosInternal", type: "DependencyResolverMacro")
-#endif
+
+@freestanding(declaration, names: arbitrary)
+public macro Inject(_ keyPath: PartialKeyPath<Dependencies>, name: String? = nil, observed: Bool = false) = #externalMacro(module: "FilterCamMacrosInternal", type: "DependencyInjectorMacro")
 
 @attached(accessor)
 public macro Provide() = #externalMacro(module: "FilterCamMacrosInternal", type: "DependencyEntryMacro")
+#endif

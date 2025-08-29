@@ -116,6 +116,39 @@ public enum DependencyResolverMacro: ExpressionMacro {
     }
 }
 
+public enum DependencyInjectorMacro: DeclarationMacro {
+    public static func expansion(
+        of node: some FreestandingMacroExpansionSyntax,
+        in context: some MacroExpansionContext
+    ) throws -> [DeclSyntax] {
+        guard let keyPathExpr = node.arguments.first?.expression.as(KeyPathExprSyntax.self),
+              let component = keyPathExpr.components.first?.component.as(KeyPathPropertyComponentSyntax.self) else {
+            throw DependencyMacroError.argumentTypeMismatch("Inject macro requires at least one keypath descending from Dependencies.")
+        }
+        
+        let componentName = component.declName.baseName.text
+        var variableName = componentName
+        
+        if let stringExpr = node.arguments.first(labeled: "name")?.expression.as(StringLiteralExprSyntax.self),
+           let providedName = stringExpr.segments.first?.as(StringSegmentSyntax.self)?.content.text {
+            variableName = providedName
+        }
+        
+        var observed = false
+        if let boolExpr = node.arguments.first(labeled: "observed")?.expression.as(BooleanLiteralExprSyntax.self),
+           boolExpr.literal.text == "true" {
+            observed = true
+        }
+        
+        var variableDeclSyntax = try VariableDeclSyntax("private var \(raw: variableName) = Dependencies.shared.\(raw: componentName)")
+        if observed {
+            variableDeclSyntax.attributes = "@ObservedObject"
+        }
+        
+        return [DeclSyntax(variableDeclSyntax)]
+    }
+}
+
 // MARK: - Error
 enum DependencyMacroError: LocalizedError, CustomStringConvertible {
     case typeMismatch(String)
