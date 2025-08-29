@@ -9,8 +9,8 @@ import FilterCamBase
 import FilterCamMacros
 import SwiftUI
 
-@DependencyProvider(\.mediaStore)
-@DependencyProvider(\.cameraModel, observed: true)
+@Provider(\.mediaStore)
+@Provider(\.cameraModel, observed: true)
 struct SettingsView: View {
     @Storage(.cameraSwitchRotationEffect) private var rotateCamera = true
     @Storage(.showDeveloperSettings) private var showDeveloperSettings = false

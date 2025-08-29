@@ -12,8 +12,8 @@ import FilterCamMacros
 import GPUImage
 import SwiftUI
 
-@DependencyProvider(\.database)
-@DependencyProvider(\.cameraModel, observed: true)
+@Provider(\.database)
+@Provider(\.cameraModel, observed: true)
 struct FilterChainCreatorView: View {
     @StateObject private var model = Model()
     

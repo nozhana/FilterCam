@@ -9,7 +9,7 @@ import FilterCamBase
 import FilterCamMacros
 import SwiftUI
 
-@DependencyProvider(\.cameraModel, name: "model", observed: true)
+@Provider(\.cameraModel, name: "model", observed: true)
 struct CameraSecondaryOptionsView: View {
     @State private var expandedOption: CameraOption?
     
@@ -31,7 +31,7 @@ struct CameraSecondaryOptionsView: View {
     CameraSecondaryOptionsView()
 }
 
-@DependencyProvider(\.cameraModel, name: "model", observed: true)
+@Provider(\.cameraModel, name: "model", observed: true)
 private struct CameraOptionView: View {
     var option: CameraOption
     @Binding var expandedOption: CameraOption?

@@ -10,7 +10,7 @@ import FilterCamMacros
 import simd
 import SwiftUI
 
-@DependencyProvider(\.cameraModel, name: "model", observed: true)
+@Provider(\.cameraModel, name: "model", observed: true)
 struct CameraActionButton: View {
     @State private var dragXOffset = CGFloat.zero
     

@@ -16,15 +16,15 @@ public enum DependencyProviderMacro: MemberMacro {
         guard let structDecl = declaration.as(StructDeclSyntax.self),
               let view = structDecl.inheritanceClause?.inheritedTypes.first?.type.as(IdentifierTypeSyntax.self),
               view.name.text == "View" else {
-            throw DependencyMacroError.typeMismatch("DependencyProvider macro can only be installed on a view.")
+            throw DependencyMacroError.typeMismatch("Provider macro can only be installed on a view.")
         }
         
         guard case .argumentList(let arguments) = node.arguments else {
-            throw DependencyMacroError.argumentTypeMismatch("DependencyProvider requires at least one dependency.")
+            throw DependencyMacroError.argumentTypeMismatch("Provider requires at least one dependency.")
         }
         
         guard let first = arguments.first, first.expression.is(KeyPathExprSyntax.self) else {
-            throw DependencyMacroError.argumentTypeMismatch("DependencyProvider requires a variadic list of valid KeyPaths descending from Dependencies.")
+            throw DependencyMacroError.argumentTypeMismatch("Provider requires a variadic list of valid KeyPaths descending from Dependencies.")
         }
         
         let dependencyKeys = arguments

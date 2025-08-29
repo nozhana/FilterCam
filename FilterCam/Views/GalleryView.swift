@@ -10,7 +10,7 @@ import FilterCamMacros
 import simd
 import SwiftUI
 
-@DependencyProvider(\.mediaStore)
+@Provider(\.mediaStore)
 struct GalleryView: View {
     private var animation: Namespace.ID?
     
