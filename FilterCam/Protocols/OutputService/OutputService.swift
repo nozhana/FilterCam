@@ -6,19 +6,23 @@
 //
 
 import AVFoundation
+import Combine
 import Foundation
 
 protocol OutputService {
-    associatedtype Output: AVCaptureOutput
+    associatedtype Output: CaptureOutput
     var output: Output { get }
     var captureActivity: CaptureActivity { get }
+    var captureActivityPublisher: AnyPublisher<CaptureActivity, Never> { get }
     func updateConfiguration(for device: AVCaptureDevice)
     func setVideoRotationAngle(_ angle: CGFloat)
 }
 
 extension OutputService {
     func setVideoRotationAngle(_ angle: CGFloat) {
-        output.connection(with: .video)?.videoRotationAngle = angle
+        if let avOutput = output.output as? AVCaptureOutput {
+            avOutput.connection(with: .video)?.videoRotationAngle = angle
+        }
     }
     
     func updateConfiguration(for device: AVCaptureDevice) {}

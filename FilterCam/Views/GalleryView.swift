@@ -28,9 +28,10 @@ struct GalleryView: View {
         NavigationStack {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 0) {
-                    ForEach(model.photos) { photo in
-                        if let uiImage = UIImage(data: photo.data),
-                           let thumbnail = Thumbnail(id: photo.id, sourceImage: uiImage) {
+                    ForEach(model.media) { medium in
+                        if let thumbnailData = medium.thumbnailData,
+                           let uiImage = UIImage(data: thumbnailData) {
+                            let thumbnail = Thumbnail(id: medium.id, image: uiImage)
                             Rectangle()
                                 .overlay {
                                     Image(uiImage: thumbnail.image)
@@ -41,14 +42,21 @@ struct GalleryView: View {
                                 .clipShape(.rect)
                                 .contextMenu {
                                     Button("Delete", systemImage: "trash.fill", role: .destructive) {
-                                        try? model.deletePhoto(photo)
+                                        try? model.delete(medium)
                                     }
                                 } preview: {
-                                    Image(uiImage: uiImage)
-                                        .resizable()
-                                        .scaledToFit()
+                                    if let photo = medium.as(Photo.self),
+                                       let uiImage = UIImage(data: photo.data) {
+                                        Image(uiImage: uiImage)
+                                            .resizable()
+                                            .scaledToFit()
+                                    } else {
+                                        // TODO: Add video preview support
+                                        Image(uiImage: uiImage)
+                                            .resizable()
+                                            .scaledToFit()
+                                    }
                                 }
-
                         }
                     }
                 }
@@ -87,23 +95,28 @@ struct GalleryView: View {
 
 extension GalleryView {
     final class Model: ObservableObject {
-        @Published private(set) var photos = [Photo]()
+        @Published var media = [AnyOutputMedium]()
         
         private var mediaStore: MediaStore!
         
         func configure(with mediaStore: MediaStore) {
             self.mediaStore = mediaStore
-            refreshPhotos()
+            refreshMedia()
         }
         
-        private func refreshPhotos() {
-            photos = mediaStore.photos
+        private func refreshMedia() {
+            media = mediaStore.media
         }
         
         @MainActor
-        func deletePhoto(_ photo: Photo) throws {
-            _ = try mediaStore.deletePhoto(photo)
-            photos.removeAll(where: { $0.id == photo.id })
+        func delete(_ medium: AnyOutputMedium) throws {
+            try mediaStore.delete(medium)
+            media.removeAll(where: { $0.id == medium.id })
+        }
+        
+        @MainActor
+        func delete(_ id: UUID) throws {
+            try mediaStore.delete(id)
         }
     }
 }

@@ -30,7 +30,7 @@ struct GalleryDetailView: View {
                     Spacer()
                     HStack(spacing: 16) {
                         Button("Delete", systemImage: "trash", role: .destructive) {
-                            try? model.deleteItem(selection)
+                            try? model.delete(selection)
                         }
                     }
                 }

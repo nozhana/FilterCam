@@ -8,5 +8,7 @@
 import GPUImage
 
 protocol FilterGenerator {
+    var title: String { get }
+    var layoutIndex: Int { get }
     func makeOperation() -> any ImageProcessingOperation
 }

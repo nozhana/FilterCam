@@ -108,3 +108,17 @@ extension Backport.ScrollGeometry {
         self.init(contentOffset: geometry.contentOffset, contentSize: geometry.contentSize, contentInsets: geometry.contentInsets, containerSize: geometry.containerSize, visibleRect: geometry.visibleRect, bounds: geometry.bounds)
     }
 }
+
+extension ViewAlignedScrollTargetBehavior.LimitBehavior {
+    static var backport: Backport<Self> { .init(.automatic) }
+}
+
+extension Backport where V == ViewAlignedScrollTargetBehavior.LimitBehavior {
+    var alwaysByOne: V {
+        if #available(iOS 18.0, *) {
+            .alwaysByOne
+        } else {
+            .always
+        }
+    }
+}

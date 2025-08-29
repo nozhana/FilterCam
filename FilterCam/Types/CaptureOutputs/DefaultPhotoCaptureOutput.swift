@@ -9,7 +9,7 @@ import Foundation
 import AVFoundation
 
 struct DefaultPhotoCaptureOutput: DefaultCaptureOutput {
-    let output: AVCaptureOutput
+    let output: AVCapturePhotoOutput
     
     init(output: AVCapturePhotoOutput = .init()) {
         self.output = output

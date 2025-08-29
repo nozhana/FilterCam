@@ -5,10 +5,12 @@
 //  Created by Nozhan A. on 8/19/25.
 //
 
+import AVFoundation
 import Foundation
+import CoreGraphics
 
 struct PhotoFeatures {
-    var flashMode: FlashMode = .auto
+    var flashMode: FlashMode = .firstAvailable
     var qualityPrioritization: QualityPrioritization = .balanced
     
     static let `default` = PhotoFeatures()
@@ -39,6 +41,17 @@ enum FlashMode: Int, Codable, CaseIterable, CameraOptionable {
         case .auto: "bolt.badge.automatic.fill"
         }
     }
+    
+    static var availableFlashModes: [FlashMode] {
+        if let systemPreferredCamera = AVCaptureDevice.systemPreferredCamera,
+           systemPreferredCamera.hasFlash,
+           systemPreferredCamera.isFlashAvailable {
+            return FlashMode.allCases
+        }
+        return [.off]
+    }
+    
+    static let firstAvailable = availableFlashModes.first!
 }
 
 enum QualityPrioritization: Int, Codable, CaseIterable, CameraOptionable {
@@ -61,6 +74,65 @@ enum QualityPrioritization: Int, Codable, CaseIterable, CameraOptionable {
         case .speed: "bolt.horizontal.fill"
         case .balanced: "equal"
         case .quality: "sparkles"
+        }
+    }
+}
+
+enum AspectRatio: CGFloat, Codable, CaseIterable, CameraOptionable {
+    case fourToThree
+    case sixteenToNine
+    case threeToTwo
+    case square
+    
+    var id: CGFloat { rawValue }
+    
+    var rawValue: CGFloat {
+        switch self {
+        case .fourToThree: 4.0/3
+        case .sixteenToNine: 16.0/9
+        case .threeToTwo: 3.0/2
+        case .square: 1.0
+        }
+    }
+    
+    init?(rawValue: CGFloat) {
+        if let value: AspectRatio = switch rawValue {
+        case 4.0/3: .fourToThree
+        case 16.0/9: .sixteenToNine
+        case 3.0/2: .threeToTwo
+        case 1.0: .square
+        default: nil
+        } {
+            self = value
+        } else {
+            return nil
+        }
+    }
+    
+    var title: String {
+        switch self {
+        case .fourToThree: "4:3"
+        case .sixteenToNine: "16:9"
+        case .threeToTwo: "3:2"
+        case .square: "Square"
+        }
+    }
+    
+    var systemImage: String {
+        switch self {
+        case .fourToThree: "rectangle.ratio.3.to.4"
+        case .sixteenToNine: "rectangle.ratio.9.to.16"
+        case .threeToTwo: "aspectratio"
+        case .square: "square"
+        }
+    }
+    
+    var previewOffsetY: CGFloat {
+        switch self {
+        case .fourToThree: 110
+        case .threeToTwo: 60
+        case .sixteenToNine: .zero
+        case .square: 140
         }
     }
 }

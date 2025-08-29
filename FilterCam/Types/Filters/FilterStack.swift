@@ -31,7 +31,7 @@ final class FilterStack: PreviewSource, PreviewTarget, ImageProcessingOperation,
         self.targetsMap = targetsMap
     }
     
-    func addTarget(_ target: some Target, for filter: CameraFilter) {
+    func addTarget(_ target: some Target = MetalPreviewTarget(), for filter: CameraFilter) {
         let operation = filter.makeOperation()
         self --> operation --> target
         targetsMap[filter] = (operation, target)

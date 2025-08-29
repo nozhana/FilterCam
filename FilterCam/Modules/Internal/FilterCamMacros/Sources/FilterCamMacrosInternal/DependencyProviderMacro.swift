@@ -23,16 +23,12 @@ public struct DependencyProviderMacro: MemberMacro {
             throw DependencyProviderMacroError.argumentTypeMismatch("DependencyProvider requires at least one dependency.")
         }
         
-        guard let first = arguments.first,
-              first.expression.is(MemberAccessExprSyntax.self) || first.expression.is(KeyPathExprSyntax.self) else {
+        guard let first = arguments.first, first.expression.is(KeyPathExprSyntax.self) else {
             throw DependencyProviderMacroError.argumentTypeMismatch("DependencyProvider requires a variadic list of valid KeyPaths descending from Dependencies.")
         }
         
         let dependencyKeys = arguments
             .compactMap { arg -> String? in
-                // if let memberAccessExpr = arg.expression.as(MemberAccessExprSyntax.self) {
-                //     return memberAccessExpr.declName.baseName.text
-                // } else if let keyPathExpr = arg.expression.as(KeyPathExprSyntax.self), // !!!: Comment below line when uncommenting this
                 if let keyPathExpr = arg.expression.as(KeyPathExprSyntax.self),
                    let firstComponent = keyPathExpr.components.first?.component.as(KeyPathPropertyComponentSyntax.self) {
                     return firstComponent.declName.baseName.text

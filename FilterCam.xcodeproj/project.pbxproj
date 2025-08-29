@@ -91,7 +91,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"Dependencies/CameraModel+Dependency.swift",
-				"Dependencies/DatabaseService+Dependency.swift",
+				"Dependencies/Database+Dependency.swift",
 				"Dependencies/MediaStore+Dependency.swift",
 				Environment/AppConfiguration.swift,
 				"Environment/CaptureExtension+Environment.swift",

@@ -8,5 +8,5 @@
 import Foundation
 
 enum CaptureMode: String, Codable {
-    case photo
+    case photo, video
 }

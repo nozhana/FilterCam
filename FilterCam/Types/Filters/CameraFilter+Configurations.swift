@@ -16,9 +16,11 @@ extension CameraFilter {
             [.button(title: "Delete", systemImage: "trash.fill", role: .destructive, onTapped: { filter, _, parentOperation in
                 guard let filterStack = parentOperation as? FilterStack else { return }
                 filterStack.removeTarget(for: filter)
-                Task {
-                    let database = DefaultDatabaseService.shared
-                    try await database.delete(customFilter)
+                if let model = customFilter as? CustomFilter {
+                    Task {
+                        let database = DefaultDatabaseService.shared
+                        try await database.delete(model)
+                    }
                 }
             })]
         case .noir: []
