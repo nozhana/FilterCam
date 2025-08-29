@@ -10,6 +10,9 @@ import FilterCamBase
 
 @attached(member, names: arbitrary)
 public macro DependencyProvider(_ keyPaths: PartialKeyPath<Dependencies>..., name: String..., observed: Bool = false) = #externalMacro(module: "FilterCamMacrosInternal", type: "DependencyProviderMacro")
+
+@freestanding(expression)
+public macro resolve<T>(_ keyPath: KeyPath<Dependencies, T>) -> T = #externalMacro(module: "FilterCamMacrosInternal", type: "DependencyResolverMacro")
 #endif
 
 @attached(accessor)

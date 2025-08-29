@@ -6,7 +6,7 @@ import SwiftSyntaxMacros
 import FilterCamBase
 import Foundation
 
-public struct DependencyProviderMacro: MemberMacro {
+public enum DependencyProviderMacro: MemberMacro {
     public static func expansion(
       of node: AttributeSyntax,
       providingMembersOf declaration: some DeclGroupSyntax,
@@ -16,15 +16,15 @@ public struct DependencyProviderMacro: MemberMacro {
         guard let structDecl = declaration.as(StructDeclSyntax.self),
               let view = structDecl.inheritanceClause?.inheritedTypes.first?.type.as(IdentifierTypeSyntax.self),
               view.name.text == "View" else {
-            throw DependencyProviderMacroError.typeMismatch("DependencyProvider macro can only be installed on a view.")
+            throw DependencyMacroError.typeMismatch("DependencyProvider macro can only be installed on a view.")
         }
         
         guard case .argumentList(let arguments) = node.arguments else {
-            throw DependencyProviderMacroError.argumentTypeMismatch("DependencyProvider requires at least one dependency.")
+            throw DependencyMacroError.argumentTypeMismatch("DependencyProvider requires at least one dependency.")
         }
         
         guard let first = arguments.first, first.expression.is(KeyPathExprSyntax.self) else {
-            throw DependencyProviderMacroError.argumentTypeMismatch("DependencyProvider requires a variadic list of valid KeyPaths descending from Dependencies.")
+            throw DependencyMacroError.argumentTypeMismatch("DependencyProvider requires a variadic list of valid KeyPaths descending from Dependencies.")
         }
         
         let dependencyKeys = arguments
@@ -71,7 +71,7 @@ public struct DependencyProviderMacro: MemberMacro {
     }
 }
 
-public struct DependencyEntryMacro: AccessorMacro {
+public enum DependencyEntryMacro: AccessorMacro {
     public static func expansion(
         of node: AttributeSyntax,
         providingAccessorsOf declaration: some DeclSyntaxProtocol,
@@ -80,13 +80,13 @@ public struct DependencyEntryMacro: AccessorMacro {
         guard let variableDecl = declaration.as(VariableDeclSyntax.self),
               let patternBinding = variableDecl.bindings.first,
               let identifierPattern = patternBinding.pattern.as(IdentifierPatternSyntax.self) else {
-            throw DependencyProviderMacroError.typeMismatch("Provide macro only works on variables.")
+            throw DependencyMacroError.typeMismatch("Provide macro only works on variables.")
         }
         
         guard let parentExtension = context.lexicalContext.first?.as(ExtensionDeclSyntax.self),
               let extensionIdentifier = parentExtension.extendedType.as(IdentifierTypeSyntax.self),
               ["Dependencies", "DependencyContainer"].contains(extensionIdentifier.name.text) else {
-            throw DependencyProviderMacroError.parentTypeMismatch("Provide macro should be used inside an extension block of Dependencies.")
+            throw DependencyMacroError.parentTypeMismatch("Provide macro should be used inside an extension block of Dependencies.")
         }
         
         var defaultValue: ExprSyntax = .init(NilLiteralExprSyntax())
@@ -103,7 +103,26 @@ public struct DependencyEntryMacro: AccessorMacro {
     }
 }
 
-enum DependencyProviderMacroError: LocalizedError, CustomStringConvertible {
+public enum DependencyResolverMacro: ExpressionMacro {
+    public static func expansion(
+        of node: some FreestandingMacroExpansionSyntax,
+        in context: some MacroExpansionContext
+    ) throws -> ExprSyntax {
+        guard node.arguments.count <= 1 else {
+            throw DependencyMacroError.argumentTypeMismatch("Too many arguments. Only one accepted.")
+        }
+        guard let keyPathExpr = node.arguments.first?.expression.as(KeyPathExprSyntax.self),
+              let component = keyPathExpr.components.first?.component.as(KeyPathPropertyComponentSyntax.self) else {
+            throw DependencyMacroError.argumentTypeMismatch("resolve macro requires at least one keypath descending from Dependencies.")
+        }
+        
+        let componentName = component.declName.baseName.text
+        
+        return "Dependencies.shared.\(raw: componentName)"
+    }
+}
+
+enum DependencyMacroError: LocalizedError, CustomStringConvertible {
     case typeMismatch(String)
     case parentTypeMismatch(String)
     case argumentTypeMismatch(String)

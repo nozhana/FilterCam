@@ -7,5 +7,6 @@ struct FilterCamMacrosPlugin: CompilerPlugin {
         OptionSetMacro.self,
         DependencyProviderMacro.self,
         DependencyEntryMacro.self,
+        DependencyResolverMacro.self,
     ]
 }
