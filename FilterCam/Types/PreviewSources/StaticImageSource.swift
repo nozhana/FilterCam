@@ -6,6 +6,7 @@
 //
 
 @preconcurrency import AVFoundation
+import FilterCamInterfaces
 @preconcurrency import GPUImage
 import UIKit
 

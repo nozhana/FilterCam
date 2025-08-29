@@ -47,7 +47,7 @@ public protocol CameraModelProtocol: AnyObject, ObservableObject {
     func focusAndExpose(on devicePoint: CGPoint, layerPoint: CGPoint) async
 }
 
-extension CameraModelProtocol {
+public extension CameraModelProtocol {
     func pauseStream() async {}
     func unpauseStream() async {}
     func switchCamera() async {}
@@ -57,7 +57,7 @@ extension CameraModelProtocol {
     func focusAndExpose(on devicePoint: CGPoint, layerPoint: CGPoint) async {}
 }
 
-extension CameraModelProtocol {
+public extension CameraModelProtocol {
     var isRunningAndActive: Bool {
         status == .running && !isPaused && !isSwitchingCameras
     }

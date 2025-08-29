@@ -5,8 +5,8 @@
 //  Created by Nozhan A. on 8/25/25.
 //
 
-import GPUImage
 import FilterCamShared
+import GPUImage
 import SwiftUI
 
 extension CameraFilter {

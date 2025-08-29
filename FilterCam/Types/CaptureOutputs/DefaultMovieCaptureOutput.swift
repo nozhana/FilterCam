@@ -5,6 +5,7 @@
 //  Created by Nozhan A. on 8/24/25.
 //
 
+import FilterCamInterfaces
 import Foundation
 import AVFoundation
 

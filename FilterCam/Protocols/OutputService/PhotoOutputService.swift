@@ -9,6 +9,6 @@ import FilterCamInterfaces
 import FilterCamShared
 import Foundation
 
-public protocol PhotoOutputService: OutputService {
+protocol PhotoOutputService: OutputService {
     func capturePhoto(with features: PhotoFeatures) async throws -> Photo
 }

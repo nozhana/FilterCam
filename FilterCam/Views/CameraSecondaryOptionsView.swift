@@ -6,6 +6,7 @@
 //
 
 import FilterCamCore
+import FilterCamInterfaces
 import FilterCamMacros
 import FilterCamShared
 import SwiftUI

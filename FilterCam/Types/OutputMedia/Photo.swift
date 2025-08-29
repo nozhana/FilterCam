@@ -5,6 +5,7 @@
 //  Created by Nozhan A. on 8/19/25.
 //
 
+import FilterCamInterfaces
 import FilterCamUtilities
 import UIKit
 

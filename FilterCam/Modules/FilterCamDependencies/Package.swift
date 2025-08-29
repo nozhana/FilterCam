@@ -13,6 +13,7 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../Internal/FilterCamCore"),
+        .package(path: "../Internal/FilterCamInterfaces"),
         .package(path: "../Internal/FilterCamMacros"),
         .package(path: "../Internal/FilterCamShared"),
         .package(path: "../Internal/FilterCamUtilities"),
@@ -21,6 +22,7 @@ let package = Package(
         .target(
             name: "FilterCamDependencies", dependencies: [
                 "FilterCamCore",
+                "FilterCamInterfaces",
                 "FilterCamMacros",
                 "FilterCamShared",
                 "FilterCamUtilities",

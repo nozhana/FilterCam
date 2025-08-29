@@ -6,6 +6,7 @@
 //
 
 @preconcurrency import AVFoundation
+import FilterCamInterfaces
 import Foundation
 
 struct DefaultPreviewSource: PreviewSource {

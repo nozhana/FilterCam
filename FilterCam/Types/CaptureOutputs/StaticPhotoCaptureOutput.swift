@@ -5,6 +5,7 @@
 //  Created by Nozhan A. on 8/27/25.
 //
 
+import FilterCamInterfaces
 import UIKit
 
 struct StaticPhotoCaptureOutput: CaptureOutput {

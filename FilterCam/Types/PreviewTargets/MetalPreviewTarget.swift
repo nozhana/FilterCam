@@ -6,6 +6,7 @@
 //
 
 @preconcurrency import AVFoundation
+import FilterCamInterfaces
 import Foundation
 @preconcurrency import GPUImage
 import MetalKit

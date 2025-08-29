@@ -5,6 +5,7 @@
 //  Created by Nozhan A. on 8/22/25.
 //
 
+import FilterCamInterfaces
 import UIKit
 
 public enum OutputMediumType {

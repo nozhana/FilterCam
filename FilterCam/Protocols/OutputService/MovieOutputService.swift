@@ -9,7 +9,7 @@ import FilterCamInterfaces
 import FilterCamShared
 import Foundation
 
-public protocol MovieOutputService: OutputService {
+protocol MovieOutputService: OutputService {
     func recordVideo(with features: VideoFeatures) async throws -> Video
     func stopRecording()
 }
