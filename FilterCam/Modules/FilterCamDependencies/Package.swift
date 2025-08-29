@@ -15,6 +15,7 @@ let package = Package(
         .package(path: "../Internal/FilterCamBase"),
         .package(path: "../Internal/FilterCamMacros"),
         .package(path: "../Internal/FilterCamShared"),
+        .package(path: "../Internal/FilterCamUtilities"),
     ],
     targets: [
         .target(
@@ -22,6 +23,7 @@ let package = Package(
                 "FilterCamBase",
                 "FilterCamMacros",
                 "FilterCamShared",
+                "FilterCamUtilities",
             ]
         ),
     ]

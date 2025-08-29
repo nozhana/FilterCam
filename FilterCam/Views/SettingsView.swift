@@ -8,6 +8,7 @@
 import FilterCamBase
 import FilterCamMacros
 import FilterCamShared
+import FilterCamUtilities
 import SwiftUI
 
 @Provider(\.mediaStore)

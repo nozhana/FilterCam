@@ -3,7 +3,6 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-import FilterCamBase
 import Foundation
 
 public enum DependencyProviderMacro: MemberMacro {

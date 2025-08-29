@@ -5,8 +5,8 @@
 //  Created by Nozhan A. on 8/27/25.
 //
 
-import FilterCamBase
 import FilterCamShared
+import FilterCamUtilities
 import Foundation
 import GPUImage
 

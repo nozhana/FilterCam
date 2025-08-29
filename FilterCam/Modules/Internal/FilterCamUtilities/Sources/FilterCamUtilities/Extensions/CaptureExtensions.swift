@@ -1,6 +1,6 @@
 //
 //  CaptureExtensions.swift
-//  FilterCam
+//  FilterCamUtilities
 //
 //  Created by Nozhan A. on 8/19/25.
 //

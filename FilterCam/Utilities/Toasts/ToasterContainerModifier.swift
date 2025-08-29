@@ -5,7 +5,7 @@
 //  Created by Nozhan A. on 8/24/25.
 //
 
-import FilterCamBase
+import FilterCamUtilities
 import simd
 import SwiftUI
 

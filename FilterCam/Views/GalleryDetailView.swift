@@ -7,7 +7,6 @@
 
 import AVKit
 import Combine
-import FilterCamBase
 import SwiftUI
 
 struct GalleryDetailView: View {
