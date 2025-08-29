@@ -4,15 +4,15 @@
 import PackageDescription
 
 let package = Package(
-    name: "FilterCamBase",
+    name: "FilterCamCore",
     platforms: [.iOS(.v17), .macOS(.v10_15)],
     products: [
         .library(
-            name: "FilterCamBase",
-            targets: ["FilterCamBase"]),
+            name: "FilterCamCore",
+            targets: ["FilterCamCore"]),
     ],
     targets: [
         .target(
-            name: "FilterCamBase"),
+            name: "FilterCamCore"),
     ]
 )

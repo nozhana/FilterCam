@@ -19,7 +19,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.0-latest"),
-        .package(path: "../FilterCamBase"),
+        .package(path: "../FilterCamCore"),
     ],
     targets: [
         .macro(
@@ -27,7 +27,7 @@ let package = Package(
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-                "FilterCamBase",
+                "FilterCamCore",
             ]
         ),
         

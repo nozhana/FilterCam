@@ -1,6 +1,6 @@
 import SwiftUI
 
-import FilterCamBase
+import FilterCamCore
 import FilterCamMacros
 
 // MARK: - OptionSetBuilder

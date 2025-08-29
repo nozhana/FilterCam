@@ -6,7 +6,7 @@
 //
 
 import AVFoundation
-import FilterCamBase
+import FilterCamCore
 import FilterCamMacros
 import FilterCamShared
 import FilterCamUtilities

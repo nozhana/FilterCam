@@ -5,8 +5,8 @@
 @attached(extension, conformances: OptionSet)
 public macro OptionSetBuilder<RawType>() = #externalMacro(module: "FilterCamMacrosInternal", type: "OptionSetMacro")
 
-#if canImport(FilterCamBase)
-import FilterCamBase
+#if canImport(FilterCamCore)
+import FilterCamCore
 
 @attached(member, names: arbitrary)
 public macro Provider(_ keyPaths: PartialKeyPath<Dependencies>..., name: String..., observed: Bool = false) = #externalMacro(module: "FilterCamMacrosInternal", type: "DependencyProviderMacro")

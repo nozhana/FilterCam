@@ -5,7 +5,7 @@
 //  Created by Nozhan A. on 8/26/25.
 //
 
-import FilterCamBase
+import FilterCamCore
 import FilterCamMacros
 import FilterCamShared
 import SwiftUI

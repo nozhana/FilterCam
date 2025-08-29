@@ -7,7 +7,7 @@
 
 import AVFoundation
 import Combine
-import FilterCamBase
+import FilterCamCore
 import FilterCamMacros
 import FilterCamShared
 import GPUImage
