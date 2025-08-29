@@ -12,7 +12,7 @@ let package = Package(
             targets: ["FilterCamDomain"]),
     ],
     dependencies: [
-        .package(path: "../Internal/FilterCamInterfaces"),
+        .package(path: "../Domain/FilterCamInterfaces"),
     ],
     targets: [
         .target(

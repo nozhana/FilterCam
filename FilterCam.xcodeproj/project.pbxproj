@@ -77,11 +77,12 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"Models/CustomFilter+Noop.swift",
-				Modules/FilterCamDomain,
-				Modules/Internal/FilterCamInterfaces,
-				Modules/Internal/FilterCamMacros,
-				Modules/Internal/FilterCamResources,
-				Modules/Internal/FilterCamUtilities,
+				Modules/Internal/Base/FilterCamMacros,
+				Modules/Internal/Base/FilterCamResources,
+				Modules/Internal/Base/FilterCamUtilities,
+				Modules/Internal/Domain/FilterCamInterfaces,
+				Modules/Internal/FilterCamBase,
+				Modules/Internal/FilterCamDomain,
 			);
 			target = 31AB53202E54D66F00A51742 /* FilterCam */;
 		};

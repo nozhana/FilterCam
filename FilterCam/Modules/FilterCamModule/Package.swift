@@ -12,22 +12,14 @@ let package = Package(
             targets: ["FilterCamModule"]),
     ],
     dependencies: [
-        .package(path: "../FilterCamDomain"),
-        .package(path: "../Internal/FilterCamCore"),
-        .package(path: "../Internal/FilterCamMacros"),
-        .package(path: "../Internal/FilterCamResources"),
-        .package(path: "../Internal/FilterCamShared"),
-        .package(path: "../Internal/FilterCamUtilities"),
+        .package(path: "../Internal/FilterCamBase"),
+        .package(path: "../Internal/FilterCamDomain"),
     ],
     targets: [
         .target(
             name: "FilterCamModule", dependencies: [
+                "FilterCamBase",
                 "FilterCamDomain",
-                "FilterCamCore",
-                "FilterCamMacros",
-                "FilterCamResources",
-                "FilterCamShared",
-                "FilterCamUtilities",
             ]
         ),
     ]
