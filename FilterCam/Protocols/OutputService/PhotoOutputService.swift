@@ -5,9 +5,10 @@
 //  Created by Nozhan A. on 8/19/25.
 //
 
+import FilterCamInterfaces
 import FilterCamShared
 import Foundation
 
-protocol PhotoOutputService: OutputService {
+public protocol PhotoOutputService: OutputService {
     func capturePhoto(with features: PhotoFeatures) async throws -> Photo
 }

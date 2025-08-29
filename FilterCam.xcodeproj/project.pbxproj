@@ -134,6 +134,7 @@
 				"Types/Filters/CameraFilter+Configurations.swift",
 				Types/Filters/FilterChain.swift,
 				Types/Filters/FilterStack.swift,
+				Types/OutputMedia/AnyOutputMedium.swift,
 				Types/OutputMedia/Photo.swift,
 				Types/OutputMedia/Video.swift,
 				Types/OutputServices/DefaultMovieOutputService.swift,
