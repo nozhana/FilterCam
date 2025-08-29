@@ -7,26 +7,26 @@
 
 import SwiftUI
 
-final class Toaster: ObservableObject {
-    @Published private(set) var toasts = [Toast]()
+public final class Toaster: ObservableObject {
+    @Published public private(set) var toasts = [Toast]()
     
     private init() {}
     
-    static let shared = Toaster()
+    public static let shared = Toaster()
     
-    func showToast(_ message: Text, icon: Image? = nil, tint: Color? = nil, duration: TimeInterval = 2.0) {
+    public func showToast(_ message: Text, icon: Image? = nil, tint: Color? = nil, duration: TimeInterval = 2.0) {
         showToast(.init(message: message, icon: icon, tint: tint, duration: duration))
     }
     
-    func showToast(_ message: LocalizedStringKey, icon: Image? = nil, tint: Color? = nil, duration: TimeInterval = 2.0) {
+    public func showToast(_ message: LocalizedStringKey, icon: Image? = nil, tint: Color? = nil, duration: TimeInterval = 2.0) {
         showToast(.init(message: Text(message), icon: icon, tint: tint, duration: duration))
     }
     
-    func showToast(verbatim message: String, icon: Image? = nil, tint: Color? = nil, duration: TimeInterval = 2.0) {
+    public func showToast(verbatim message: String, icon: Image? = nil, tint: Color? = nil, duration: TimeInterval = 2.0) {
         showToast(.init(message: Text(message), icon: icon, tint: tint, duration: duration))
     }
     
-    func showToast(_ toast: Toast) {
+    public func showToast(_ toast: Toast) {
         Task {
             await MainActor.run {
                 withAnimation(.bouncy) {
@@ -42,7 +42,7 @@ final class Toaster: ObservableObject {
         }
     }
     
-    func removeToast(_ toast: Toast) {
+    public func removeToast(_ toast: Toast) {
         Task {
             await MainActor.run {
                 withAnimation(.snappy) {
@@ -53,14 +53,14 @@ final class Toaster: ObservableObject {
     }
 }
 
-struct Toast: Equatable {
-    var message: Text
-    var icon: Image?
-    var tint: Color?
-    var duration: TimeInterval = 2.0
+public struct Toast: Equatable {
+    public var message: Text
+    public var icon: Image?
+    public var tint: Color?
+    public var duration: TimeInterval = 2.0
 }
 
-extension Toast {
+public extension Toast {
     static func `default`(_ message: Text, duration: TimeInterval = 2.0) -> Toast {
         .init(message: message, duration: duration)
     }

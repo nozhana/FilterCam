@@ -151,8 +151,6 @@
 				Utilities/Modifiers/ScrollRevealingModifier.swift,
 				Utilities/SPCObserver.swift,
 				Utilities/ThermalStateObserver.swift,
-				Utilities/Toasts/Toaster.swift,
-				Utilities/Toasts/ToasterContainerModifier.swift,
 				Views/CameraActionButton.swift,
 				Views/CameraInteractiveView.swift,
 				Views/CameraModel.swift,
@@ -205,8 +203,6 @@
 				Utilities/Layouts/RadialLayout.swift,
 				Utilities/Modifiers/ScrollRevealingModifier.swift,
 				Utilities/ThermalStateObserver.swift,
-				Utilities/Toasts/Toaster.swift,
-				Utilities/Toasts/ToasterContainerModifier.swift,
 				Views/CameraInteractiveView.swift,
 				Views/CircularZoomSlider.swift,
 			);

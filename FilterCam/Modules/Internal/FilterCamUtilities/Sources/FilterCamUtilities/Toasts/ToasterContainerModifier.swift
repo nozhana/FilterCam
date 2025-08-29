@@ -69,7 +69,7 @@ private struct ToastView: View {
     }
 }
 
-extension View {
+public extension View {
     func toasterContainer(_ toaster: Toaster = .shared) -> some View {
         modifier(ToasterContainerModifier(toaster: toaster))
     }

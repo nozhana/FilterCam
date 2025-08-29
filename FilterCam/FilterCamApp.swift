@@ -5,15 +5,16 @@
 //  Created by Nozhan A. on 8/19/25.
 //
 
-import SwiftUI
+import FilterCamUtilities
 import LockedCameraCapture
+import SwiftUI
 
 @main
 struct FilterCamApp: App {
     @Environment(\.mediaStore) private var mediaStore
     @Environment(\.scenePhase) private var scenePhase
     
-    @ObservedObject private var toaster  = Toaster.shared
+    @ObservedObject private var toaster = Toaster.shared
     @StateObject private var thermalStateObserver = ThermalStateObserver()
     
     var body: some Scene {
