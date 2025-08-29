@@ -6,6 +6,7 @@
 //
 
 import AVFoundation
+import FilterCamShared
 import SwiftUI
 
 struct MediaStore {

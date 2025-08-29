@@ -7,13 +7,13 @@
 
 import Foundation
 
-enum CaptureActivity {
+public enum CaptureActivity {
     case idle
     case photo(willCapture: Bool = false)
     case video(duration: TimeInterval = .zero)
 }
 
-extension CaptureActivity {
+public extension CaptureActivity {
     var willCapture: Bool {
         if case .photo(true) = self { return true }
         return false

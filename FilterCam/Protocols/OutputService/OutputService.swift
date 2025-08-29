@@ -7,6 +7,7 @@
 
 import AVFoundation
 import Combine
+import FilterCamShared
 import Foundation
 
 protocol OutputService {

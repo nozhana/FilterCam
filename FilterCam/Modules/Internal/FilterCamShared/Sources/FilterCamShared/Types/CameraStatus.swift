@@ -7,10 +7,10 @@
 
 import Foundation
 
-enum CameraStatus: Int, CustomStringConvertible {
+public enum CameraStatus: Int, CustomStringConvertible {
     case unknown, failed, unauthorized, loading, running, interrupted
     
-    var description: String {
+    public var description: String {
         switch self {
         case .unknown:
             "Unknown"
