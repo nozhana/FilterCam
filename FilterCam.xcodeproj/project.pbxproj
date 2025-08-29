@@ -96,6 +96,7 @@
 				"Dependencies/Database+Dependency.swift",
 				"Dependencies/MediaStore+Dependency.swift",
 				Environment/AppConfiguration.swift,
+				"Environment/AppConfiguration+Environment.swift",
 				"Environment/CaptureExtension+Environment.swift",
 				"Environment/DatabaseService+Environment.swift",
 				"Environment/MediaStore+Environment.swift",
@@ -193,6 +194,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Environment/AppConfiguration.swift,
+				"Environment/AppConfiguration+Environment.swift",
 				"Environment/CaptureExtension+Environment.swift",
 				"Environment/ThermalState+Environment.swift",
 				"Extensions/Logger+.swift",
